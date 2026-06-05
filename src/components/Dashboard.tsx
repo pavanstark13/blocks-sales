@@ -3,8 +3,17 @@
 import { useEffect, useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell
+  ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts';
+
+async function downloadCSV(url: string, filename: string) {
+  const res = await fetch(url);
+  const blob = await res.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
 
 interface Summary {
   monthSummary: MonthRow[];
@@ -227,7 +236,23 @@ export default function Dashboard() {
 
       {/* Monthly summary table */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4">Monthly Summary</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-slate-700">Monthly Summary</h2>
+          <div className="flex gap-2">
+            <button onClick={() => downloadCSV('/api/export?type=summary', 'monthly-summary.csv')}
+              className="px-3 py-1 text-xs bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+              ↓ Monthly CSV
+            </button>
+            <button onClick={() => downloadCSV('/api/export?type=sales', 'sales-all.csv')}
+              className="px-3 py-1 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              ↓ All Sales CSV
+            </button>
+            <button onClick={() => downloadCSV('/api/export?type=customer', 'customers.csv')}
+              className="px-3 py-1 text-xs bg-violet-600 text-white rounded-lg hover:bg-violet-700">
+              ↓ Customers CSV
+            </button>
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

@@ -4,11 +4,12 @@ import { useState } from 'react';
 import Dashboard from '@/components/Dashboard';
 import SalesTable from '@/components/SalesTable';
 import AddSaleForm from '@/components/AddSaleForm';
+import BulkEntry from '@/components/BulkEntry';
 import Customers from '@/components/Customers';
 import Outstanding from '@/components/Outstanding';
 import Ledger from '@/components/Ledger';
 
-type Tab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'add';
+type Tab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'add';
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>('dashboard');
@@ -16,13 +17,14 @@ export default function Home() {
 
   const refresh = () => setRefreshKey(k => k + 1);
 
-  const tabs: { id: Tab; label: string }[] = [
+  const tabs: { id: Tab; label: string; color?: string }[] = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'sales', label: 'Sales Log' },
     { id: 'outstanding', label: 'Outstanding' },
     { id: 'customers', label: 'Customers' },
     { id: 'ledger', label: 'Ledger' },
-    { id: 'add', label: '+ New Sale' },
+    { id: 'bulk', label: '⚡ Daily Entry', color: 'orange' },
+    { id: 'add', label: '+ Single Sale', color: 'green' },
   ];
 
   return (
@@ -42,7 +44,9 @@ export default function Home() {
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     tab === t.id
                       ? 'bg-blue-600 text-white'
-                      : t.id === 'add'
+                      : t.color === 'orange'
+                      ? 'bg-orange-50 text-orange-700 hover:bg-orange-100'
+                      : t.color === 'green'
                       ? 'bg-green-50 text-green-700 hover:bg-green-100'
                       : t.id === 'ledger'
                       ? 'text-violet-600 hover:bg-violet-50'
@@ -58,12 +62,13 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {tab === 'dashboard' && <Dashboard key={refreshKey} />}
-        {tab === 'sales' && <SalesTable key={refreshKey} onRefresh={refresh} />}
-        {tab === 'outstanding' && <Outstanding key={refreshKey} onRefresh={refresh} />}
-        {tab === 'customers' && <Customers key={refreshKey} />}
-        {tab === 'ledger' && <Ledger key={refreshKey} />}
-        {tab === 'add' && <AddSaleForm onSaved={() => { refresh(); setTab('sales'); }} />}
+        {tab === 'dashboard'  && <Dashboard key={refreshKey} />}
+        {tab === 'sales'      && <SalesTable key={refreshKey} onRefresh={refresh} />}
+        {tab === 'outstanding'&& <Outstanding key={refreshKey} onRefresh={refresh} />}
+        {tab === 'customers'  && <Customers key={refreshKey} />}
+        {tab === 'ledger'     && <Ledger key={refreshKey} />}
+        {tab === 'bulk'       && <BulkEntry onSaved={() => { refresh(); setTab('sales'); }} />}
+        {tab === 'add'        && <AddSaleForm onSaved={() => { refresh(); setTab('sales'); }} />}
       </main>
     </div>
   );

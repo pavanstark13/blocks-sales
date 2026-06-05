@@ -21,6 +21,13 @@ interface Sale {
 }
 
 const MONTHS = ['JULY-25','AUG-25','SEPT-25','OCTO-25','NOV-2025','DEC','JAN-2026','FEB-26','MAR-26','Apr-26','MAY-26'];
+const STATUSES = ['CLOSED','OPEN','PENDING'];
+const STATUS_NEXT: Record<string, string> = { CLOSED: 'OPEN', OPEN: 'PENDING', PENDING: 'CLOSED' };
+const STATUS_COLOR: Record<string, string> = {
+  CLOSED: 'bg-green-100 text-green-800',
+  OPEN:   'bg-amber-100 text-amber-800',
+  PENDING:'bg-blue-100 text-blue-800',
+};
 
 function fmt(n: number | null) {
   if (n == null) return '—';
@@ -41,12 +48,13 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
   const [status, setStatus] = useState('');
   const [customer, setCustomer] = useState('');
   const [editing, setEditing] = useState<Partial<Sale> | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams({ page: String(page), limit: '50' });
-    if (month) params.set('month', month);
-    if (status) params.set('status', status);
+    if (month)    params.set('month', month);
+    if (status)   params.set('status', status);
     if (customer) params.set('search', customer);
     const res = await fetch('/api/sales?' + params);
     const data = await res.json();
@@ -60,8 +68,7 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this sale?')) return;
     await fetch(`/api/sales/${id}`, { method: 'DELETE' });
-    load();
-    onRefresh();
+    load(); onRefresh();
   };
 
   const handleMarkClosed = async (sale: Sale) => {
@@ -70,8 +77,18 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'CLOSED', balance: 0, advance: sale.amount }),
     });
-    load();
-    onRefresh();
+    load(); onRefresh();
+  };
+
+  // Quick status cycle: click badge to go CLOSED→OPEN→PENDING→CLOSED
+  const handleStatusCycle = async (sale: Sale) => {
+    const next = STATUS_NEXT[sale.status] || 'CLOSED';
+    await fetch(`/api/sales/${sale.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: next }),
+    });
+    load(); onRefresh();
   };
 
   const saveEdit = async () => {
@@ -81,9 +98,24 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(editing),
     });
-    setEditing(null);
-    load();
-    onRefresh();
+    setEditing(null); load(); onRefresh();
+  };
+
+  const handleExport = async () => {
+    setExporting(true);
+    const params = new URLSearchParams({ type: 'sales' });
+    if (month)    params.set('month', month);
+    if (status)   params.set('status', status);
+    if (customer) params.set('search', customer);
+    const res = await fetch('/api/export?' + params);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = month ? `sales-${month}.csv` : 'sales-all.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    setExporting(false);
   };
 
   const totalPages = Math.ceil(total / 50);
@@ -105,19 +137,28 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
           <select value={status} onChange={e => { setStatus(e.target.value); setPage(1); }}
             className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">All</option>
-            <option>CLOSED</option>
-            <option>OPEN</option>
-            <option>PENDING</option>
+            {STATUSES.map(s => <option key={s}>{s}</option>)}
           </select>
         </div>
         <div>
-          <label className="block text-xs text-slate-500 mb-1">Customer Search</label>
-          <input placeholder="Search name, address, phone..." value={customer}
+          <label className="block text-xs text-slate-500 mb-1">Search</label>
+          <input placeholder="Name, address or phone..." value={customer}
             onChange={e => { setCustomer(e.target.value); setPage(1); }}
-            className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64" />
+            className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-56" />
         </div>
         <span className="text-xs text-slate-400 self-end pb-2">{total} records</span>
+        <div className="ml-auto self-end">
+          <button onClick={handleExport} disabled={exporting}
+            className="px-3 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 font-medium">
+            {exporting ? 'Exporting...' : '↓ Export CSV'}
+          </button>
+        </div>
       </div>
+
+      {/* Tip about status */}
+      <p className="text-xs text-slate-400 px-1">
+        Tip: Click any status badge to toggle it instantly (CLOSED → OPEN → PENDING → CLOSED)
+      </p>
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
@@ -160,14 +201,16 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
                     </td>
                     <td className="px-4 py-2 text-slate-500">{s.payment_mode || '—'}</td>
                     <td className="px-4 py-2">
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                        s.status === 'CLOSED' ? 'bg-green-100 text-green-800' :
-                        s.status === 'OPEN' ? 'bg-amber-100 text-amber-800' :
-                        'bg-blue-100 text-blue-800'
-                      }`}>{s.status}</span>
+                      {/* Clickable status badge */}
+                      <button
+                        onClick={() => handleStatusCycle(s)}
+                        title="Click to change status"
+                        className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium cursor-pointer hover:opacity-75 transition-opacity ${STATUS_COLOR[s.status] || 'bg-slate-100 text-slate-600'}`}>
+                        {s.status}
+                      </button>
                     </td>
                     <td className="px-4 py-2">
-                      <div className="flex gap-1">
+                      <div className="flex gap-1.5">
                         <button onClick={() => setEditing(s)}
                           className="text-xs text-blue-600 hover:underline">Edit</button>
                         {s.status !== 'CLOSED' && (
