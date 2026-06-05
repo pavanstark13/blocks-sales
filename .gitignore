@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# SQLite database (generated from migration)
-/data/
+# SQLite database is committed for deployment
+# /data/

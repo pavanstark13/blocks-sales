@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const month = searchParams.get('month');
   const status = searchParams.get('status');
-  const customer = searchParams.get('customer');
+  const search = searchParams.get('search') || searchParams.get('customer');
   const page = parseInt(searchParams.get('page') || '1');
   const limit = parseInt(searchParams.get('limit') || '50');
   const offset = (page - 1) * limit;
@@ -15,7 +15,10 @@ export async function GET(req: NextRequest) {
 
   if (month) { where += ' AND month_label = ?'; params.push(month); }
   if (status) { where += ' AND status = ?'; params.push(status); }
-  if (customer) { where += ' AND customer_name LIKE ?'; params.push(`%${customer}%`); }
+  if (search) {
+    where += ' AND (customer_name LIKE ? OR address LIKE ? OR phone LIKE ?)';
+    params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+  }
 
   const database = db();
   const total = (database.prepare(`SELECT COUNT(*) as cnt FROM sales ${where}`).get(...params) as { cnt: number }).cnt;

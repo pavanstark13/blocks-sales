@@ -6,8 +6,9 @@ import SalesTable from '@/components/SalesTable';
 import AddSaleForm from '@/components/AddSaleForm';
 import Customers from '@/components/Customers';
 import Outstanding from '@/components/Outstanding';
+import Ledger from '@/components/Ledger';
 
-type Tab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'add';
+type Tab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'add';
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>('dashboard');
@@ -20,12 +21,13 @@ export default function Home() {
     { id: 'sales', label: 'Sales Log' },
     { id: 'outstanding', label: 'Outstanding' },
     { id: 'customers', label: 'Customers' },
+    { id: 'ledger', label: 'Ledger' },
     { id: 'add', label: '+ New Sale' },
   ];
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-10 print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             <div>
@@ -42,6 +44,8 @@ export default function Home() {
                       ? 'bg-blue-600 text-white'
                       : t.id === 'add'
                       ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                      : t.id === 'ledger'
+                      ? 'text-violet-600 hover:bg-violet-50'
                       : 'text-slate-600 hover:bg-slate-100'
                   }`}
                 >
@@ -58,6 +62,7 @@ export default function Home() {
         {tab === 'sales' && <SalesTable key={refreshKey} onRefresh={refresh} />}
         {tab === 'outstanding' && <Outstanding key={refreshKey} onRefresh={refresh} />}
         {tab === 'customers' && <Customers key={refreshKey} />}
+        {tab === 'ledger' && <Ledger key={refreshKey} />}
         {tab === 'add' && <AddSaleForm onSaved={() => { refresh(); setTab('sales'); }} />}
       </main>
     </div>

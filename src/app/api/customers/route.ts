@@ -21,8 +21,8 @@ export async function GET(req: NextRequest) {
   const params: string[] = [];
 
   if (q) {
-    query += ' AND customer_name LIKE ?';
-    params.push(`%${q}%`);
+    query += ' AND (customer_name LIKE ? OR address LIKE ? OR phone LIKE ?)';
+    params.push(`%${q}%`, `%${q}%`, `%${q}%`);
   }
 
   query += ' GROUP BY customer_name ORDER BY last_order DESC';

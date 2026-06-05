@@ -47,7 +47,7 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
     const params = new URLSearchParams({ page: String(page), limit: '50' });
     if (month) params.set('month', month);
     if (status) params.set('status', status);
-    if (customer) params.set('customer', customer);
+    if (customer) params.set('search', customer);
     const res = await fetch('/api/sales?' + params);
     const data = await res.json();
     setSales(data.data);
@@ -112,9 +112,9 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
         </div>
         <div>
           <label className="block text-xs text-slate-500 mb-1">Customer Search</label>
-          <input placeholder="Search customer..." value={customer}
+          <input placeholder="Search name, address, phone..." value={customer}
             onChange={e => { setCustomer(e.target.value); setPage(1); }}
-            className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-48" />
+            className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64" />
         </div>
         <span className="text-xs text-slate-400 self-end pb-2">{total} records</span>
       </div>
