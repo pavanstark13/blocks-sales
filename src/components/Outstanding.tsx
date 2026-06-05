@@ -29,27 +29,35 @@ export default function Outstanding({ onRefresh }: { onRefresh: () => void }) {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [updating, setUpdating] = useState<number | null>(null);
   const [payInput, setPayInput] = useState<Record<number, string>>({});
 
   const load = useCallback(async () => {
     setLoading(true);
-    const params = new URLSearchParams({ limit: '500' });
-    if (statusFilter) params.set('status', statusFilter);
-    else {
-      const openRes = await fetch('/api/sales?status=OPEN&limit=500');
-      const pendingRes = await fetch('/api/sales?status=PENDING&limit=500');
-      const openData = await openRes.json();
-      const pendingData = await pendingRes.json();
+    const dateParams = new URLSearchParams({ limit: '500' });
+    if (dateFrom) dateParams.set('date_from', dateFrom);
+    if (dateTo)   dateParams.set('date_to', dateTo);
+
+    if (statusFilter) {
+      dateParams.set('status', statusFilter);
+      const res = await fetch('/api/sales?' + dateParams);
+      const data = await res.json();
+      setSales(data.data);
+    } else {
+      const openParams = new URLSearchParams(dateParams);
+      openParams.set('status', 'OPEN');
+      const pendingParams = new URLSearchParams(dateParams);
+      pendingParams.set('status', 'PENDING');
+      const [openData, pendingData] = await Promise.all([
+        fetch('/api/sales?' + openParams).then(r => r.json()),
+        fetch('/api/sales?' + pendingParams).then(r => r.json()),
+      ]);
       setSales([...openData.data, ...pendingData.data].sort((a: Sale, b: Sale) => b.date.localeCompare(a.date)));
-      setLoading(false);
-      return;
     }
-    const res = await fetch('/api/sales?' + params);
-    const data = await res.json();
-    setSales(data.data);
     setLoading(false);
-  }, [statusFilter]);
+  }, [statusFilter, dateFrom, dateTo]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -96,13 +104,32 @@ export default function Outstanding({ onRefresh }: { onRefresh: () => void }) {
       </div>
 
       {/* Filter */}
-      <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 flex gap-3">
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-          className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">Open + Pending</option>
-          <option value="OPEN">Open Only</option>
-          <option value="PENDING">Pending Only</option>
-        </select>
+      <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 flex flex-wrap gap-3 items-end">
+        <div>
+          <label className="block text-xs text-slate-500 mb-1">Status</label>
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+            className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Open + Pending</option>
+            <option value="OPEN">Open Only</option>
+            <option value="PENDING">Pending Only</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs text-slate-500 mb-1">From</label>
+          <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+            className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label className="block text-xs text-slate-500 mb-1">To</label>
+          <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+            className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        {(dateFrom || dateTo) && (
+          <button onClick={() => { setDateFrom(''); setDateTo(''); }}
+            className="px-3 py-2 text-xs text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50 self-end">
+            Clear dates
+          </button>
+        )}
       </div>
 
       {/* Table */}

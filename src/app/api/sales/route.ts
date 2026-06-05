@@ -3,18 +3,22 @@ import { db } from '@/lib/db';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const month  = searchParams.get('month');
-  const status = searchParams.get('status');
-  const search = searchParams.get('search') || searchParams.get('customer');
-  const page   = parseInt(searchParams.get('page')  || '1');
-  const limit  = parseInt(searchParams.get('limit') || '50');
-  const offset = (page - 1) * limit;
+  const month     = searchParams.get('month');
+  const status    = searchParams.get('status');
+  const search    = searchParams.get('search') || searchParams.get('customer');
+  const dateFrom  = searchParams.get('date_from');
+  const dateTo    = searchParams.get('date_to');
+  const page      = parseInt(searchParams.get('page')  || '1');
+  const limit     = parseInt(searchParams.get('limit') || '50');
+  const offset    = (page - 1) * limit;
 
   let where = 'WHERE 1=1';
   const params: unknown[] = [];
 
-  if (month)  { where += ' AND month_label = ?'; params.push(month); }
-  if (status) { where += ' AND status = ?';      params.push(status); }
+  if (month)    { where += ' AND month_label = ?'; params.push(month); }
+  if (status)   { where += ' AND status = ?';      params.push(status); }
+  if (dateFrom) { where += ' AND date >= ?';        params.push(dateFrom); }
+  if (dateTo)   { where += ' AND date <= ?';        params.push(dateTo); }
   if (search) {
     where += ' AND (customer_name LIKE ? OR address LIKE ? OR phone LIKE ?)';
     params.push(`%${search}%`, `%${search}%`, `%${search}%`);

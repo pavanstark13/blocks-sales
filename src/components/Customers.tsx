@@ -27,23 +27,30 @@ export default function Customers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [selected, setSelected] = useState<Customer | null>(null);
   const [history, setHistory] = useState<unknown[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
-    if (search) params.set('q', search);
+    if (search)   params.set('q', search);
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo)   params.set('date_to', dateTo);
     const res = await fetch('/api/customers?' + params);
     const data = await res.json();
     setCustomers(data);
     setLoading(false);
-  }, [search]);
+  }, [search, dateFrom, dateTo]);
 
   useEffect(() => { load(); }, [load]);
 
   const loadHistory = async (name: string) => {
-    const res = await fetch(`/api/sales?customer=${encodeURIComponent(name)}&limit=100`);
+    const params = new URLSearchParams({ customer: name, limit: '100' });
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo)   params.set('date_to', dateTo);
+    const res = await fetch('/api/sales?' + params);
     const data = await res.json();
     setHistory(data.data);
   };
@@ -57,10 +64,28 @@ export default function Customers() {
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
       {/* Customer list */}
       <div className="lg:col-span-2 space-y-4">
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+        <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 space-y-2">
           <input placeholder="Search customer..." value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <label className="block text-xs text-slate-500 mb-1">From</label>
+              <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+                className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-slate-500 mb-1">To</label>
+              <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+                className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+          {(dateFrom || dateTo) && (
+            <button onClick={() => { setDateFrom(''); setDateTo(''); }}
+              className="w-full text-xs text-slate-500 border border-slate-200 rounded-lg py-1 hover:bg-slate-50">
+              Clear date filter
+            </button>
+          )}
         </div>
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
           {loading ? (

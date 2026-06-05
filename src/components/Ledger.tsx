@@ -55,23 +55,31 @@ export default function Ledger() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(false);
   const [customerSearch, setCustomerSearch] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [printing, setPrinting] = useState(false);
 
-  // Load customer list
+  // Load customer list (re-loads when date range changes so sidebar totals reflect the filter)
   useEffect(() => {
-    fetch('/api/ledger').then(r => r.json()).then(d => setCustomers(d.customers));
-  }, []);
+    const params = new URLSearchParams();
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo)   params.set('date_to', dateTo);
+    fetch('/api/ledger?' + params).then(r => r.json()).then(d => setCustomers(d.customers));
+  }, [dateFrom, dateTo]);
 
   // Load ledger for selected customer
   const loadLedger = useCallback(async (name: string) => {
     if (!name) return;
     setLoading(true);
-    const res = await fetch(`/api/ledger?customer=${encodeURIComponent(name)}`);
+    const params = new URLSearchParams({ customer: name });
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo)   params.set('date_to', dateTo);
+    const res = await fetch('/api/ledger?' + params);
     const data = await res.json();
     setEntries(data.entries);
     setSummary(data.summary);
     setLoading(false);
-  }, []);
+  }, [dateFrom, dateTo]);
 
   useEffect(() => { if (selected) loadLedger(selected); }, [selected, loadLedger]);
 
@@ -89,13 +97,31 @@ export default function Ledger() {
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 print:block">
       {/* Customer sidebar */}
       <div className="lg:col-span-1 print:hidden space-y-3">
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-3">
+        <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-3 space-y-2">
           <input
             placeholder="Search name, address, phone..."
             value={customerSearch}
             onChange={e => setCustomerSearch(e.target.value)}
             className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <label className="block text-xs text-slate-500 mb-1">From</label>
+              <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+                className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-slate-500 mb-1">To</label>
+              <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+                className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+          {(dateFrom || dateTo) && (
+            <button onClick={() => { setDateFrom(''); setDateTo(''); }}
+              className="w-full text-xs text-slate-500 border border-slate-200 rounded-lg py-1 hover:bg-slate-50">
+              Clear date filter
+            </button>
+          )}
         </div>
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="px-4 py-2 border-b border-slate-100 bg-slate-50 flex justify-between text-xs text-slate-500">
@@ -169,7 +195,12 @@ export default function Ledger() {
                 {customers.find(c => c.customer_name === selected)?.phone && (
                   <p className="text-sm">Ph: {customers.find(c => c.customer_name === selected)?.phone}</p>
                 )}
-                <p className="text-xs text-slate-500 mt-1">Printed: {new Date().toLocaleDateString('en-IN')}</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {dateFrom || dateTo
+                    ? `Period: ${dateFrom || '—'} to ${dateTo || '—'} · `
+                    : ''}
+                  Printed: {new Date().toLocaleDateString('en-IN')}
+                </p>
                 <hr className="mt-3" />
               </div>
 

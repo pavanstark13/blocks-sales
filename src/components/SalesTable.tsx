@@ -47,6 +47,8 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
   const [month, setMonth] = useState('');
   const [status, setStatus] = useState('');
   const [customer, setCustomer] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [editing, setEditing] = useState<Partial<Sale> | null>(null);
   const [exporting, setExporting] = useState(false);
 
@@ -56,12 +58,14 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
     if (month)    params.set('month', month);
     if (status)   params.set('status', status);
     if (customer) params.set('search', customer);
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo)   params.set('date_to', dateTo);
     const res = await fetch('/api/sales?' + params);
     const data = await res.json();
     setSales(data.data);
     setTotal(data.total);
     setLoading(false);
-  }, [page, month, status, customer]);
+  }, [page, month, status, customer, dateFrom, dateTo]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -107,6 +111,8 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
     if (month)    params.set('month', month);
     if (status)   params.set('status', status);
     if (customer) params.set('search', customer);
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo)   params.set('date_to', dateTo);
     const res = await fetch('/api/export?' + params);
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
@@ -146,6 +152,24 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
             onChange={e => { setCustomer(e.target.value); setPage(1); }}
             className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-56" />
         </div>
+        <div>
+          <label className="block text-xs text-slate-500 mb-1">From</label>
+          <input type="date" value={dateFrom} onChange={e => { setDateFrom(e.target.value); setPage(1); }}
+            className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label className="block text-xs text-slate-500 mb-1">To</label>
+          <input type="date" value={dateTo} onChange={e => { setDateTo(e.target.value); setPage(1); }}
+            className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        {(dateFrom || dateTo) && (
+          <div className="self-end">
+            <button onClick={() => { setDateFrom(''); setDateTo(''); setPage(1); }}
+              className="px-3 py-2 text-xs text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50">
+              Clear dates
+            </button>
+          </div>
+        )}
         <span className="text-xs text-slate-400 self-end pb-2">{total} records</span>
         <div className="ml-auto self-end">
           <button onClick={handleExport} disabled={exporting}

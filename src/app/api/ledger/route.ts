@@ -6,8 +6,15 @@ export async function GET(req: NextRequest) {
   const customer = searchParams.get('customer');
   const month    = searchParams.get('month');
   const search   = searchParams.get('search');
+  const dateFrom = searchParams.get('date_from');
+  const dateTo   = searchParams.get('date_to');
 
   const database = db();
+
+  const listWhere = ['customer_name IS NOT NULL'];
+  const listParams: unknown[] = [];
+  if (dateFrom) { listWhere.push('date >= ?'); listParams.push(dateFrom); }
+  if (dateTo)   { listWhere.push('date <= ?'); listParams.push(dateTo); }
 
   const customers = await database.all(`
     SELECT customer_name, MAX(address) as address, MAX(phone) as phone,
@@ -15,9 +22,9 @@ export async function GET(req: NextRequest) {
       ROUND(SUM(COALESCE(amount,0)),2)  as total_debit,
       ROUND(SUM(COALESCE(advance,0)),2) as total_credit,
       ROUND(SUM(COALESCE(balance,0)),2) as closing_balance
-    FROM sales WHERE customer_name IS NOT NULL
+    FROM sales WHERE ${listWhere.join(' AND ')}
     GROUP BY customer_name ORDER BY closing_balance DESC, customer_name
-  `);
+  `, ...listParams);
 
   if (!customer) {
     return NextResponse.json({ customers, entries: [], summary: null });
@@ -25,8 +32,10 @@ export async function GET(req: NextRequest) {
 
   let where = 'WHERE customer_name = ?';
   const params: unknown[] = [customer];
-  if (month)  { where += ' AND month_label = ?'; params.push(month); }
-  if (search) { where += ' AND (address LIKE ? OR notes LIKE ?)'; params.push(`%${search}%`, `%${search}%`); }
+  if (month)    { where += ' AND month_label = ?'; params.push(month); }
+  if (dateFrom) { where += ' AND date >= ?';       params.push(dateFrom); }
+  if (dateTo)   { where += ' AND date <= ?';       params.push(dateTo); }
+  if (search)   { where += ' AND (address LIKE ? OR notes LIKE ?)'; params.push(`%${search}%`, `%${search}%`); }
 
   const rows = await database.all(
     `SELECT id, date, address, size, quantity, rate, amount, advance, balance, status, payment_mode, notes, month_label
