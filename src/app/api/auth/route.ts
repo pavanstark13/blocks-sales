@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     if (!checkCredentials(user, pass)) {
       return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
     }
-    const token = createToken();
+    const token = await createToken();
     const res = NextResponse.json({ ok: true });
     res.cookies.set(COOKIE, token, COOKIE_OPTS);
     return res;
