@@ -59,6 +59,40 @@ const SCHEMA = `
     notes TEXT,
     created_at TEXT DEFAULT (datetime('now'))
   );
+  CREATE TABLE IF NOT EXISTS rmc_sales (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    customer_name TEXT,
+    site_address TEXT,
+    grade TEXT NOT NULL,
+    quantity REAL NOT NULL,
+    rate REAL,
+    amount REAL,
+    pump_charge REAL DEFAULT 0,
+    total_amount REAL,
+    advance REAL DEFAULT 0,
+    balance REAL DEFAULT 0,
+    status TEXT DEFAULT 'CLOSED',
+    payment_mode TEXT,
+    notes TEXT,
+    month_label TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS rmc_payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_name TEXT NOT NULL,
+    date TEXT NOT NULL,
+    amount REAL NOT NULL,
+    payment_mode TEXT,
+    notes TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS rmc_customer_rates (
+    customer_name TEXT NOT NULL,
+    grade TEXT NOT NULL,
+    rate REAL NOT NULL,
+    PRIMARY KEY (customer_name, grade)
+  );
   CREATE INDEX IF NOT EXISTS idx_sales_date      ON sales(date);
   CREATE INDEX IF NOT EXISTS idx_sales_status    ON sales(status);
   CREATE INDEX IF NOT EXISTS idx_sales_customer  ON sales(customer_name);
@@ -67,6 +101,11 @@ const SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_payments_date   ON payments(date);
   CREATE INDEX IF NOT EXISTS idx_rate_periods    ON customer_rate_periods(customer_name, size);
   CREATE INDEX IF NOT EXISTS idx_production_date ON production(date);
+  CREATE INDEX IF NOT EXISTS idx_rmc_sales_date     ON rmc_sales(date);
+  CREATE INDEX IF NOT EXISTS idx_rmc_sales_status   ON rmc_sales(status);
+  CREATE INDEX IF NOT EXISTS idx_rmc_sales_customer ON rmc_sales(customer_name);
+  CREATE INDEX IF NOT EXISTS idx_rmc_sales_month    ON rmc_sales(month_label);
+  CREATE INDEX IF NOT EXISTS idx_rmc_payments_cust  ON rmc_payments(customer_name);
 `;
 
 // ── Unified row type ──────────────────────────────────────────────────────────
