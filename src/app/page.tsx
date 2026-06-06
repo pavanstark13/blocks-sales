@@ -15,10 +15,12 @@ import RMCSalesTable from '@/components/rmc/RMCSalesTable';
 import RMCBulkEntry from '@/components/rmc/RMCBulkEntry';
 import RMCOutstanding from '@/components/rmc/RMCOutstanding';
 import RMCCustomers from '@/components/rmc/RMCCustomers';
+import RMCCubeTests from '@/components/rmc/RMCCubeTests';
+import AgeingReport from '@/components/AgeingReport';
 
 type Module = 'blocks' | 'rmc';
-type Tab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'add' | 'stock';
-type RMCTab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'bulk';
+type Tab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'add' | 'stock' | 'ageing';
+type RMCTab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'bulk' | 'cube-tests' | 'ageing';
 
 export default function Home() {
   const [module, setModule] = useState<Module>('blocks');
@@ -45,6 +47,7 @@ export default function Home() {
     { id: 'customers', label: 'Customers' },
     { id: 'ledger', label: 'Ledger' },
     { id: 'stock', label: '📦 Stock', color: 'slate' },
+    { id: 'ageing', label: 'Ageing' },
     { id: 'bulk', label: '⚡ Daily Entry', color: 'orange' },
     { id: 'add', label: '+ Single Sale', color: 'green' },
   ];
@@ -54,6 +57,8 @@ export default function Home() {
     { id: 'sales', label: 'Sales Log' },
     { id: 'outstanding', label: 'Outstanding' },
     { id: 'customers', label: 'Customers' },
+    { id: 'cube-tests', label: '🧪 Cube Tests' },
+    { id: 'ageing', label: 'Ageing' },
     { id: 'bulk', label: '⚡ Daily Entry', color: 'orange' },
   ];
 
@@ -146,6 +151,7 @@ export default function Home() {
             {tab === 'customers'  && <Customers key={refreshKey} />}
             {tab === 'ledger'     && <Ledger key={refreshKey} />}
             {tab === 'stock'      && <Stock key={refreshKey} />}
+            {tab === 'ageing'     && <AgeingReport key={refreshKey} apiBase="/api" />}
             {tab === 'bulk'       && <BulkEntry onSaved={() => { refresh(); setTab('sales'); }} />}
             {tab === 'add'        && <AddSaleForm onSaved={() => { refresh(); setTab('sales'); }} />}
           </>
@@ -158,6 +164,8 @@ export default function Home() {
             {rmcTab === 'sales'       && <RMCSalesTable key={refreshKey} onRefresh={refresh} />}
             {rmcTab === 'outstanding' && <RMCOutstanding key={refreshKey} onRefresh={refresh} />}
             {rmcTab === 'customers'   && <RMCCustomers key={refreshKey} />}
+            {rmcTab === 'cube-tests'  && <RMCCubeTests key={refreshKey} />}
+            {rmcTab === 'ageing'      && <AgeingReport key={refreshKey} apiBase="/api/rmc" />}
             {rmcTab === 'bulk'        && <RMCBulkEntry onSaved={() => { refresh(); setRmcTab('sales'); }} />}
           </>
         )}

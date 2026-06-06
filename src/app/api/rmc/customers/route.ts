@@ -19,6 +19,8 @@ export async function GET(req: NextRequest) {
       ROUND(SUM(CASE WHEN grade='M20' THEN quantity ELSE 0 END), 1) as qty_m20,
       ROUND(SUM(CASE WHEN grade='M25' THEN quantity ELSE 0 END), 1) as qty_m25,
       ROUND(SUM(CASE WHEN grade='M30' THEN quantity ELSE 0 END), 1) as qty_m30,
+      ROUND(SUM(CASE WHEN grade='M35' THEN quantity ELSE 0 END), 1) as qty_m35,
+      ROUND(SUM(CASE WHEN grade='M40' THEN quantity ELSE 0 END), 1) as qty_m40,
       MAX(date) as last_order_date
     FROM rmc_sales WHERE customer_name IS NOT NULL
   `;

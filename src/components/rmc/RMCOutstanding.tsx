@@ -32,6 +32,8 @@ const GRADE_COLOR: Record<string, string> = {
   M20: 'bg-blue-100 text-blue-700',
   M25: 'bg-violet-100 text-violet-700',
   M30: 'bg-purple-100 text-purple-700',
+  M35: 'bg-rose-100 text-rose-700',
+  M40: 'bg-orange-100 text-orange-700',
 };
 
 export default function RMCOutstanding({ onRefresh }: { onRefresh: () => void }) {

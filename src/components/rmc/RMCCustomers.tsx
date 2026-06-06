@@ -14,6 +14,8 @@ interface Customer {
   qty_m20: number;
   qty_m25: number;
   qty_m30: number;
+  qty_m35: number;
+  qty_m40: number;
   last_order_date: string;
 }
 
@@ -54,11 +56,13 @@ const GRADE_CHIPS: Record<string, string> = {
   M20: 'bg-blue-50 text-blue-700 border-blue-200',
   M25: 'bg-violet-50 text-violet-700 border-violet-200',
   M30: 'bg-purple-50 text-purple-700 border-purple-200',
+  M35: 'bg-rose-50 text-rose-700 border-rose-200',
+  M40: 'bg-orange-50 text-orange-700 border-orange-200',
 };
 
-const GRADES = ['M10', 'M15', 'M20', 'M25', 'M30'] as const;
+const GRADES = ['M10', 'M15', 'M20', 'M25', 'M30', 'M35', 'M40'] as const;
 const GRADE_QTY_KEYS: Record<string, keyof Customer> = {
-  M10: 'qty_m10', M15: 'qty_m15', M20: 'qty_m20', M25: 'qty_m25', M30: 'qty_m30',
+  M10: 'qty_m10', M15: 'qty_m15', M20: 'qty_m20', M25: 'qty_m25', M30: 'qty_m30', M35: 'qty_m35', M40: 'qty_m40',
 };
 
 export default function RMCCustomers() {
@@ -83,6 +87,12 @@ export default function RMCCustomers() {
   // Rate editing
   const [editingRate, setEditingRate] = useState<{ grade: string; val: string } | null>(null);
 
+  // Credit limit
+  const [creditLimit, setCreditLimit] = useState<number | null>(null);
+  const [creditLimitInput, setCreditLimitInput] = useState('');
+  const [savingCreditLimit, setSavingCreditLimit] = useState(false);
+  const [creditLimitSaved, setCreditLimitSaved] = useState(false);
+
   // Merge/rename
   const [showMerge, setShowMerge] = useState(false);
   const [mergeForm, setMergeForm] = useState({ new_name: '', merge_into: '' });
@@ -106,17 +116,40 @@ export default function RMCCustomers() {
 
   const fetchDetail = useCallback(async (name: string) => {
     setLoadingDetail(true);
-    const [ledgerRes, ratesRes] = await Promise.all([
+    const [ledgerRes, ratesRes, creditRes] = await Promise.all([
       fetch(`/api/rmc/ledger?customer_name=${encodeURIComponent(name)}`),
       fetch(`/api/rmc/customer-rates?customer=${encodeURIComponent(name)}`),
+      fetch(`/api/credit-limits?module=rmc&customer_name=${encodeURIComponent(name)}`),
     ]);
     const ledgerData = await ledgerRes.json();
     const ratesData = await ratesRes.json();
+    const creditData = await creditRes.json();
     setLedger(ledgerData.entries || []);
     setLedgerSummary(ledgerData.summary || null);
     setRates(ratesData.rates || {});
+    if (creditData.length > 0) {
+      setCreditLimit(Number(creditData[0].credit_limit));
+      setCreditLimitInput(String(creditData[0].credit_limit));
+    } else {
+      setCreditLimit(null);
+      setCreditLimitInput('');
+    }
     setLoadingDetail(false);
   }, []);
+
+  const saveCreditLimit = async () => {
+    if (!selected || !creditLimitInput) return;
+    setSavingCreditLimit(true);
+    await fetch('/api/credit-limits', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ customer_name: selected, module: 'rmc', credit_limit: parseFloat(creditLimitInput) }),
+    });
+    setSavingCreditLimit(false);
+    setCreditLimitSaved(true);
+    setCreditLimit(parseFloat(creditLimitInput));
+    setTimeout(() => setCreditLimitSaved(false), 2000);
+  };
 
   const selectCustomer = (name: string) => {
     if (selected === name) { setSelected(null); return; }
@@ -294,6 +327,35 @@ export default function RMCCustomers() {
                       </div>
                     </div>
                   )}
+
+                  {/* Credit Limit */}
+                  <div className="flex flex-wrap items-center gap-3 mb-3">
+                    {creditLimit != null && selectedCustomer && (
+                      <div className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm border ${Number(selectedCustomer.total_balance) >= creditLimit ? 'bg-red-50 border-red-300' : 'bg-slate-50 border-slate-200'}`}>
+                        <span className="text-xs text-slate-500">Credit Limit:</span>
+                        <span className="font-semibold text-slate-700">{fmtCur(creditLimit)}</span>
+                        {Number(selectedCustomer.total_balance) >= creditLimit && (
+                          <span className="text-xs font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded">⚠ EXCEEDED</span>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        placeholder="Set credit limit (₹)"
+                        value={creditLimitInput}
+                        onChange={e => setCreditLimitInput(e.target.value)}
+                        className="w-44 border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                      <button
+                        onClick={saveCreditLimit}
+                        disabled={savingCreditLimit || !creditLimitInput}
+                        className="px-3 py-1.5 text-xs bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                      >
+                        {savingCreditLimit ? 'Saving...' : creditLimitSaved ? '✓ Saved' : 'Set Limit'}
+                      </button>
+                    </div>
+                  </div>
 
                   {/* Grade chips */}
                   <div className="flex gap-2 flex-wrap">

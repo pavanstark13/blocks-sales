@@ -8,7 +8,7 @@ interface DashboardData {
   month_amount: number;
   outstanding_amount: number;
   outstanding_count: number;
-  grade_breakdown: { M10: number; M15: number; M20: number; M25: number; M30: number };
+  grade_breakdown: { M10: number; M15: number; M20: number; M25: number; M30: number; M35: number; M40: number; Other: number };
   monthly_summary: Array<{ month_label: string; volume: number; amount: number; orders: number }>;
 }
 
@@ -22,6 +22,9 @@ const GRADE_COLORS: Record<string, string> = {
   M20: 'bg-blue-500',
   M25: 'bg-violet-500',
   M30: 'bg-purple-600',
+  M35: 'bg-rose-500',
+  M40: 'bg-orange-500',
+  Other: 'bg-amber-400',
 };
 
 const GRADE_TEXT: Record<string, string> = {
@@ -30,6 +33,9 @@ const GRADE_TEXT: Record<string, string> = {
   M20: 'text-blue-600',
   M25: 'text-violet-600',
   M30: 'text-purple-700',
+  M35: 'text-rose-600',
+  M40: 'text-orange-600',
+  Other: 'text-amber-600',
 };
 
 export default function RMCDashboard() {
@@ -50,7 +56,7 @@ export default function RMCDashboard() {
     return <div className="text-center py-12 text-red-500">Failed to load dashboard.</div>;
   }
 
-  const grades = ['M10', 'M15', 'M20', 'M25', 'M30'] as const;
+  const grades = ['M10', 'M15', 'M20', 'M25', 'M30', 'M35', 'M40', 'Other'] as const;
   const totalGradeVolume = grades.reduce((s, g) => s + (data.grade_breakdown[g] || 0), 0);
 
   return (

@@ -28,7 +28,10 @@ export async function GET() {
         ROUND(SUM(CASE WHEN grade='M15' THEN quantity ELSE 0 END),1) as M15,
         ROUND(SUM(CASE WHEN grade='M20' THEN quantity ELSE 0 END),1) as M20,
         ROUND(SUM(CASE WHEN grade='M25' THEN quantity ELSE 0 END),1) as M25,
-        ROUND(SUM(CASE WHEN grade='M30' THEN quantity ELSE 0 END),1) as M30
+        ROUND(SUM(CASE WHEN grade='M30' THEN quantity ELSE 0 END),1) as M30,
+        ROUND(SUM(CASE WHEN grade='M35' THEN quantity ELSE 0 END),1) as M35,
+        ROUND(SUM(CASE WHEN grade='M40' THEN quantity ELSE 0 END),1) as M40,
+        ROUND(SUM(CASE WHEN grade NOT IN ('M10','M15','M20','M25','M30','M35','M40') AND grade IS NOT NULL AND grade != '' THEN quantity ELSE 0 END),1) as Other
        FROM rmc_sales`
     ),
     database.all(
@@ -47,7 +50,7 @@ export async function GET() {
     month_amount:       Number(monthRow?.amount ?? 0),
     outstanding_amount: Number(outstandingRow?.amount ?? 0),
     outstanding_count:  Number(outstandingRow?.cnt ?? 0),
-    grade_breakdown:    gradeRow ?? { M10: 0, M15: 0, M20: 0, M25: 0, M30: 0 },
+    grade_breakdown:    gradeRow ?? { M10: 0, M15: 0, M20: 0, M25: 0, M30: 0, M35: 0, M40: 0, Other: 0 },
     monthly_summary:    monthlySummary.reverse(),
   });
 }

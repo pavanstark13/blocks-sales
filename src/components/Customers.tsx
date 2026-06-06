@@ -63,6 +63,12 @@ export default function Customers() {
   const [savingPeriod, setSavingPeriod] = useState(false);
   const [periodSaveMsg, setPeriodSaveMsg] = useState('');
 
+  // Credit limit
+  const [creditLimit, setCreditLimit] = useState<number | null>(null);
+  const [creditLimitInput, setCreditLimitInput] = useState('');
+  const [savingCreditLimit, setSavingCreditLimit] = useState(false);
+  const [creditLimitSaved, setCreditLimitSaved] = useState(false);
+
   // Edit / rename / merge
   const [showEdit, setShowEdit] = useState(false);
   const [editName, setEditName] = useState('');
@@ -114,6 +120,31 @@ export default function Customers() {
     setRatePeriods(data);
   };
 
+  const loadCreditLimit = async (name: string) => {
+    const data = await fetch(`/api/credit-limits?module=blocks&customer_name=${encodeURIComponent(name)}`).then(r => r.json());
+    if (data.length > 0) {
+      setCreditLimit(Number(data[0].credit_limit));
+      setCreditLimitInput(String(data[0].credit_limit));
+    } else {
+      setCreditLimit(null);
+      setCreditLimitInput('');
+    }
+  };
+
+  const saveCreditLimit = async () => {
+    if (!selected || !creditLimitInput) return;
+    setSavingCreditLimit(true);
+    await fetch('/api/credit-limits', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ customer_name: selected.customer_name, module: 'blocks', credit_limit: parseFloat(creditLimitInput) }),
+    });
+    setSavingCreditLimit(false);
+    setCreditLimitSaved(true);
+    setCreditLimit(parseFloat(creditLimitInput));
+    setTimeout(() => setCreditLimitSaved(false), 2000);
+  };
+
   const selectCustomer = (c: Customer) => {
     setSelected(c);
     setPayResult(null);
@@ -125,6 +156,7 @@ export default function Customers() {
     loadHistory(c.customer_name);
     loadRates(c.customer_name);
     loadRatePeriods(c.customer_name);
+    loadCreditLimit(c.customer_name);
   };
 
   const openEdit = () => {
@@ -404,6 +436,34 @@ export default function Customers() {
                     <p className={`text-lg font-bold ${stat.red ? 'text-rose-600' : 'text-slate-800'}`}>{stat.value}</p>
                   </div>
                 ))}
+              </div>
+              {/* Credit Limit */}
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                {creditLimit != null && (
+                  <div className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm border ${selected.outstanding >= creditLimit ? 'bg-red-50 border-red-300' : 'bg-slate-50 border-slate-200'}`}>
+                    <span className="text-xs text-slate-500">Credit Limit:</span>
+                    <span className="font-semibold text-slate-700">{fmtCur(creditLimit)}</span>
+                    {selected.outstanding >= creditLimit && (
+                      <span className="text-xs font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded">⚠ EXCEEDED</span>
+                    )}
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    placeholder="Set credit limit (₹)"
+                    value={creditLimitInput}
+                    onChange={e => setCreditLimitInput(e.target.value)}
+                    className="w-44 border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={saveCreditLimit}
+                    disabled={savingCreditLimit || !creditLimitInput}
+                    className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {savingCreditLimit ? 'Saving...' : creditLimitSaved ? '✓ Saved' : 'Set Limit'}
+                  </button>
+                </div>
               </div>
               {(selected.qty_4 > 0 || selected.qty_6 > 0 || selected.qty_8 > 0) && (
                 <div className="mt-3 flex gap-3 flex-wrap">

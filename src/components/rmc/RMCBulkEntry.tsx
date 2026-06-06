@@ -14,7 +14,7 @@ interface Row {
   status: string;
 }
 
-const GRADES = ['M10', 'M15', 'M20', 'M25', 'M30'];
+const GRADES = ['M10', 'M15', 'M20', 'M25', 'M30', 'M35', 'M40'];
 
 const emptyRow = (): Row => ({
   customer_name: '', site_address: '',
@@ -263,17 +263,29 @@ export default function RMCBulkEntry({ onSaved }: { onSaved: () => void }) {
                       )}
                     </td>
                     <td className="px-2 py-1.5">
-                      <select value={row.grade} onChange={e => {
-                        const newGrade = e.target.value;
-                        setCell(i, 'grade', newGrade);
-                        const cached = rateCache.current[row.customer_name];
-                        if (cached && cached[newGrade]) {
-                          setRows(prev => prev.map((r, idx) => idx === i ? { ...r, grade: newGrade, rate: String(cached[newGrade]) } : r));
-                        }
-                      }}
-                        className={`${inputCls} ${isSameCustomer ? 'border-purple-300' : ''}`}>
-                        {GRADES.map(g => <option key={g} value={g}>{g}</option>)}
-                      </select>
+                      {/* Show text input if grade is custom (not in standard list) */}
+                      {!GRADES.includes(row.grade as typeof GRADES[number]) && row.grade !== '' ? (
+                        <div className="flex gap-1">
+                          <input value={row.grade} onChange={e => setCell(i, 'grade', e.target.value)}
+                            placeholder="e.g. M45" className={`${inputCls} w-20`} />
+                          <button onClick={() => setCell(i, 'grade', 'M20')}
+                            className="text-xs text-slate-400 hover:text-slate-600">↩</button>
+                        </div>
+                      ) : (
+                        <select value={row.grade} onChange={e => {
+                          const newGrade = e.target.value;
+                          if (newGrade === '__custom__') { setCell(i, 'grade', ''); return; }
+                          setCell(i, 'grade', newGrade);
+                          const cached = rateCache.current[row.customer_name];
+                          if (cached && cached[newGrade]) {
+                            setRows(prev => prev.map((r, idx) => idx === i ? { ...r, grade: newGrade, rate: String(cached[newGrade]) } : r));
+                          }
+                        }}
+                          className={`${inputCls} ${isSameCustomer ? 'border-purple-300' : ''}`}>
+                          {GRADES.map(g => <option key={g} value={g}>{g}</option>)}
+                          <option value="__custom__">Other (type)...</option>
+                        </select>
+                      )}
                     </td>
                     <td className="px-2 py-1.5">
                       <input type="number" value={row.quantity} step="0.1"

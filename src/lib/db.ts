@@ -106,6 +106,31 @@ const SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_rmc_sales_customer ON rmc_sales(customer_name);
   CREATE INDEX IF NOT EXISTS idx_rmc_sales_month    ON rmc_sales(month_label);
   CREATE INDEX IF NOT EXISTS idx_rmc_payments_cust  ON rmc_payments(customer_name);
+  CREATE TABLE IF NOT EXISTS rmc_cube_tests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sale_id INTEGER,
+    date TEXT NOT NULL,
+    customer_name TEXT,
+    site_address TEXT,
+    grade TEXT NOT NULL,
+    batch_date TEXT,
+    quantity REAL,
+    sample_count INTEGER DEFAULT 3,
+    result_7day REAL,
+    result_28day REAL,
+    required_strength REAL,
+    status TEXT DEFAULT 'PENDING',
+    notes TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_cube_tests_date ON rmc_cube_tests(date);
+  CREATE INDEX IF NOT EXISTS idx_cube_tests_customer ON rmc_cube_tests(customer_name);
+  CREATE TABLE IF NOT EXISTS customer_credit_limits (
+    customer_name TEXT PRIMARY KEY,
+    module TEXT NOT NULL DEFAULT 'blocks',
+    credit_limit REAL NOT NULL,
+    notes TEXT
+  );
 `;
 
 // ── Unified row type ──────────────────────────────────────────────────────────
