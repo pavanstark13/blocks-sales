@@ -34,10 +34,30 @@ const SCHEMA = `
     rate REAL NOT NULL,
     PRIMARY KEY (customer_name, size)
   );
-  CREATE INDEX IF NOT EXISTS idx_sales_date     ON sales(date);
-  CREATE INDEX IF NOT EXISTS idx_sales_status   ON sales(status);
-  CREATE INDEX IF NOT EXISTS idx_sales_customer ON sales(customer_name);
-  CREATE INDEX IF NOT EXISTS idx_sales_month    ON sales(month_label);
+  CREATE TABLE IF NOT EXISTS payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_name TEXT NOT NULL,
+    date TEXT NOT NULL,
+    amount REAL NOT NULL,
+    payment_mode TEXT,
+    notes TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS customer_rate_periods (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_name TEXT NOT NULL,
+    size INTEGER NOT NULL,
+    rate REAL NOT NULL,
+    date_from TEXT NOT NULL,
+    date_to TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_sales_date      ON sales(date);
+  CREATE INDEX IF NOT EXISTS idx_sales_status    ON sales(status);
+  CREATE INDEX IF NOT EXISTS idx_sales_customer  ON sales(customer_name);
+  CREATE INDEX IF NOT EXISTS idx_sales_month     ON sales(month_label);
+  CREATE INDEX IF NOT EXISTS idx_payments_cust   ON payments(customer_name);
+  CREATE INDEX IF NOT EXISTS idx_payments_date   ON payments(date);
+  CREATE INDEX IF NOT EXISTS idx_rate_periods    ON customer_rate_periods(customer_name, size);
 `;
 
 // ── Unified row type ──────────────────────────────────────────────────────────

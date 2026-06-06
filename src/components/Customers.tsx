@@ -16,21 +16,26 @@ interface Customer {
   last_order: string;
 }
 
-interface CustomerRates {
-  4?: number;
-  6?: number;
-  8?: number;
+interface CustomerRates { 4?: number; 6?: number; 8?: number; }
+
+interface RatePeriod {
+  id: number;
+  size: number;
+  rate: number;
+  date_from: string;
+  date_to: string;
 }
 
 function fmtCur(n: number | null) {
   if (n == null) return '—';
   return '₹' + new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(n);
 }
-
 function fmt(n: number | null) {
   if (n == null) return '—';
   return new Intl.NumberFormat('en-IN').format(n);
 }
+
+const today = new Date().toISOString().split('T')[0];
 
 export default function Customers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -41,14 +46,26 @@ export default function Customers() {
   const [selected, setSelected] = useState<Customer | null>(null);
   const [history, setHistory] = useState<unknown[]>([]);
 
-  // Rates state
+  // Fixed rates
   const [rates, setRates] = useState<CustomerRates>({});
   const [rateInputs, setRateInputs] = useState<{ 4: string; 6: string; 8: string }>({ 4: '', 6: '', 8: '' });
   const [savingRates, setSavingRates] = useState(false);
   const [ratesSaved, setRatesSaved] = useState(false);
 
-  // Bulk payment state
+  // Rate periods
+  const [ratePeriods, setRatePeriods] = useState<RatePeriod[]>([]);
+  const [showAddPeriod, setShowAddPeriod] = useState(false);
+  const [periodSize, setPeriodSize] = useState<'4'|'6'|'8'>('6');
+  const [periodRate, setPeriodRate] = useState('');
+  const [periodFrom, setPeriodFrom] = useState('');
+  const [periodTo, setPeriodTo] = useState(today);
+  const [applyToOrders, setApplyToOrders] = useState(true);
+  const [savingPeriod, setSavingPeriod] = useState(false);
+  const [periodSaveMsg, setPeriodSaveMsg] = useState('');
+
+  // Bulk payment
   const [payAmount, setPayAmount] = useState('');
+  const [payDate, setPayDate] = useState(today);
   const [payMode, setPayMode] = useState('CASH');
   const [payNotes, setPayNotes] = useState('');
   const [paying, setPaying] = useState(false);
@@ -60,53 +77,52 @@ export default function Customers() {
     if (search)   params.set('q', search);
     if (dateFrom) params.set('date_from', dateFrom);
     if (dateTo)   params.set('date_to', dateTo);
-    const res = await fetch('/api/customers?' + params);
-    const data = await res.json();
+    const data = await fetch('/api/customers?' + params).then(r => r.json());
     setCustomers(data);
     setLoading(false);
   }, [search, dateFrom, dateTo]);
 
   useEffect(() => { load(); }, [load]);
 
-  const loadHistory = async (name: string) => {
+  const loadHistory = useCallback(async (name: string) => {
     const params = new URLSearchParams({ customer: name, limit: '200' });
     if (dateFrom) params.set('date_from', dateFrom);
     if (dateTo)   params.set('date_to', dateTo);
-    const res = await fetch('/api/sales?' + params);
-    const data = await res.json();
+    const data = await fetch('/api/sales?' + params).then(r => r.json());
     setHistory(data.data);
-  };
+  }, [dateFrom, dateTo]);
 
   const loadRates = async (name: string) => {
-    const res = await fetch(`/api/customer-rates?customer=${encodeURIComponent(name)}`);
-    const data = await res.json();
+    const data = await fetch(`/api/customer-rates?customer=${encodeURIComponent(name)}`).then(r => r.json());
     const r = data.rates as CustomerRates;
     setRates(r);
-    setRateInputs({
-      4: r[4] != null ? String(r[4]) : '',
-      6: r[6] != null ? String(r[6]) : '',
-      8: r[8] != null ? String(r[8]) : '',
-    });
+    setRateInputs({ 4: r[4] != null ? String(r[4]) : '', 6: r[6] != null ? String(r[6]) : '', 8: r[8] != null ? String(r[8]) : '' });
+  };
+
+  const loadRatePeriods = async (name: string) => {
+    const data = await fetch(`/api/customer-rate-periods?customer=${encodeURIComponent(name)}`).then(r => r.json());
+    setRatePeriods(data);
   };
 
   const selectCustomer = (c: Customer) => {
     setSelected(c);
     setPayResult(null);
     setPayAmount('');
+    setShowAddPeriod(false);
+    setPeriodSaveMsg('');
     loadHistory(c.customer_name);
     loadRates(c.customer_name);
+    loadRatePeriods(c.customer_name);
   };
 
-  const saveRates = async () => {
+  const saveFixedRates = async () => {
     if (!selected) return;
     setSavingRates(true);
-    const sizes: (4 | 6 | 8)[] = [4, 6, 8];
-    await Promise.all(sizes.map(size => {
+    await Promise.all(([4, 6, 8] as const).map(size => {
       const val = parseFloat(rateInputs[size]);
       if (!val || val <= 0) return Promise.resolve();
       return fetch('/api/customer-rates', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ customer_name: selected.customer_name, size, rate: val }),
       });
     }));
@@ -116,16 +132,48 @@ export default function Customers() {
     setTimeout(() => setRatesSaved(false), 2000);
   };
 
+  const saveRatePeriod = async () => {
+    if (!selected || !periodRate || !periodFrom || !periodTo) return;
+    setSavingPeriod(true);
+    const res = await fetch('/api/customer-rate-periods', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customer_name: selected.customer_name,
+        size: parseInt(periodSize),
+        rate: parseFloat(periodRate),
+        date_from: periodFrom,
+        date_to: periodTo,
+        apply_to_orders: applyToOrders,
+      }),
+    });
+    const result = await res.json();
+    setSavingPeriod(false);
+    setPeriodSaveMsg(
+      result.ok
+        ? `Saved${result.orders_updated > 0 ? ` · ${result.orders_updated} orders updated` : ''}`
+        : 'Error saving'
+    );
+    await loadRatePeriods(selected.customer_name);
+    setPeriodRate(''); setPeriodFrom('');
+    setShowAddPeriod(false);
+    setTimeout(() => setPeriodSaveMsg(''), 3000);
+  };
+
+  const deleteRatePeriod = async (id: number) => {
+    await fetch(`/api/customer-rate-periods?id=${id}`, { method: 'DELETE' });
+    if (selected) loadRatePeriods(selected.customer_name);
+  };
+
   const handleBulkPay = async () => {
     if (!selected || !payAmount || parseFloat(payAmount) <= 0) return;
     setPaying(true);
     setPayResult(null);
     const res = await fetch('/api/customers/payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         customer_name: selected.customer_name,
         amount: parseFloat(payAmount),
+        date: payDate,
         payment_mode: payMode,
         notes: payNotes || undefined,
       }),
@@ -135,16 +183,8 @@ export default function Customers() {
     setPaying(false);
     setPayAmount('');
     setPayNotes('');
-    // Reload customer list and history to reflect updated balances
     load();
     loadHistory(selected.customer_name);
-    // Re-select updated customer
-    setTimeout(() => {
-      setSelected(prev => {
-        if (!prev) return prev;
-        return { ...prev, outstanding: Math.max(0, prev.outstanding - result.amount_applied) };
-      });
-    }, 500);
   };
 
   const inputCls = 'border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
@@ -155,8 +195,7 @@ export default function Customers() {
       <div className="lg:col-span-2 space-y-3">
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 space-y-2">
           <input placeholder="Search customer..." value={search}
-            onChange={e => setSearch(e.target.value)}
-            className={`w-full ${inputCls}`} />
+            onChange={e => setSearch(e.target.value)} className={`w-full ${inputCls}`} />
           <div className="flex gap-2">
             <div className="flex-1">
               <label className="block text-xs text-slate-500 mb-1">From</label>
@@ -193,9 +232,7 @@ export default function Customers() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-semibold text-blue-600">{fmtCur(c.total_amount)}</p>
-                      {c.outstanding > 0 && (
-                        <p className="text-xs text-rose-500">{fmtCur(c.outstanding)} due</p>
-                      )}
+                      {c.outstanding > 0 && <p className="text-xs text-rose-500">{fmtCur(c.outstanding)} due</p>}
                     </div>
                   </div>
                   <p className="text-xs text-slate-400 mt-1">{c.total_orders} orders · {fmt(c.total_qty)} blocks · Last: {c.last_order}</p>
@@ -215,8 +252,6 @@ export default function Customers() {
               <h2 className="text-base font-semibold text-slate-900">{selected.customer_name}</h2>
               {selected.phone && <p className="text-sm text-blue-600 mt-0.5">{selected.phone}</p>}
               {selected.address && <p className="text-sm text-slate-500">{selected.address}</p>}
-
-              {/* Totals grid */}
               <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                   { label: 'Total Orders', value: String(selected.total_orders) },
@@ -230,8 +265,6 @@ export default function Customers() {
                   </div>
                 ))}
               </div>
-
-              {/* Size breakdown */}
               {(selected.qty_4 > 0 || selected.qty_6 > 0 || selected.qty_8 > 0) && (
                 <div className="mt-3 flex gap-3 flex-wrap">
                   {selected.qty_4 > 0 && (
@@ -259,38 +292,115 @@ export default function Customers() {
               )}
             </div>
 
-            {/* Saved rates per size */}
-            <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
-              <h3 className="text-sm font-semibold text-slate-700 mb-3">
-                Saved Rates (auto-filled in Daily Entry)
-              </h3>
-              <div className="flex gap-3 flex-wrap items-end">
-                {([4, 6, 8] as const).map(size => (
-                  <div key={size}>
-                    <label className="block text-xs text-slate-500 mb-1">
-                      {size}&quot; Block rate (₹)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.5"
-                      placeholder={rates[size] ? String(rates[size]) : 'Not set'}
-                      value={rateInputs[size]}
-                      onChange={e => setRateInputs(p => ({ ...p, [size]: e.target.value }))}
-                      className={`w-28 ${inputCls} ${rates[size] ? 'border-blue-300 bg-blue-50/30' : ''}`}
-                    />
-                    {rates[size] && (
-                      <p className="text-xs text-blue-600 mt-0.5">Saved: ₹{rates[size]}</p>
-                    )}
-                  </div>
-                ))}
-                <button onClick={saveRates} disabled={savingRates}
-                  className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 self-end">
-                  {savingRates ? 'Saving...' : ratesSaved ? '✓ Saved' : 'Save Rates'}
-                </button>
+            {/* Rates section */}
+            <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5 space-y-4">
+              <h3 className="text-sm font-semibold text-slate-700">Rate Management</h3>
+
+              {/* Fixed (default) rates */}
+              <div>
+                <p className="text-xs text-slate-500 mb-2">Default rate (auto-filled in Daily Entry unless a period rate applies)</p>
+                <div className="flex gap-3 flex-wrap items-end">
+                  {([4, 6, 8] as const).map(size => (
+                    <div key={size}>
+                      <label className="block text-xs text-slate-500 mb-1">{size}&quot; Block (₹)</label>
+                      <input type="number" step="0.5"
+                        placeholder={rates[size] ? String(rates[size]) : 'Not set'}
+                        value={rateInputs[size]}
+                        onChange={e => setRateInputs(p => ({ ...p, [size]: e.target.value }))}
+                        className={`w-24 ${inputCls} ${rates[size] ? 'border-blue-300 bg-blue-50/30' : ''}`}
+                      />
+                      {rates[size] && <p className="text-xs text-blue-600 mt-0.5">₹{rates[size]}</p>}
+                    </div>
+                  ))}
+                  <button onClick={saveFixedRates} disabled={savingRates}
+                    className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 self-end">
+                    {savingRates ? 'Saving...' : ratesSaved ? '✓ Saved' : 'Save'}
+                  </button>
+                </div>
               </div>
-              <p className="text-xs text-slate-400 mt-2">
-                These rates are auto-filled when you type this customer&apos;s name in Daily Entry.
-              </p>
+
+              {/* Rate periods */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs text-slate-500">Date-range rates (override default for a specific period)</p>
+                  <button onClick={() => setShowAddPeriod(v => !v)}
+                    className="text-xs text-blue-600 hover:underline">
+                    {showAddPeriod ? 'Cancel' : '+ Add period'}
+                  </button>
+                </div>
+
+                {showAddPeriod && (
+                  <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-3 space-y-2 mb-3">
+                    <div className="flex flex-wrap gap-2 items-end">
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">Size</label>
+                        <select value={periodSize} onChange={e => setPeriodSize(e.target.value as '4'|'6'|'8')}
+                          className="border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <option value="4">4&quot;</option>
+                          <option value="6">6&quot;</option>
+                          <option value="8">8&quot;</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">Rate (₹)</label>
+                        <input type="number" step="0.5" placeholder="e.g. 44" value={periodRate}
+                          onChange={e => setPeriodRate(e.target.value)}
+                          className="w-24 border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">From date</label>
+                        <input type="date" value={periodFrom} onChange={e => setPeriodFrom(e.target.value)}
+                          className="border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">To date</label>
+                        <input type="date" value={periodTo} onChange={e => setPeriodTo(e.target.value)}
+                          className="border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      </div>
+                    </div>
+                    <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+                      <input type="checkbox" checked={applyToOrders} onChange={e => setApplyToOrders(e.target.checked)}
+                        className="rounded" />
+                      Update rate on all existing orders within this date range
+                    </label>
+                    <button onClick={saveRatePeriod} disabled={savingPeriod || !periodRate || !periodFrom}
+                      className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                      {savingPeriod ? 'Saving...' : 'Save Rate Period'}
+                    </button>
+                    {periodSaveMsg && <p className="text-xs text-emerald-600 font-medium">{periodSaveMsg}</p>}
+                  </div>
+                )}
+
+                {ratePeriods.length > 0 ? (
+                  <table className="w-full text-xs border border-slate-100 rounded-lg overflow-hidden">
+                    <thead className="bg-slate-50">
+                      <tr className="text-left text-slate-500">
+                        <th className="px-3 py-2">Size</th>
+                        <th className="px-3 py-2">Rate</th>
+                        <th className="px-3 py-2">From</th>
+                        <th className="px-3 py-2">To</th>
+                        <th className="px-3 py-2"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {ratePeriods.map(p => (
+                        <tr key={p.id} className="hover:bg-slate-50">
+                          <td className="px-3 py-2 font-medium">{p.size}&quot;</td>
+                          <td className="px-3 py-2 text-blue-700 font-semibold">₹{p.rate}</td>
+                          <td className="px-3 py-2 text-slate-500">{p.date_from}</td>
+                          <td className="px-3 py-2 text-slate-500">{p.date_to}</td>
+                          <td className="px-3 py-2">
+                            <button onClick={() => deleteRatePeriod(p.id)}
+                              className="text-red-400 hover:text-red-600 text-xs">Remove</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className="text-xs text-slate-400 italic">No date-range rates set.</p>
+                )}
+              </div>
             </div>
 
             {/* Bulk payment */}
@@ -301,18 +411,18 @@ export default function Customers() {
                   <span className="text-sm font-bold text-rose-600">{fmtCur(selected.outstanding)} outstanding</span>
                 </div>
                 <p className="text-xs text-slate-500 mb-3">
-                  Enter the total amount received. It will be automatically distributed across open orders (oldest first).
+                  Distributed to oldest open orders first. Saved in ledger with date + mode.
                 </p>
                 <div className="flex gap-3 flex-wrap items-end">
                   <div>
-                    <label className="block text-xs text-slate-500 mb-1">Payment Amount (₹)</label>
-                    <input
-                      type="number"
-                      placeholder="Enter amount..."
-                      value={payAmount}
-                      onChange={e => setPayAmount(e.target.value)}
-                      className={`w-40 ${inputCls}`}
-                    />
+                    <label className="block text-xs text-slate-500 mb-1">Amount (₹)</label>
+                    <input type="number" placeholder="Enter amount..." value={payAmount}
+                      onChange={e => setPayAmount(e.target.value)} className={`w-36 ${inputCls}`} />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">Date</label>
+                    <input type="date" value={payDate} onChange={e => setPayDate(e.target.value)}
+                      className={inputCls} />
                   </div>
                   <div>
                     <label className="block text-xs text-slate-500 mb-1">Mode</label>
@@ -325,28 +435,20 @@ export default function Customers() {
                   </div>
                   <div>
                     <label className="block text-xs text-slate-500 mb-1">Notes (optional)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. cheque no. 1234"
-                      value={payNotes}
-                      onChange={e => setPayNotes(e.target.value)}
-                      className={`w-44 ${inputCls}`}
-                    />
+                    <input type="text" placeholder="Cheque no., etc." value={payNotes}
+                      onChange={e => setPayNotes(e.target.value)} className={`w-44 ${inputCls}`} />
                   </div>
                   <button onClick={handleBulkPay} disabled={paying || !payAmount}
                     className="px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 font-medium self-end">
                     {paying ? 'Processing...' : 'Record Payment'}
                   </button>
                 </div>
-
                 {payResult && (
                   <div className={`mt-3 rounded-lg p-3 text-sm ${payResult.leftover > 0 ? 'bg-amber-50 text-amber-700' : 'bg-green-50 text-green-700'}`}>
-                    <span className="font-semibold">
-                      {fmtCur(payResult.amount_applied)} applied
-                    </span>{' '}
+                    <span className="font-semibold">{fmtCur(payResult.amount_applied)} applied</span>{' '}
                     across {payResult.orders_updated} order{payResult.orders_updated !== 1 ? 's' : ''}.
                     {payResult.leftover > 0 && (
-                      <span className="ml-1">⚠ {fmtCur(payResult.leftover)} could not be applied (no more open orders).</span>
+                      <span className="ml-1">⚠ {fmtCur(payResult.leftover)} leftover (no more open orders).</span>
                     )}
                   </div>
                 )}
@@ -387,8 +489,7 @@ export default function Customers() {
                         <td className="px-4 py-2">
                           <span className={`inline-flex px-1.5 py-0.5 rounded text-xs ${
                             s.status === 'CLOSED' ? 'bg-green-100 text-green-700' :
-                            s.status === 'OPEN' ? 'bg-amber-100 text-amber-700' :
-                            'bg-blue-100 text-blue-700'
+                            s.status === 'OPEN' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'
                           }`}>{s.status as string}</span>
                         </td>
                       </tr>

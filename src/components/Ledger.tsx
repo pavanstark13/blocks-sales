@@ -3,22 +3,33 @@
 import { useEffect, useState, useCallback } from 'react';
 
 interface LedgerEntry {
+  row_type: 'sale' | 'payment';
   id: number;
   date: string;
-  address: string;
-  size: number;
-  quantity: number;
-  rate: number;
-  amount: number;
-  advance: number;
-  balance: number;
-  status: string;
-  payment_mode: string;
-  notes: string;
-  month_label: string;
+  // sale fields
+  address?: string;
+  size?: number;
+  quantity?: number;
+  rate?: number;
+  amount?: number;
+  advance?: number;
+  balance?: number;
+  status?: string;
+  payment_mode?: string;
+  notes?: string;
+  month_label?: string;
+  // computed
   debit: number;
   credit: number;
   running_balance: number;
+}
+
+interface PaymentRecord {
+  id: number;
+  date: string;
+  amount: number;
+  payment_mode: string;
+  notes: string;
 }
 
 interface CustomerRow {
@@ -37,6 +48,8 @@ interface Summary {
   closing_balance: number;
   total_orders: number;
   open_orders: number;
+  payment_count: number;
+  total_payments: number;
 }
 
 function fmtCur(n: number) {
@@ -52,6 +65,7 @@ export default function Ledger() {
   const [customers, setCustomers] = useState<CustomerRow[]>([]);
   const [selected, setSelected] = useState<string>('');
   const [entries, setEntries] = useState<LedgerEntry[]>([]);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(false);
   const [customerSearch, setCustomerSearch] = useState('');
@@ -59,7 +73,7 @@ export default function Ledger() {
   const [dateTo, setDateTo] = useState('');
   const [printing, setPrinting] = useState(false);
 
-  // Load customer list (re-loads when date range changes so sidebar totals reflect the filter)
+  // Load customer list
   useEffect(() => {
     const params = new URLSearchParams();
     if (dateFrom) params.set('date_from', dateFrom);
@@ -67,7 +81,6 @@ export default function Ledger() {
     fetch('/api/ledger?' + params).then(r => r.json()).then(d => setCustomers(d.customers));
   }, [dateFrom, dateTo]);
 
-  // Load ledger for selected customer
   const loadLedger = useCallback(async (name: string) => {
     if (!name) return;
     setLoading(true);
@@ -77,6 +90,7 @@ export default function Ledger() {
     const res = await fetch('/api/ledger?' + params);
     const data = await res.json();
     setEntries(data.entries);
+    setPayments(data.payments || []);
     setSummary(data.summary);
     setLoading(false);
   }, [dateFrom, dateTo]);
@@ -92,6 +106,8 @@ export default function Ledger() {
     setPrinting(true);
     setTimeout(() => { window.print(); setPrinting(false); }, 100);
   };
+
+  const selectedInfo = customers.find(c => c.customer_name === selected);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 print:block">
@@ -128,7 +144,7 @@ export default function Ledger() {
             <span>Customer</span>
             <span>Balance</span>
           </div>
-          <div className="divide-y divide-slate-50 max-h-[560px] overflow-y-auto">
+          <div className="divide-y divide-slate-50 max-h-[520px] overflow-y-auto">
             {filtered.map(c => (
               <button
                 key={c.customer_name}
@@ -166,17 +182,13 @@ export default function Ledger() {
           </div>
         ) : (
           <>
-            {/* Ledger header */}
+            {/* Header */}
             <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5 print:rounded-none print:border print:border-slate-300">
               <div className="flex items-start justify-between print:hidden">
                 <div>
                   <h2 className="text-lg font-bold text-slate-900">{selected}</h2>
-                  {customers.find(c => c.customer_name === selected)?.address && (
-                    <p className="text-sm text-slate-500">{customers.find(c => c.customer_name === selected)?.address}</p>
-                  )}
-                  {customers.find(c => c.customer_name === selected)?.phone && (
-                    <p className="text-sm text-blue-600">{customers.find(c => c.customer_name === selected)?.phone}</p>
-                  )}
+                  {selectedInfo?.address && <p className="text-sm text-slate-500">{selectedInfo.address}</p>}
+                  {selectedInfo?.phone && <p className="text-sm text-blue-600">{selectedInfo.phone}</p>}
                 </div>
                 <button onClick={handlePrint}
                   className="px-4 py-2 text-sm bg-slate-900 text-white rounded-lg hover:bg-slate-800">
@@ -189,16 +201,10 @@ export default function Ledger() {
                 <h1 className="text-2xl font-bold">BLOCKS SALES</h1>
                 <h2 className="text-lg font-semibold mt-1">Customer Ledger</h2>
                 <p className="text-base mt-1">{selected}</p>
-                {customers.find(c => c.customer_name === selected)?.address && (
-                  <p className="text-sm text-slate-600">{customers.find(c => c.customer_name === selected)?.address}</p>
-                )}
-                {customers.find(c => c.customer_name === selected)?.phone && (
-                  <p className="text-sm">Ph: {customers.find(c => c.customer_name === selected)?.phone}</p>
-                )}
+                {selectedInfo?.address && <p className="text-sm text-slate-600">{selectedInfo.address}</p>}
+                {selectedInfo?.phone && <p className="text-sm">Ph: {selectedInfo.phone}</p>}
                 <p className="text-xs text-slate-500 mt-1">
-                  {dateFrom || dateTo
-                    ? `Period: ${dateFrom || '—'} to ${dateTo || '—'} · `
-                    : ''}
+                  {dateFrom || dateTo ? `Period: ${dateFrom || '—'} to ${dateTo || '—'} · ` : ''}
                   Printed: {new Date().toLocaleDateString('en-IN')}
                 </p>
                 <hr className="mt-3" />
@@ -225,54 +231,74 @@ export default function Ledger() {
                     </p>
                   </div>
                   <div className="bg-slate-50 rounded-lg p-3">
-                    <p className="text-xs text-slate-500 font-medium">Orders</p>
+                    <p className="text-xs text-slate-500 font-medium">Orders / Payments</p>
                     <p className="text-lg font-bold text-slate-700">
                       {summary.total_orders}
                       {summary.open_orders > 0 && (
                         <span className="text-xs text-amber-600 ml-1">({summary.open_orders} open)</span>
                       )}
                     </p>
+                    {summary.payment_count > 0 && (
+                      <p className="text-xs text-emerald-600">{summary.payment_count} payment{summary.payment_count > 1 ? 's' : ''}</p>
+                    )}
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Ledger table */}
+            {/* Unified ledger table */}
             <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden print:rounded-none print:border print:border-slate-300">
+              <div className="px-4 py-2 bg-slate-50 border-b border-slate-200 print:bg-slate-100">
+                <h3 className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Ledger Statement</h3>
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-slate-50 border-b border-slate-200 print:bg-slate-100">
+                  <thead className="border-b border-slate-200">
                     <tr className="text-xs text-slate-600 font-semibold">
-                      <th className="px-3 py-3 text-left w-8">#</th>
-                      <th className="px-3 py-3 text-left">Date</th>
-                      <th className="px-3 py-3 text-left">Particulars</th>
-                      <th className="px-3 py-3 text-right">Size</th>
-                      <th className="px-3 py-3 text-right">Qty</th>
-                      <th className="px-3 py-3 text-right">Rate</th>
-                      <th className="px-3 py-3 text-right text-red-600">Debit (₹)</th>
-                      <th className="px-3 py-3 text-right text-green-600">Credit (₹)</th>
-                      <th className="px-3 py-3 text-right">Balance (₹)</th>
-                      <th className="px-3 py-3 text-center print:hidden">Status</th>
+                      <th className="px-3 py-2 text-left w-6">#</th>
+                      <th className="px-3 py-2 text-left">Date</th>
+                      <th className="px-3 py-2 text-left">Particulars</th>
+                      <th className="px-3 py-2 text-right">Size</th>
+                      <th className="px-3 py-2 text-right">Qty</th>
+                      <th className="px-3 py-2 text-right">Rate</th>
+                      <th className="px-3 py-2 text-right text-red-600">Debit (₹)</th>
+                      <th className="px-3 py-2 text-right text-green-600">Credit (₹)</th>
+                      <th className="px-3 py-2 text-right">Balance (₹)</th>
+                      <th className="px-3 py-2 text-center print:hidden">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {entries.map((e, i) => (
-                      <tr key={e.id} className={`hover:bg-slate-50 ${(e.status === 'OPEN' || e.status === 'PENDING') ? 'bg-amber-50/30' : ''}`}>
+                      <tr key={`${e.row_type}-${e.id}`}
+                        className={`hover:bg-slate-50 ${
+                          e.row_type === 'payment' ? 'bg-emerald-50/40' :
+                          (e.status === 'OPEN' || e.status === 'PENDING') ? 'bg-amber-50/30' : ''
+                        }`}>
                         <td className="px-3 py-2 text-xs text-slate-400">{i + 1}</td>
                         <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{e.date}</td>
                         <td className="px-3 py-2">
-                          <div className="font-medium text-slate-800">
-                            {e.size}&quot; Blocks sold
-                          </div>
-                          <div className="text-xs text-slate-400">
-                            {e.payment_mode && <span className="mr-2">{e.payment_mode}</span>}
-                            {e.notes && <span>{e.notes}</span>}
-                            {e.address && !e.notes && <span>{e.address}</span>}
-                          </div>
+                          {e.row_type === 'payment' ? (
+                            <div>
+                              <div className="font-medium text-emerald-700">Payment received</div>
+                              <div className="text-xs text-slate-400">
+                                {e.payment_mode && <span className="mr-2">{e.payment_mode}</span>}
+                                {e.notes && <span>{e.notes}</span>}
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <div className="font-medium text-slate-800">{e.size}&quot; Blocks sold</div>
+                              <div className="text-xs text-slate-400">
+                                {e.payment_mode && <span className="mr-2">{e.payment_mode}</span>}
+                                {e.notes && <span>{e.notes}</span>}
+                                {e.address && !e.notes && <span>{e.address}</span>}
+                              </div>
+                            </div>
+                          )}
                         </td>
-                        <td className="px-3 py-2 text-right">{e.size}&quot;</td>
-                        <td className="px-3 py-2 text-right">{fmt(e.quantity)}</td>
-                        <td className="px-3 py-2 text-right">{e.rate ? `₹${e.rate}` : '—'}</td>
+                        <td className="px-3 py-2 text-right">{e.row_type === 'sale' ? `${e.size}"` : '—'}</td>
+                        <td className="px-3 py-2 text-right">{e.row_type === 'sale' ? fmt(e.quantity ?? null) : '—'}</td>
+                        <td className="px-3 py-2 text-right">{e.row_type === 'sale' && e.rate ? `₹${e.rate}` : '—'}</td>
                         <td className="px-3 py-2 text-right font-medium text-red-600">
                           {e.debit > 0 ? fmtCur(e.debit) : '—'}
                         </td>
@@ -281,14 +307,20 @@ export default function Ledger() {
                         </td>
                         <td className={`px-3 py-2 text-right font-bold ${e.running_balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
                           {fmtCur(e.running_balance)}
-                          <span className="text-xs ml-0.5">{e.running_balance > 0 ? 'Dr' : 'Cr'}</span>
+                          <span className="text-xs ml-0.5 font-normal">{e.running_balance > 0 ? 'Dr' : 'Cr'}</span>
                         </td>
                         <td className="px-3 py-2 text-center print:hidden">
-                          <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                            e.status === 'CLOSED' ? 'bg-green-100 text-green-700' :
-                            e.status === 'OPEN' ? 'bg-amber-100 text-amber-700' :
-                            'bg-blue-100 text-blue-700'
-                          }`}>{e.status}</span>
+                          {e.row_type === 'sale' ? (
+                            <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                              e.status === 'CLOSED' ? 'bg-green-100 text-green-700' :
+                              e.status === 'OPEN' ? 'bg-amber-100 text-amber-700' :
+                              'bg-blue-100 text-blue-700'
+                            }`}>{e.status}</span>
+                          ) : (
+                            <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                              PAID
+                            </span>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -310,6 +342,45 @@ export default function Ledger() {
                 </table>
               </div>
             </div>
+
+            {/* Payment Receipts section */}
+            {payments.length > 0 && (
+              <div className="bg-white rounded-xl border border-emerald-100 shadow-sm overflow-hidden print:rounded-none print:border print:border-slate-300 print:mt-6">
+                <div className="px-4 py-2 bg-emerald-50 border-b border-emerald-100 print:bg-slate-100 print:border-slate-200">
+                  <h3 className="text-xs font-semibold text-emerald-700 print:text-slate-600 uppercase tracking-wide">
+                    Payment Receipts ({payments.length})
+                  </h3>
+                </div>
+                <table className="w-full text-sm">
+                  <thead className="border-b border-slate-100">
+                    <tr className="text-xs text-slate-500 font-semibold text-left">
+                      <th className="px-4 py-2">#</th>
+                      <th className="px-4 py-2">Date</th>
+                      <th className="px-4 py-2">Mode</th>
+                      <th className="px-4 py-2">Notes</th>
+                      <th className="px-4 py-2 text-right">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {payments.map((p, i) => (
+                      <tr key={p.id} className="hover:bg-slate-50">
+                        <td className="px-4 py-2 text-xs text-slate-400">{i + 1}</td>
+                        <td className="px-4 py-2 text-slate-600">{p.date}</td>
+                        <td className="px-4 py-2">{p.payment_mode || '—'}</td>
+                        <td className="px-4 py-2 text-slate-500">{p.notes || '—'}</td>
+                        <td className="px-4 py-2 text-right font-semibold text-emerald-700">{fmtCur(p.amount)}</td>
+                      </tr>
+                    ))}
+                    <tr className="bg-emerald-50 font-semibold border-t border-emerald-200">
+                      <td colSpan={4} className="px-4 py-2 text-sm text-right text-slate-600">Total Received</td>
+                      <td className="px-4 py-2 text-right text-emerald-800">
+                        {fmtCur(payments.reduce((s, p) => s + p.amount, 0))}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
 
             {/* Print footer */}
             <div className="hidden print:block mt-8 pt-4 border-t border-slate-300 text-xs text-slate-500 text-center">

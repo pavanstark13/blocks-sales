@@ -52,27 +52,24 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
     setRows(prev => prev.map((r, idx) => idx === i ? { ...r, [key]: val } : r));
   };
 
-  // When customer name is set (on blur), fetch saved rates and auto-fill if rate is empty
+  // When customer name is set (on blur), fetch saved rates (including date-range periods) and auto-fill
   const handleCustomerBlur = useCallback(async (i: number, name: string) => {
     if (!name.trim()) return;
-    let cached = rateCache.current[name];
-    if (!cached) {
-      try {
-        const res = await fetch(`/api/customer-rates?customer=${encodeURIComponent(name)}`);
-        const data = await res.json();
-        cached = data.rates as Record<number, number>;
-        rateCache.current[name] = cached;
-      } catch { return; }
-    }
-    setRows(prev => prev.map((r, idx) => {
-      if (idx !== i) return r;
-      const sizeKey = parseInt(r.size) as 4 | 6 | 8;
-      const savedRate = cached[sizeKey];
-      // Only fill if rate field is currently empty
-      if (savedRate && !r.rate) return { ...r, rate: String(savedRate) };
-      return r;
-    }));
-  }, []);
+    try {
+      const res = await fetch(
+        `/api/customer-rates?customer=${encodeURIComponent(name)}&date=${encodeURIComponent(date)}`
+      );
+      const data = await res.json();
+      const fetched = data.rates as Record<number, number>;
+      rateCache.current[name] = fetched;
+      setRows(prev => prev.map((r, idx) => {
+        if (idx !== i) return r;
+        const savedRate = fetched[parseInt(r.size)];
+        if (savedRate && !r.rate) return { ...r, rate: String(savedRate) };
+        return r;
+      }));
+    } catch { /* ignore */ }
+  }, [date]);
 
 
   const addRow = useCallback(() => {
