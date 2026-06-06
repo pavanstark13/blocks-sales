@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Dashboard from '@/components/Dashboard';
 import SalesTable from '@/components/SalesTable';
 import AddSaleForm from '@/components/AddSaleForm';
@@ -14,8 +15,18 @@ type Tab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bul
 export default function Home() {
   const [tab, setTab] = useState<Tab>('dashboard');
   const [refreshKey, setRefreshKey] = useState(0);
+  const router = useRouter();
 
   const refresh = () => setRefreshKey(k => k + 1);
+
+  const handleLogout = async () => {
+    await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'logout' }),
+    });
+    router.push('/login');
+  };
 
   const tabs: { id: Tab; label: string; color?: string }[] = [
     { id: 'dashboard', label: 'Dashboard' },
@@ -36,7 +47,7 @@ export default function Home() {
               <h1 className="text-lg font-bold text-slate-900">BLOCKS SALES</h1>
               <p className="text-xs text-slate-500 -mt-0.5">Sales Manager</p>
             </div>
-            <nav className="flex gap-1 flex-wrap">
+            <nav className="flex gap-1 flex-wrap items-center">
               {tabs.map(t => (
                 <button
                   key={t.id}
@@ -56,6 +67,13 @@ export default function Home() {
                   {t.label}
                 </button>
               ))}
+              <button
+                onClick={handleLogout}
+                className="ml-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 border border-slate-200"
+                title="Sign out"
+              >
+                Sign out
+              </button>
             </nav>
           </div>
         </div>
