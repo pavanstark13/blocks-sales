@@ -3,32 +3,22 @@ import { NextRequest, NextResponse } from 'next/server';
 const COOKIE = 'bs_session';
 const PUBLIC = ['/login', '/api/auth'];
 
-// Edge-compatible HMAC-SHA256 verify (Web Crypto API)
-async function verifyToken(token: string): Promise<boolean> {
+// Middleware only checks cookie presence + expiry (no crypto).
+// Full HMAC verification happens inside each API route via auth.ts.
+function hasValidSession(token: string | undefined): boolean {
+  if (!token) return false;
   try {
     const parts = token.split(':');
     if (parts.length !== 3) return false;
-    const payload = `${parts[0]}:${parts[1]}`;
     const exp = parseInt(parts[1]);
     if (isNaN(exp) || Date.now() > exp) return false;
-
-    const secret = process.env.AUTH_SECRET || 'blocks-sales-dev-secret-change-in-prod';
-    const key = await crypto.subtle.importKey(
-      'raw',
-      new TextEncoder().encode(secret),
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['sign']
-    );
-    const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload));
-    const expected = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
-    return expected === parts[2];
+    return true;
   } catch {
     return false;
   }
 }
 
-export async function middleware(req: NextRequest) {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (PUBLIC.some(p => pathname.startsWith(p)) || pathname.startsWith('/_next')) {
@@ -36,7 +26,7 @@ export async function middleware(req: NextRequest) {
   }
 
   const token = req.cookies.get(COOKIE)?.value;
-  if (token && await verifyToken(token)) {
+  if (hasValidSession(token)) {
     return NextResponse.next();
   }
 
