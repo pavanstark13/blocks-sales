@@ -10,6 +10,9 @@ export async function GET(req: NextRequest) {
   let sql = `
     SELECT customer_name, MAX(address) as address, MAX(phone) as phone,
       COUNT(*) as total_orders, SUM(quantity) as total_qty,
+      SUM(CASE WHEN size=4 THEN quantity ELSE 0 END) as qty_4,
+      SUM(CASE WHEN size=6 THEN quantity ELSE 0 END) as qty_6,
+      SUM(CASE WHEN size=8 THEN quantity ELSE 0 END) as qty_8,
       ROUND(SUM(COALESCE(amount,0)),2)  as total_amount,
       ROUND(SUM(COALESCE(balance,0)),2) as outstanding,
       MAX(date) as last_order

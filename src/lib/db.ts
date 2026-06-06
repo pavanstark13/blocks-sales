@@ -28,6 +28,12 @@ const SCHEMA = `
     month_label TEXT,
     created_at TEXT DEFAULT (datetime('now'))
   );
+  CREATE TABLE IF NOT EXISTS customer_rates (
+    customer_name TEXT NOT NULL,
+    size INTEGER NOT NULL,
+    rate REAL NOT NULL,
+    PRIMARY KEY (customer_name, size)
+  );
   CREATE INDEX IF NOT EXISTS idx_sales_date     ON sales(date);
   CREATE INDEX IF NOT EXISTS idx_sales_status   ON sales(status);
   CREATE INDEX IF NOT EXISTS idx_sales_customer ON sales(customer_name);

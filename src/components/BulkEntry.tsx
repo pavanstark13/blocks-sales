@@ -45,10 +45,35 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<{ saved: number; errors: number } | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
+  // Cache: { customerName -> { 4: rate, 6: rate, 8: rate } }
+  const rateCache = useRef<Record<string, Record<number, number>>>({});
 
   const setCell = (i: number, key: keyof Row, val: string) => {
     setRows(prev => prev.map((r, idx) => idx === i ? { ...r, [key]: val } : r));
   };
+
+  // When customer name is set (on blur), fetch saved rates and auto-fill if rate is empty
+  const handleCustomerBlur = useCallback(async (i: number, name: string) => {
+    if (!name.trim()) return;
+    let cached = rateCache.current[name];
+    if (!cached) {
+      try {
+        const res = await fetch(`/api/customer-rates?customer=${encodeURIComponent(name)}`);
+        const data = await res.json();
+        cached = data.rates as Record<number, number>;
+        rateCache.current[name] = cached;
+      } catch { return; }
+    }
+    setRows(prev => prev.map((r, idx) => {
+      if (idx !== i) return r;
+      const sizeKey = parseInt(r.size) as 4 | 6 | 8;
+      const savedRate = cached[sizeKey];
+      // Only fill if rate field is currently empty
+      if (savedRate && !r.rate) return { ...r, rate: String(savedRate) };
+      return r;
+    }));
+  }, []);
+
 
   const addRow = useCallback(() => {
     setRows(prev => [...prev, emptyRow()]);
@@ -246,7 +271,9 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
                           </span>
                         </div>
                       ) : (
-                        <input value={row.customer_name} onChange={e => setCell(i, 'customer_name', e.target.value)}
+                        <input value={row.customer_name}
+                          onChange={e => setCell(i, 'customer_name', e.target.value)}
+                          onBlur={e => handleCustomerBlur(i, e.target.value)}
                           onKeyDown={e => handleKeyDown(e, i, 0)}
                           placeholder="Name" className={inputCls} />
                       )}
@@ -270,7 +297,16 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
                       )}
                     </td>
                     <td className="px-2 py-1.5">
-                      <select value={row.size} onChange={e => setCell(i, 'size', e.target.value)}
+                      <select value={row.size} onChange={e => {
+                        const newSize = e.target.value;
+                        setCell(i, 'size', newSize);
+                        // Auto-fill rate if customer has a saved rate for new size
+                        const cached = rateCache.current[row.customer_name];
+                        if (cached) {
+                          const savedRate = cached[parseInt(newSize) as 4 | 6 | 8];
+                          if (savedRate) setRows(prev => prev.map((r, idx) => idx === i ? { ...r, size: newSize, rate: String(savedRate) } : r));
+                        }
+                      }}
                         className={`${inputCls} ${isSameCustomer ? 'border-orange-300' : ''}`}>
                         <option value="4">4&quot;</option>
                         <option value="6">6&quot;</option>

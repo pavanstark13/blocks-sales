@@ -8,9 +8,18 @@ interface Customer {
   phone: string;
   total_orders: number;
   total_qty: number;
+  qty_4: number;
+  qty_6: number;
+  qty_8: number;
   total_amount: number;
   outstanding: number;
   last_order: string;
+}
+
+interface CustomerRates {
+  4?: number;
+  6?: number;
+  8?: number;
 }
 
 function fmtCur(n: number | null) {
@@ -32,6 +41,19 @@ export default function Customers() {
   const [selected, setSelected] = useState<Customer | null>(null);
   const [history, setHistory] = useState<unknown[]>([]);
 
+  // Rates state
+  const [rates, setRates] = useState<CustomerRates>({});
+  const [rateInputs, setRateInputs] = useState<{ 4: string; 6: string; 8: string }>({ 4: '', 6: '', 8: '' });
+  const [savingRates, setSavingRates] = useState(false);
+  const [ratesSaved, setRatesSaved] = useState(false);
+
+  // Bulk payment state
+  const [payAmount, setPayAmount] = useState('');
+  const [payMode, setPayMode] = useState('CASH');
+  const [payNotes, setPayNotes] = useState('');
+  const [paying, setPaying] = useState(false);
+  const [payResult, setPayResult] = useState<{ orders_updated: number; amount_applied: number; leftover: number } | null>(null);
+
   const load = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
@@ -47,7 +69,7 @@ export default function Customers() {
   useEffect(() => { load(); }, [load]);
 
   const loadHistory = async (name: string) => {
-    const params = new URLSearchParams({ customer: name, limit: '100' });
+    const params = new URLSearchParams({ customer: name, limit: '200' });
     if (dateFrom) params.set('date_from', dateFrom);
     if (dateTo)   params.set('date_to', dateTo);
     const res = await fetch('/api/sales?' + params);
@@ -55,19 +77,86 @@ export default function Customers() {
     setHistory(data.data);
   };
 
+  const loadRates = async (name: string) => {
+    const res = await fetch(`/api/customer-rates?customer=${encodeURIComponent(name)}`);
+    const data = await res.json();
+    const r = data.rates as CustomerRates;
+    setRates(r);
+    setRateInputs({
+      4: r[4] != null ? String(r[4]) : '',
+      6: r[6] != null ? String(r[6]) : '',
+      8: r[8] != null ? String(r[8]) : '',
+    });
+  };
+
   const selectCustomer = (c: Customer) => {
     setSelected(c);
+    setPayResult(null);
+    setPayAmount('');
     loadHistory(c.customer_name);
+    loadRates(c.customer_name);
   };
+
+  const saveRates = async () => {
+    if (!selected) return;
+    setSavingRates(true);
+    const sizes: (4 | 6 | 8)[] = [4, 6, 8];
+    await Promise.all(sizes.map(size => {
+      const val = parseFloat(rateInputs[size]);
+      if (!val || val <= 0) return Promise.resolve();
+      return fetch('/api/customer-rates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customer_name: selected.customer_name, size, rate: val }),
+      });
+    }));
+    await loadRates(selected.customer_name);
+    setSavingRates(false);
+    setRatesSaved(true);
+    setTimeout(() => setRatesSaved(false), 2000);
+  };
+
+  const handleBulkPay = async () => {
+    if (!selected || !payAmount || parseFloat(payAmount) <= 0) return;
+    setPaying(true);
+    setPayResult(null);
+    const res = await fetch('/api/customers/payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customer_name: selected.customer_name,
+        amount: parseFloat(payAmount),
+        payment_mode: payMode,
+        notes: payNotes || undefined,
+      }),
+    });
+    const result = await res.json();
+    setPayResult(result);
+    setPaying(false);
+    setPayAmount('');
+    setPayNotes('');
+    // Reload customer list and history to reflect updated balances
+    load();
+    loadHistory(selected.customer_name);
+    // Re-select updated customer
+    setTimeout(() => {
+      setSelected(prev => {
+        if (!prev) return prev;
+        return { ...prev, outstanding: Math.max(0, prev.outstanding - result.amount_applied) };
+      });
+    }, 500);
+  };
+
+  const inputCls = 'border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
       {/* Customer list */}
-      <div className="lg:col-span-2 space-y-4">
+      <div className="lg:col-span-2 space-y-3">
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 space-y-2">
           <input placeholder="Search customer..." value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            className={`w-full ${inputCls}`} />
           <div className="flex gap-2">
             <div className="flex-1">
               <label className="block text-xs text-slate-500 mb-1">From</label>
@@ -87,6 +176,7 @@ export default function Customers() {
             </button>
           )}
         </div>
+
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center h-40 text-slate-400">Loading...</div>
@@ -117,12 +207,17 @@ export default function Customers() {
       </div>
 
       {/* Customer detail */}
-      <div className="lg:col-span-3">
+      <div className="lg:col-span-3 space-y-4">
         {selected ? (
-          <div className="space-y-4">
+          <>
+            {/* Summary */}
             <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
               <h2 className="text-base font-semibold text-slate-900">{selected.customer_name}</h2>
-              <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {selected.phone && <p className="text-sm text-blue-600 mt-0.5">{selected.phone}</p>}
+              {selected.address && <p className="text-sm text-slate-500">{selected.address}</p>}
+
+              {/* Totals grid */}
+              <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                   { label: 'Total Orders', value: String(selected.total_orders) },
                   { label: 'Total Blocks', value: fmt(selected.total_qty) },
@@ -135,18 +230,130 @@ export default function Customers() {
                   </div>
                 ))}
               </div>
-              {selected.phone && (
-                <p className="mt-3 text-sm text-slate-600">
-                  <span className="font-medium">Phone:</span> {selected.phone}
-                </p>
-              )}
-              {selected.address && (
-                <p className="text-sm text-slate-600">
-                  <span className="font-medium">Address:</span> {selected.address}
-                </p>
+
+              {/* Size breakdown */}
+              {(selected.qty_4 > 0 || selected.qty_6 > 0 || selected.qty_8 > 0) && (
+                <div className="mt-3 flex gap-3 flex-wrap">
+                  {selected.qty_4 > 0 && (
+                    <div className="flex items-center gap-1.5 bg-blue-50 rounded-lg px-3 py-1.5">
+                      <span className="text-xs font-semibold text-blue-700">4&quot;</span>
+                      <span className="text-sm font-bold text-blue-800">{fmt(selected.qty_4)}</span>
+                      <span className="text-xs text-blue-500">blocks</span>
+                    </div>
+                  )}
+                  {selected.qty_6 > 0 && (
+                    <div className="flex items-center gap-1.5 bg-emerald-50 rounded-lg px-3 py-1.5">
+                      <span className="text-xs font-semibold text-emerald-700">6&quot;</span>
+                      <span className="text-sm font-bold text-emerald-800">{fmt(selected.qty_6)}</span>
+                      <span className="text-xs text-emerald-500">blocks</span>
+                    </div>
+                  )}
+                  {selected.qty_8 > 0 && (
+                    <div className="flex items-center gap-1.5 bg-amber-50 rounded-lg px-3 py-1.5">
+                      <span className="text-xs font-semibold text-amber-700">8&quot;</span>
+                      <span className="text-sm font-bold text-amber-800">{fmt(selected.qty_8)}</span>
+                      <span className="text-xs text-amber-500">blocks</span>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
+            {/* Saved rates per size */}
+            <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+              <h3 className="text-sm font-semibold text-slate-700 mb-3">
+                Saved Rates (auto-filled in Daily Entry)
+              </h3>
+              <div className="flex gap-3 flex-wrap items-end">
+                {([4, 6, 8] as const).map(size => (
+                  <div key={size}>
+                    <label className="block text-xs text-slate-500 mb-1">
+                      {size}&quot; Block rate (₹)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      placeholder={rates[size] ? String(rates[size]) : 'Not set'}
+                      value={rateInputs[size]}
+                      onChange={e => setRateInputs(p => ({ ...p, [size]: e.target.value }))}
+                      className={`w-28 ${inputCls} ${rates[size] ? 'border-blue-300 bg-blue-50/30' : ''}`}
+                    />
+                    {rates[size] && (
+                      <p className="text-xs text-blue-600 mt-0.5">Saved: ₹{rates[size]}</p>
+                    )}
+                  </div>
+                ))}
+                <button onClick={saveRates} disabled={savingRates}
+                  className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 self-end">
+                  {savingRates ? 'Saving...' : ratesSaved ? '✓ Saved' : 'Save Rates'}
+                </button>
+              </div>
+              <p className="text-xs text-slate-400 mt-2">
+                These rates are auto-filled when you type this customer&apos;s name in Daily Entry.
+              </p>
+            </div>
+
+            {/* Bulk payment */}
+            {selected.outstanding > 0 && (
+              <div className="bg-white rounded-xl border border-rose-100 shadow-sm p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-slate-700">Record Bulk Payment</h3>
+                  <span className="text-sm font-bold text-rose-600">{fmtCur(selected.outstanding)} outstanding</span>
+                </div>
+                <p className="text-xs text-slate-500 mb-3">
+                  Enter the total amount received. It will be automatically distributed across open orders (oldest first).
+                </p>
+                <div className="flex gap-3 flex-wrap items-end">
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">Payment Amount (₹)</label>
+                    <input
+                      type="number"
+                      placeholder="Enter amount..."
+                      value={payAmount}
+                      onChange={e => setPayAmount(e.target.value)}
+                      className={`w-40 ${inputCls}`}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">Mode</label>
+                    <select value={payMode} onChange={e => setPayMode(e.target.value)} className={inputCls}>
+                      <option>CASH</option>
+                      <option>NY A/C</option>
+                      <option>MKL A/C</option>
+                      <option>KMK A/C</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">Notes (optional)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. cheque no. 1234"
+                      value={payNotes}
+                      onChange={e => setPayNotes(e.target.value)}
+                      className={`w-44 ${inputCls}`}
+                    />
+                  </div>
+                  <button onClick={handleBulkPay} disabled={paying || !payAmount}
+                    className="px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 font-medium self-end">
+                    {paying ? 'Processing...' : 'Record Payment'}
+                  </button>
+                </div>
+
+                {payResult && (
+                  <div className={`mt-3 rounded-lg p-3 text-sm ${payResult.leftover > 0 ? 'bg-amber-50 text-amber-700' : 'bg-green-50 text-green-700'}`}>
+                    <span className="font-semibold">
+                      {fmtCur(payResult.amount_applied)} applied
+                    </span>{' '}
+                    across {payResult.orders_updated} order{payResult.orders_updated !== 1 ? 's' : ''}.
+                    {payResult.leftover > 0 && (
+                      <span className="ml-1">⚠ {fmtCur(payResult.leftover)} could not be applied (no more open orders).</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Order history */}
             <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
               <div className="px-5 py-3 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-700">Order History</h3>
@@ -190,7 +397,7 @@ export default function Customers() {
                 </table>
               </div>
             </div>
-          </div>
+          </>
         ) : (
           <div className="bg-white rounded-xl border border-slate-100 shadow-sm flex items-center justify-center h-64 text-slate-400">
             Select a customer to view their history
