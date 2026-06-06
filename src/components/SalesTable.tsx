@@ -18,7 +18,6 @@ interface Sale {
   payment_mode: string;
   notes: string;
   month_label: string;
-  vehicle_no: string;
 }
 
 const MONTHS = ['JULY-25','AUG-25','SEPT-25','OCTO-25','NOV-2025','DEC','JAN-2026','FEB-26','MAR-26','Apr-26','MAY-26'];
@@ -51,7 +50,6 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [editing, setEditing] = useState<Partial<Sale> | null>(null);
-  const [challan, setChallan] = useState<Sale | null>(null);
   const [exporting, setExporting] = useState(false);
 
   const load = useCallback(async () => {
@@ -237,8 +235,6 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
                     </td>
                     <td className="px-4 py-2">
                       <div className="flex gap-1.5 flex-wrap">
-                        <button onClick={() => setChallan(s)}
-                          className="text-xs text-slate-600 hover:underline">Challan</button>
                         <button onClick={() => setEditing(s)}
                           className="text-xs text-blue-600 hover:underline">Edit</button>
                         {s.status !== 'CLOSED' && (
@@ -269,96 +265,6 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
             className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50">
             Next
           </button>
-        </div>
-      )}
-
-      {/* Delivery Challan Modal */}
-      {challan && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-            {/* Print area */}
-            <div id="challan-print" className="p-8 font-sans text-sm">
-              {/* Header */}
-              <div className="text-center mb-6 border-b-2 border-slate-800 pb-4">
-                <h1 className="text-xl font-bold text-slate-900 tracking-wide">BLOCKS SALES</h1>
-                <p className="text-xs text-slate-500 mt-0.5">Delivery Challan</p>
-              </div>
-
-              {/* Challan meta */}
-              <div className="flex justify-between mb-5 text-xs text-slate-600">
-                <div>
-                  <p><span className="font-semibold">Challan No:</span> {challan.id}</p>
-                  <p className="mt-1"><span className="font-semibold">Date:</span> {challan.date}</p>
-                  {challan.vehicle_no && (
-                    <p className="mt-1"><span className="font-semibold">Vehicle No:</span> {challan.vehicle_no}</p>
-                  )}
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-slate-800">{challan.customer_name || '—'}</p>
-                  {challan.address && <p className="text-slate-500">{challan.address}</p>}
-                  {challan.phone   && <p className="text-slate-500">{challan.phone}</p>}
-                </div>
-              </div>
-
-              {/* Items table */}
-              <table className="w-full border border-slate-300 text-xs mb-6">
-                <thead>
-                  <tr className="bg-slate-100">
-                    <th className="border border-slate-300 px-3 py-2 text-left">Description</th>
-                    <th className="border border-slate-300 px-3 py-2 text-right">Qty</th>
-                    <th className="border border-slate-300 px-3 py-2 text-right">Rate (₹)</th>
-                    <th className="border border-slate-300 px-3 py-2 text-right">Amount (₹)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="border border-slate-300 px-3 py-2">{challan.size}&quot; Solid Cement Block</td>
-                    <td className="border border-slate-300 px-3 py-2 text-right">{fmt(challan.quantity)}</td>
-                    <td className="border border-slate-300 px-3 py-2 text-right">{challan.rate ?? '—'}</td>
-                    <td className="border border-slate-300 px-3 py-2 text-right font-semibold">{fmtCur(challan.amount)}</td>
-                  </tr>
-                </tbody>
-                <tfoot>
-                  <tr className="bg-slate-50 font-semibold">
-                    <td colSpan={3} className="border border-slate-300 px-3 py-2 text-right">Total</td>
-                    <td className="border border-slate-300 px-3 py-2 text-right">{fmtCur(challan.amount)}</td>
-                  </tr>
-                  {(challan.advance ?? 0) > 0 && (
-                    <tr>
-                      <td colSpan={3} className="border border-slate-300 px-3 py-2 text-right text-emerald-700">Advance Paid</td>
-                      <td className="border border-slate-300 px-3 py-2 text-right text-emerald-700">{fmtCur(challan.advance)}</td>
-                    </tr>
-                  )}
-                  {(challan.balance ?? 0) > 0 && (
-                    <tr className="font-bold text-rose-700">
-                      <td colSpan={3} className="border border-slate-300 px-3 py-2 text-right">Balance Due</td>
-                      <td className="border border-slate-300 px-3 py-2 text-right">{fmtCur(challan.balance)}</td>
-                    </tr>
-                  )}
-                </tfoot>
-              </table>
-
-              {/* Signatures */}
-              <div className="flex justify-between mt-8 pt-4 text-xs text-slate-500 border-t border-slate-200">
-                <div className="text-center">
-                  <div className="h-10 border-b border-slate-400 w-32 mb-1" />
-                  <p>Receiver&apos;s Signature</p>
-                </div>
-                <div className="text-center">
-                  <div className="h-10 border-b border-slate-400 w-32 mb-1" />
-                  <p>Authorised Signatory</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Action buttons — hidden when printing */}
-            <div className="flex justify-end gap-2 px-6 pb-5 print:hidden">
-              <button onClick={() => setChallan(null)}
-                className="px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50">Close</button>
-              <button onClick={() => window.print()}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">🖨 Print</button>
-            </div>
-          </div>
         </div>
       )}
 

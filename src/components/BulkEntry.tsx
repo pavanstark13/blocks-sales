@@ -12,13 +12,12 @@ interface Row {
   advance: string;
   payment_mode: string;
   status: string;
-  vehicle_no: string;
 }
 
 const emptyRow = (): Row => ({
   customer_name: '', address: '', phone: '',
   size: '6', quantity: '', rate: '', advance: '0',
-  payment_mode: 'CASH', status: 'CLOSED', vehicle_no: '',
+  payment_mode: 'CASH', status: 'CLOSED',
 });
 
 function calcAmount(r: Row) {
@@ -37,7 +36,7 @@ function fmtCur(n: number | null) {
   return '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
 }
 
-const COLS = ['customer_name','address','phone','size','quantity','rate','advance','payment_mode','status','vehicle_no'];
+const COLS = ['customer_name','address','phone','size','quantity','rate','advance','payment_mode','status'];
 
 export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
   const today = new Date().toISOString().split('T')[0];
@@ -95,7 +94,6 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
       quantity: '',
       rate: src.rate, // keep same rate as hint
       advance: '0',
-      vehicle_no: '',
     };
     setRows(prev => {
       const next = [...prev];
@@ -159,7 +157,6 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
             advance: parseFloat(row.advance) || 0,
             payment_mode: row.payment_mode,
             status: row.status,
-            vehicle_no: row.vehicle_no || null,
           }),
         });
         if (res.ok) saved++; else errors++;
@@ -246,7 +243,6 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
                 <th className="px-2 py-2 w-20">Balance</th>
                 <th className="px-2 py-2 w-24">Mode</th>
                 <th className="px-2 py-2 w-24">Status</th>
-                <th className="px-2 py-2 w-24">Vehicle</th>
                 <th className="px-2 py-2 w-16">Action</th>
               </tr>
             </thead>
@@ -356,12 +352,6 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
                         <option>OPEN</option>
                         <option>PENDING</option>
                       </select>
-                    </td>
-                    <td className="px-2 py-1.5">
-                      <input value={row.vehicle_no}
-                        onChange={e => setCell(i, 'vehicle_no', e.target.value)}
-                        onKeyDown={e => handleKeyDown(e, i, 9)}
-                        placeholder="AP 01 AB 1234" className={inputCls} />
                     </td>
                     <td className="px-2 py-1.5">
                       <div className="flex gap-1">
