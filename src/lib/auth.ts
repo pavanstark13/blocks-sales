@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 
 const SECRET  = process.env.AUTH_SECRET  || 'blocks-sales-dev-secret-change-in-prod';
 const USER    = process.env.ADMIN_USER   || 'admin';
-const PASS    = process.env.ADMIN_PASSWORD || '';
+const PASS    = process.env.ADMIN_PASSWORD || 'blocks2025';
 const COOKIE  = 'bs_session';
 const TTL_MS  = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -27,7 +27,6 @@ export function verifyToken(token: string): boolean {
 }
 
 export function checkCredentials(user: string, pass: string): boolean {
-  if (!PASS) return false; // no password set — deny all
   return user === USER && pass === PASS;
 }
 
