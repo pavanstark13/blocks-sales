@@ -43,6 +43,7 @@ export default function Customers() {
   const [search, setSearch] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [sizeFilter, setSizeFilter] = useState('');
   const [selected, setSelected] = useState<Customer | null>(null);
   const [history, setHistory] = useState<unknown[]>([]);
 
@@ -90,13 +91,14 @@ export default function Customers() {
   const load = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
-    if (search)   params.set('q', search);
-    if (dateFrom) params.set('date_from', dateFrom);
-    if (dateTo)   params.set('date_to', dateTo);
+    if (search)     params.set('q', search);
+    if (dateFrom)   params.set('date_from', dateFrom);
+    if (dateTo)     params.set('date_to', dateTo);
+    if (sizeFilter) params.set('size', sizeFilter);
     const data = await fetch('/api/customers?' + params).then(r => r.json());
     setCustomers(data);
     setLoading(false);
-  }, [search, dateFrom, dateTo]);
+  }, [search, dateFrom, dateTo, sizeFilter]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -289,6 +291,17 @@ export default function Customers() {
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 space-y-2">
           <input placeholder="Search customer..." value={search}
             onChange={e => setSearch(e.target.value)} className={`w-full ${inputCls}`} />
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Filter by size</label>
+            <div className="flex gap-1.5">
+              {(['', '4', '6', '8'] as const).map(s => (
+                <button key={s} onClick={() => setSizeFilter(s)}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-colors ${sizeFilter === s ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}>
+                  {s === '' ? 'All' : `${s}"`}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="flex gap-2">
             <div className="flex-1">
               <label className="block text-xs text-slate-500 mb-1">From</label>

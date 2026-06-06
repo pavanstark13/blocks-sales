@@ -166,7 +166,11 @@ export default function RMCLedger() {
             {filtered.map(c => (
               <button
                 key={c.customer_name}
-                onClick={() => { setSelected(c.customer_name); setViewMode('ledger'); }}
+                onClick={() => {
+                  setSelected(c.customer_name);
+                  if (viewMode === 'payments') setPaySearch(c.customer_name);
+                  else setViewMode('ledger');
+                }}
                 className={`w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors ${selected === c.customer_name && viewMode === 'ledger' ? 'bg-purple-50 border-l-2 border-purple-500' : ''}`}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -198,10 +202,10 @@ export default function RMCLedger() {
             Customer Ledger
           </button>
           <button
-            onClick={() => setViewMode('payments')}
+            onClick={() => { setViewMode('payments'); setPaySearch(selected || ''); }}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${viewMode === 'payments' ? 'bg-emerald-600 text-white' : 'border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
           >
-            Payment Register
+            {selected ? `${selected} — Payments` : 'Payment Register'}
           </button>
         </div>
 

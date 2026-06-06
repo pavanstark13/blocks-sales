@@ -6,6 +6,7 @@ export async function GET(req: NextRequest) {
   const search   = searchParams.get('search') || searchParams.get('q');
   const dateFrom = searchParams.get('date_from');
   const dateTo   = searchParams.get('date_to');
+  const grade    = searchParams.get('grade');
 
   let sql = `
     SELECT customer_name,
@@ -32,6 +33,7 @@ export async function GET(req: NextRequest) {
   }
   if (dateFrom) { sql += ' AND date >= ?'; params.push(dateFrom); }
   if (dateTo)   { sql += ' AND date <= ?'; params.push(dateTo); }
+  if (grade)    { sql += ' AND grade = ?'; params.push(grade); }
 
   sql += ' GROUP BY customer_name ORDER BY last_order_date DESC';
 

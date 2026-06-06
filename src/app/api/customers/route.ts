@@ -6,6 +6,7 @@ export async function GET(req: NextRequest) {
   const q        = searchParams.get('q');
   const dateFrom = searchParams.get('date_from');
   const dateTo   = searchParams.get('date_to');
+  const size     = searchParams.get('size');
 
   let sql = `
     SELECT customer_name, MAX(address) as address, MAX(phone) as phone,
@@ -26,6 +27,7 @@ export async function GET(req: NextRequest) {
   }
   if (dateFrom) { sql += ' AND date >= ?'; params.push(dateFrom); }
   if (dateTo)   { sql += ' AND date <= ?'; params.push(dateTo); }
+  if (size)     { sql += ' AND size = ?';  params.push(parseInt(size)); }
 
   sql += ' GROUP BY customer_name ORDER BY last_order DESC';
 

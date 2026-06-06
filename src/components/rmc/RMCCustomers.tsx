@@ -70,6 +70,7 @@ export default function RMCCustomers() {
   const [search, setSearch] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [gradeFilter, setGradeFilter] = useState('');
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -101,16 +102,17 @@ export default function RMCCustomers() {
   const fetchCustomers = useCallback(async () => {
     setLoading(true);
     const p = new URLSearchParams();
-    if (search) p.set('search', search);
-    if (dateFrom) p.set('date_from', dateFrom);
-    if (dateTo) p.set('date_to', dateTo);
+    if (search)      p.set('search', search);
+    if (dateFrom)    p.set('date_from', dateFrom);
+    if (dateTo)      p.set('date_to', dateTo);
+    if (gradeFilter) p.set('grade', gradeFilter);
     try {
       const res = await fetch('/api/rmc/customers?' + p.toString());
       setCustomers(await res.json());
     } finally {
       setLoading(false);
     }
-  }, [search, dateFrom, dateTo]);
+  }, [search, dateFrom, dateTo, gradeFilter]);
 
   useEffect(() => { fetchCustomers(); }, [fetchCustomers]);
 
@@ -238,6 +240,21 @@ export default function RMCCustomers() {
           <label className="block text-xs font-medium text-slate-500 mb-1">Search</label>
           <input type="text" value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Customer name..." className={inputCls + ' w-full'} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-slate-500 mb-1">Filter by Grade</label>
+          <div className="flex gap-1">
+            <button onClick={() => setGradeFilter('')}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors ${gradeFilter === '' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}>
+              All
+            </button>
+            {GRADES.map(g => (
+              <button key={g} onClick={() => setGradeFilter(g)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors ${gradeFilter === g ? 'bg-purple-600 text-white border-purple-600' : `${GRADE_CHIPS[g]} hover:opacity-80`}`}>
+                {g}
+              </button>
+            ))}
+          </div>
         </div>
         <div>
           <label className="block text-xs font-medium text-slate-500 mb-1">From</label>
