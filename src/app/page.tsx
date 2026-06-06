@@ -16,11 +16,12 @@ import RMCBulkEntry from '@/components/rmc/RMCBulkEntry';
 import RMCOutstanding from '@/components/rmc/RMCOutstanding';
 import RMCCustomers from '@/components/rmc/RMCCustomers';
 import RMCCubeTests from '@/components/rmc/RMCCubeTests';
+import RMCLedger from '@/components/rmc/RMCLedger';
 import AgeingReport from '@/components/AgeingReport';
 
 type Module = 'blocks' | 'rmc';
 type Tab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'add' | 'stock' | 'ageing';
-type RMCTab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'bulk' | 'cube-tests' | 'ageing';
+type RMCTab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'cube-tests' | 'ageing';
 
 export default function Home() {
   const [module, setModule] = useState<Module>('blocks');
@@ -57,6 +58,7 @@ export default function Home() {
     { id: 'sales', label: 'Sales Log' },
     { id: 'outstanding', label: 'Outstanding' },
     { id: 'customers', label: 'Customers' },
+    { id: 'ledger', label: 'Ledger' },
     { id: 'cube-tests', label: '🧪 Cube Tests' },
     { id: 'ageing', label: 'Ageing' },
     { id: 'bulk', label: '⚡ Daily Entry', color: 'orange' },
@@ -164,6 +166,7 @@ export default function Home() {
             {rmcTab === 'sales'       && <RMCSalesTable key={refreshKey} onRefresh={refresh} />}
             {rmcTab === 'outstanding' && <RMCOutstanding key={refreshKey} onRefresh={refresh} />}
             {rmcTab === 'customers'   && <RMCCustomers key={refreshKey} />}
+            {rmcTab === 'ledger'      && <RMCLedger key={refreshKey} />}
             {rmcTab === 'cube-tests'  && <RMCCubeTests key={refreshKey} />}
             {rmcTab === 'ageing'      && <AgeingReport key={refreshKey} apiBase="/api/rmc" />}
             {rmcTab === 'bulk'        && <RMCBulkEntry onSaved={() => { refresh(); setRmcTab('sales'); }} />}

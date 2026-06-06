@@ -6,19 +6,18 @@ interface LedgerEntry {
   row_type: 'sale' | 'payment';
   id: number;
   date: string;
-  // sale fields
-  address?: string;
-  size?: number;
+  site_address?: string;
+  grade?: string;
   quantity?: number;
   rate?: number;
   amount?: number;
+  pump_charge?: number;
+  total_amount?: number;
   advance?: number;
   balance?: number;
   status?: string;
   payment_mode?: string;
   notes?: string;
-  month_label?: string;
-  // computed
   debit: number;
   credit: number;
   running_balance: number;
@@ -43,8 +42,7 @@ interface AllPaymentRecord {
 
 interface CustomerRow {
   customer_name: string;
-  address: string;
-  phone: string;
+  site_address: string;
   orders: number;
   total_debit: number;
   total_credit: number;
@@ -65,12 +63,7 @@ function fmtCur(n: number) {
   return '₹' + new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(Math.abs(n));
 }
 
-function fmt(n: number | null) {
-  if (n == null) return '—';
-  return new Intl.NumberFormat('en-IN').format(n);
-}
-
-export default function Ledger() {
+export default function RMCLedger() {
   const [customers, setCustomers] = useState<CustomerRow[]>([]);
   const [selected, setSelected] = useState<string>('');
   const [entries, setEntries] = useState<LedgerEntry[]>([]);
@@ -86,12 +79,11 @@ export default function Ledger() {
   const [allPaysLoading, setAllPaysLoading] = useState(false);
   const [paySearch, setPaySearch] = useState('');
 
-  // Load customer list
   useEffect(() => {
     const params = new URLSearchParams();
     if (dateFrom) params.set('date_from', dateFrom);
     if (dateTo)   params.set('date_to', dateTo);
-    fetch('/api/ledger?' + params).then(r => r.json()).then(d => setCustomers(d.customers));
+    fetch('/api/rmc/ledger?' + params).then(r => r.json()).then(d => setCustomers(d.customers || []));
   }, [dateFrom, dateTo]);
 
   const loadLedger = useCallback(async (name: string) => {
@@ -100,7 +92,7 @@ export default function Ledger() {
     const params = new URLSearchParams({ customer: name });
     if (dateFrom) params.set('date_from', dateFrom);
     if (dateTo)   params.set('date_to', dateTo);
-    const res = await fetch('/api/ledger?' + params);
+    const res = await fetch('/api/rmc/ledger?' + params);
     const data = await res.json();
     setEntries(data.entries);
     setPayments(data.payments || []);
@@ -115,7 +107,7 @@ export default function Ledger() {
     const params = new URLSearchParams({ all_payments: '1' });
     if (dateFrom) params.set('date_from', dateFrom);
     if (dateTo)   params.set('date_to', dateTo);
-    const res = await fetch('/api/ledger?' + params);
+    const res = await fetch('/api/rmc/ledger?' + params);
     const data = await res.json();
     setAllPays(data.payments || []);
     setAllPaysLoading(false);
@@ -125,7 +117,7 @@ export default function Ledger() {
 
   const filtered = customers.filter(c => {
     const q = customerSearch.toLowerCase();
-    return !q || c.customer_name?.toLowerCase().includes(q) || c.address?.toLowerCase().includes(q) || c.phone?.includes(q);
+    return !q || c.customer_name?.toLowerCase().includes(q) || c.site_address?.toLowerCase().includes(q);
   });
 
   const handlePrint = () => {
@@ -141,21 +133,21 @@ export default function Ledger() {
       <div className="lg:col-span-1 print:hidden space-y-3">
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-3 space-y-2">
           <input
-            placeholder="Search name, address, phone..."
+            placeholder="Search customer or site..."
             value={customerSearch}
             onChange={e => setCustomerSearch(e.target.value)}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
           <div className="flex gap-2">
             <div className="flex-1">
               <label className="block text-xs text-slate-500 mb-1">From</label>
               <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-                className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500" />
             </div>
             <div className="flex-1">
               <label className="block text-xs text-slate-500 mb-1">To</label>
               <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
-                className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500" />
             </div>
           </div>
           {(dateFrom || dateTo) && (
@@ -174,14 +166,13 @@ export default function Ledger() {
             {filtered.map(c => (
               <button
                 key={c.customer_name}
-                onClick={() => setSelected(c.customer_name)}
-                className={`w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors ${selected === c.customer_name ? 'bg-blue-50 border-l-2 border-blue-500' : ''}`}
+                onClick={() => { setSelected(c.customer_name); setViewMode('ledger'); }}
+                className={`w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors ${selected === c.customer_name && viewMode === 'ledger' ? 'bg-purple-50 border-l-2 border-purple-500' : ''}`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-slate-900 truncate">{c.customer_name}</p>
-                    {c.address && <p className="text-xs text-slate-400 truncate">{c.address}</p>}
-                    {c.phone && <p className="text-xs text-blue-500">{c.phone}</p>}
+                    {c.site_address && <p className="text-xs text-slate-400 truncate">{c.site_address}</p>}
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className={`text-sm font-bold ${c.closing_balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
@@ -202,7 +193,7 @@ export default function Ledger() {
         <div className="flex gap-2 print:hidden">
           <button
             onClick={() => setViewMode('ledger')}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${viewMode === 'ledger' ? 'bg-blue-600 text-white' : 'border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${viewMode === 'ledger' ? 'bg-purple-600 text-white' : 'border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
           >
             Customer Ledger
           </button>
@@ -259,9 +250,15 @@ export default function Ledger() {
                 </div>
                 {allPays.length > 0 && (
                   <div className="px-4 py-3 bg-emerald-50 border-t border-emerald-100 flex justify-between items-center">
-                    <span className="text-xs text-slate-500">{allPays.filter(p => !paySearch || p.customer_name?.toLowerCase().includes(paySearch.toLowerCase())).length} payment(s)</span>
+                    <span className="text-xs text-slate-500">
+                      {allPays.filter(p => !paySearch || p.customer_name?.toLowerCase().includes(paySearch.toLowerCase())).length} payment(s)
+                    </span>
                     <span className="text-sm font-bold text-emerald-800">
-                      Total: {fmtCur(allPays.filter(p => !paySearch || p.customer_name?.toLowerCase().includes(paySearch.toLowerCase())).reduce((s, p) => s + p.amount, 0))}
+                      Total: {fmtCur(
+                        allPays
+                          .filter(p => !paySearch || p.customer_name?.toLowerCase().includes(paySearch.toLowerCase()))
+                          .reduce((s, p) => s + p.amount, 0)
+                      )}
                     </span>
                   </div>
                 )}
@@ -283,22 +280,20 @@ export default function Ledger() {
               <div className="flex items-start justify-between print:hidden">
                 <div>
                   <h2 className="text-lg font-bold text-slate-900">{selected}</h2>
-                  {selectedInfo?.address && <p className="text-sm text-slate-500">{selectedInfo.address}</p>}
-                  {selectedInfo?.phone && <p className="text-sm text-blue-600">{selectedInfo.phone}</p>}
+                  {selectedInfo?.site_address && <p className="text-sm text-slate-500">{selectedInfo.site_address}</p>}
                 </div>
                 <button onClick={handlePrint}
-                  className="px-4 py-2 text-sm bg-slate-900 text-white rounded-lg hover:bg-slate-800">
+                  className="px-4 py-2 text-sm bg-purple-700 text-white rounded-lg hover:bg-purple-800">
                   Print Ledger
                 </button>
               </div>
 
               {/* Print header */}
               <div className="hidden print:block text-center mb-4">
-                <h1 className="text-2xl font-bold">BLOCKS SALES</h1>
-                <h2 className="text-lg font-semibold mt-1">Customer Ledger</h2>
+                <h1 className="text-2xl font-bold">ASTRA CONMIX</h1>
+                <h2 className="text-lg font-semibold mt-1">RMC Customer Ledger</h2>
                 <p className="text-base mt-1">{selected}</p>
-                {selectedInfo?.address && <p className="text-sm text-slate-600">{selectedInfo.address}</p>}
-                {selectedInfo?.phone && <p className="text-sm">Ph: {selectedInfo.phone}</p>}
+                {selectedInfo?.site_address && <p className="text-sm text-slate-600">{selectedInfo.site_address}</p>}
                 <p className="text-xs text-slate-500 mt-1">
                   {dateFrom || dateTo ? `Period: ${dateFrom || '—'} to ${dateTo || '—'} · ` : ''}
                   Printed: {new Date().toLocaleDateString('en-IN')}
@@ -354,8 +349,8 @@ export default function Ledger() {
                       <th className="px-3 py-2 text-left w-6">#</th>
                       <th className="px-3 py-2 text-left">Date</th>
                       <th className="px-3 py-2 text-left">Particulars</th>
-                      <th className="px-3 py-2 text-right">Size</th>
-                      <th className="px-3 py-2 text-right">Qty</th>
+                      <th className="px-3 py-2 text-right">Grade</th>
+                      <th className="px-3 py-2 text-right">m³</th>
                       <th className="px-3 py-2 text-right">Rate</th>
                       <th className="px-3 py-2 text-right text-red-600">Debit (₹)</th>
                       <th className="px-3 py-2 text-right text-green-600">Credit (₹)</th>
@@ -383,18 +378,24 @@ export default function Ledger() {
                             </div>
                           ) : (
                             <div>
-                              <div className="font-medium text-slate-800">{e.size}&quot; Blocks sold</div>
+                              <div className="font-medium text-slate-800">RMC Delivered</div>
                               <div className="text-xs text-slate-400">
                                 {e.payment_mode && <span className="mr-2">{e.payment_mode}</span>}
                                 {e.notes && <span>{e.notes}</span>}
-                                {e.address && !e.notes && <span>{e.address}</span>}
+                                {e.site_address && !e.notes && <span>{e.site_address}</span>}
                               </div>
                             </div>
                           )}
                         </td>
-                        <td className="px-3 py-2 text-right">{e.row_type === 'sale' ? `${e.size}"` : '—'}</td>
-                        <td className="px-3 py-2 text-right">{e.row_type === 'sale' ? fmt(e.quantity ?? null) : '—'}</td>
-                        <td className="px-3 py-2 text-right">{e.row_type === 'sale' && e.rate ? `₹${e.rate}` : '—'}</td>
+                        <td className="px-3 py-2 text-right text-xs font-semibold text-purple-600">
+                          {e.row_type === 'sale' ? e.grade : '—'}
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          {e.row_type === 'sale' ? Number(e.quantity ?? 0).toFixed(1) : '—'}
+                        </td>
+                        <td className="px-3 py-2 text-right text-xs">
+                          {e.row_type === 'sale' && e.rate ? `₹${e.rate}` : '—'}
+                        </td>
                         <td className="px-3 py-2 text-right font-medium text-red-600">
                           {e.debit > 0 ? fmtCur(e.debit) : '—'}
                         </td>
@@ -480,7 +481,7 @@ export default function Ledger() {
 
             {/* Print footer */}
             <div className="hidden print:block mt-8 pt-4 border-t border-slate-300 text-xs text-slate-500 text-center">
-              This is a computer-generated ledger statement from BLOCKS SALES Manager.
+              This is a computer-generated ledger statement from ASTRA CONMIX RMC Sales Manager.
             </div>
           </>
         )}

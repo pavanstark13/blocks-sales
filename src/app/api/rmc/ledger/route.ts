@@ -7,10 +7,53 @@ export async function GET(req: NextRequest) {
   const dateFrom = searchParams.get('date_from');
   const dateTo   = searchParams.get('date_to');
 
+  const allPayments = searchParams.get('all_payments');
+
   const database = db();
 
+  // All payments across all customers
+  if (allPayments) {
+    const apWhere: string[] = [];
+    const apParams: unknown[] = [];
+    if (dateFrom) { apWhere.push('date >= ?'); apParams.push(dateFrom); }
+    if (dateTo)   { apWhere.push('date <= ?'); apParams.push(dateTo); }
+    const wc = apWhere.length ? 'WHERE ' + apWhere.join(' AND ') : '';
+    const pays = await database.all(
+      `SELECT id, date, customer_name, amount, payment_mode, notes
+       FROM rmc_payments ${wc} ORDER BY date DESC, id DESC`,
+      ...apParams
+    );
+    return NextResponse.json({ payments: pays });
+  }
+
+  // Customer list (for sidebar)
+  const sDW: string[] = ['customer_name IS NOT NULL'];
+  const pDW: string[] = ['customer_name IS NOT NULL'];
+  const sDParams: unknown[] = [];
+  const pDParams: unknown[] = [];
+  if (dateFrom) { sDW.push('date >= ?'); sDParams.push(dateFrom); pDW.push('date >= ?'); pDParams.push(dateFrom); }
+  if (dateTo)   { sDW.push('date <= ?'); sDParams.push(dateTo);   pDW.push('date <= ?'); pDParams.push(dateTo); }
+
+  const customers = await database.all(`
+    SELECT customer_name, MAX(site_address) as site_address,
+      SUM(orders) as orders,
+      ROUND(SUM(total_debit), 2) as total_debit,
+      ROUND(SUM(total_credit), 2) as total_credit,
+      ROUND(SUM(total_debit) - SUM(total_credit), 2) as closing_balance
+    FROM (
+      SELECT customer_name, site_address, COUNT(*) as orders,
+        SUM(COALESCE(total_amount, 0)) as total_debit, 0 as total_credit
+      FROM rmc_sales WHERE ${sDW.join(' AND ')}
+      GROUP BY customer_name
+      UNION ALL
+      SELECT customer_name, NULL as site_address, 0, 0, SUM(COALESCE(amount, 0))
+      FROM rmc_payments WHERE ${pDW.join(' AND ')}
+      GROUP BY customer_name
+    ) GROUP BY customer_name ORDER BY closing_balance DESC, customer_name
+  `, ...sDParams, ...pDParams);
+
   if (!customer) {
-    return NextResponse.json({ entries: [], payments: [], summary: null });
+    return NextResponse.json({ customers, entries: [], payments: [], summary: null });
   }
 
   // Sales entries for this customer

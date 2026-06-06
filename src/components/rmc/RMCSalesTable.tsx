@@ -57,8 +57,6 @@ export default function RMCSalesTable({ onRefresh }: { onRefresh: () => void }) 
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [challan, setChallan] = useState<Sale | null>(null);
-
   // Filters
   const [month, setMonth] = useState('');
   const [grade, setGrade] = useState('');
@@ -270,7 +268,6 @@ export default function RMCSalesTable({ onRefresh }: { onRefresh: () => void }) 
                   <td className="px-3 py-2">
                     <div className="flex gap-1">
                       <button onClick={() => openEdit(s)} className="text-xs text-blue-600 hover:text-blue-800 font-medium">Edit</button>
-                      <button onClick={() => setChallan(s)} className="text-xs text-purple-600 hover:underline">Challan</button>
                       <button onClick={() => deleteSale(s.id)} className="text-xs text-rose-400 hover:text-rose-600">Del</button>
                     </div>
                   </td>
@@ -301,102 +298,6 @@ export default function RMCSalesTable({ onRefresh }: { onRefresh: () => void }) 
           </div>
         )}
       </div>
-
-      {/* Challan Modal */}
-      {challan && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 print:bg-white print:inset-auto print:block">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl p-8 print:shadow-none print:rounded-none print:p-6">
-            {/* Header */}
-            <div className="text-center border-b-2 border-slate-800 pb-4 mb-6">
-              <h1 className="text-2xl font-bold text-slate-900 tracking-wide">ASTRA CONMIX</h1>
-              <h2 className="text-base font-semibold text-slate-600 mt-1">Delivery Challan</h2>
-            </div>
-
-            {/* Challan Info */}
-            <div className="flex justify-between mb-6 text-sm">
-              <div className="space-y-1">
-                <p><span className="font-semibold text-slate-600">Challan No:</span> DC-{String(challan.id).padStart(4, '0')}</p>
-                <p><span className="font-semibold text-slate-600">Customer:</span> {challan.customer_name || '—'}</p>
-                <p><span className="font-semibold text-slate-600">Site Address:</span> {challan.site_address || '—'}</p>
-              </div>
-              <div className="space-y-1 text-right">
-                <p><span className="font-semibold text-slate-600">Date:</span> {challan.date}</p>
-                <p><span className="font-semibold text-slate-600">Status:</span> {challan.status}</p>
-              </div>
-            </div>
-
-            {/* Table */}
-            <table className="w-full text-sm border border-slate-300 mb-4">
-              <thead className="bg-slate-100">
-                <tr className="text-left text-xs font-semibold text-slate-700">
-                  <th className="px-3 py-2 border border-slate-300">Grade</th>
-                  <th className="px-3 py-2 border border-slate-300 text-right">Quantity (m³)</th>
-                  <th className="px-3 py-2 border border-slate-300 text-right">Rate (₹/m³)</th>
-                  <th className="px-3 py-2 border border-slate-300 text-right">Amount</th>
-                  <th className="px-3 py-2 border border-slate-300 text-right">Pump Charge</th>
-                  <th className="px-3 py-2 border border-slate-300 text-right">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="px-3 py-2 border border-slate-300 font-semibold">{challan.grade}</td>
-                  <td className="px-3 py-2 border border-slate-300 text-right">{Number(challan.quantity).toFixed(1)}</td>
-                  <td className="px-3 py-2 border border-slate-300 text-right">{challan.rate ? fmtCur(challan.rate) : '—'}</td>
-                  <td className="px-3 py-2 border border-slate-300 text-right">{fmtCur(challan.amount)}</td>
-                  <td className="px-3 py-2 border border-slate-300 text-right">{challan.pump_charge ? fmtCur(challan.pump_charge) : '—'}</td>
-                  <td className="px-3 py-2 border border-slate-300 text-right font-semibold">{fmtCur(challan.total_amount)}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            {/* Balance */}
-            {Number(challan.balance) > 0 && (
-              <div className="flex justify-end text-sm mb-4">
-                <div className="border border-rose-300 bg-rose-50 rounded-lg px-4 py-2">
-                  <span className="font-semibold text-rose-700">Balance Due: </span>
-                  <span className="font-bold text-rose-700">{fmtCur(challan.balance)}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Notes */}
-            {challan.notes && (
-              <div className="mb-6 text-sm border border-slate-200 rounded-lg p-3 bg-slate-50">
-                <p className="font-semibold text-slate-600 mb-1">Notes:</p>
-                <p className="text-slate-700">{challan.notes}</p>
-              </div>
-            )}
-
-            {/* Signature */}
-            <div className="mt-8 flex justify-between text-sm">
-              <div className="text-center">
-                <div className="border-t border-slate-400 w-40 mt-8 mb-1"></div>
-                <p className="text-slate-600 font-medium">Receiver&apos;s Signature</p>
-              </div>
-              <div className="text-center">
-                <div className="border-t border-slate-400 w-40 mt-8 mb-1"></div>
-                <p className="text-slate-600 font-medium">Authorised Signatory</p>
-              </div>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex gap-3 mt-6 print:hidden">
-              <button
-                onClick={() => window.print()}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700"
-              >
-                Print
-              </button>
-              <button
-                onClick={() => setChallan(null)}
-                className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm hover:bg-slate-50"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Edit Modal */}
       {editRow && (

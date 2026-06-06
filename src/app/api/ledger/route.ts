@@ -9,7 +9,24 @@ export async function GET(req: NextRequest) {
   const dateFrom = searchParams.get('date_from');
   const dateTo   = searchParams.get('date_to');
 
+  const allPayments = searchParams.get('all_payments');
+
   const database = db();
+
+  // All payments across all customers
+  if (allPayments) {
+    const apWhere: string[] = [];
+    const apParams: unknown[] = [];
+    if (dateFrom) { apWhere.push('date >= ?'); apParams.push(dateFrom); }
+    if (dateTo)   { apWhere.push('date <= ?'); apParams.push(dateTo); }
+    const wc = apWhere.length ? 'WHERE ' + apWhere.join(' AND ') : '';
+    const pays = await database.all(
+      `SELECT id, date, customer_name, amount, payment_mode, notes
+       FROM payments ${wc} ORDER BY date DESC, id DESC`,
+      ...apParams
+    );
+    return NextResponse.json({ payments: pays });
+  }
 
   // Customer sidebar list — totals filtered by date range if given
   const listWhere = ['customer_name IS NOT NULL'];
