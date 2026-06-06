@@ -63,6 +63,16 @@ export default function Customers() {
   const [savingPeriod, setSavingPeriod] = useState(false);
   const [periodSaveMsg, setPeriodSaveMsg] = useState('');
 
+  // Edit / rename / merge
+  const [showEdit, setShowEdit] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editAddress, setEditAddress] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [mergeTarget, setMergeTarget] = useState('');
+  const [editMode, setEditMode] = useState<'rename' | 'merge'>('rename');
+  const [saving, setSaving] = useState(false);
+  const [editMsg, setEditMsg] = useState('');
+
   // Bulk payment
   const [payAmount, setPayAmount] = useState('');
   const [payDate, setPayDate] = useState(today);
@@ -110,9 +120,60 @@ export default function Customers() {
     setPayAmount('');
     setShowAddPeriod(false);
     setPeriodSaveMsg('');
+    setShowEdit(false);
+    setEditMsg('');
     loadHistory(c.customer_name);
     loadRates(c.customer_name);
     loadRatePeriods(c.customer_name);
+  };
+
+  const openEdit = () => {
+    if (!selected) return;
+    setEditName(selected.customer_name);
+    setEditAddress(selected.address || '');
+    setEditPhone(selected.phone || '');
+    setMergeTarget('');
+    setEditMode('rename');
+    setEditMsg('');
+    setShowEdit(true);
+  };
+
+  const saveEdit = async () => {
+    if (!selected) return;
+    const newName = editMode === 'merge' ? mergeTarget : editName.trim();
+    if (!newName) return;
+    if (editMode === 'merge' && !mergeTarget) return;
+
+    const confirmMsg = editMode === 'merge'
+      ? `Merge all ${selected.total_orders} orders of "${selected.customer_name}" into "${mergeTarget}"? This cannot be undone.`
+      : `Rename "${selected.customer_name}" to "${newName}" across all orders?`;
+    if (!confirm(confirmMsg)) return;
+
+    setSaving(true);
+    setEditMsg('');
+    const res = await fetch('/api/customers', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        old_name: selected.customer_name,
+        new_name: newName,
+        new_address: editMode === 'rename' ? editAddress : undefined,
+        new_phone:   editMode === 'rename' ? editPhone   : undefined,
+      }),
+    });
+    const result = await res.json();
+    setSaving(false);
+    if (result.ok) {
+      setEditMsg('Saved!');
+      setShowEdit(false);
+      await load();
+      // Re-select under the new name
+      setTimeout(() => {
+        setSelected(prev => prev ? { ...prev, customer_name: newName, address: editAddress || prev.address, phone: editPhone || prev.phone } : prev);
+      }, 300);
+    } else {
+      setEditMsg(result.error || 'Error saving');
+    }
   };
 
   const saveFixedRates = async () => {
@@ -249,9 +310,88 @@ export default function Customers() {
           <>
             {/* Summary */}
             <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
-              <h2 className="text-base font-semibold text-slate-900">{selected.customer_name}</h2>
-              {selected.phone && <p className="text-sm text-blue-600 mt-0.5">{selected.phone}</p>}
-              {selected.address && <p className="text-sm text-slate-500">{selected.address}</p>}
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-semibold text-slate-900">{selected.customer_name}</h2>
+                  {selected.phone && <p className="text-sm text-blue-600 mt-0.5">{selected.phone}</p>}
+                  {selected.address && <p className="text-sm text-slate-500">{selected.address}</p>}
+                </div>
+                <button onClick={openEdit}
+                  className="flex-shrink-0 px-3 py-1.5 text-xs border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600">
+                  ✏ Edit / Merge
+                </button>
+              </div>
+
+              {/* Inline edit panel */}
+              {showEdit && (
+                <div className="mt-4 border border-slate-200 rounded-xl p-4 bg-slate-50 space-y-3">
+                  <div className="flex gap-2">
+                    <button onClick={() => setEditMode('rename')}
+                      className={`px-3 py-1.5 text-xs rounded-lg font-medium ${editMode === 'rename' ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                      Rename / Edit details
+                    </button>
+                    <button onClick={() => setEditMode('merge')}
+                      className={`px-3 py-1.5 text-xs rounded-lg font-medium ${editMode === 'merge' ? 'bg-orange-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                      Merge into another party
+                    </button>
+                  </div>
+
+                  {editMode === 'rename' ? (
+                    <div className="space-y-2">
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">Customer Name</label>
+                        <input value={editName} onChange={e => setEditName(e.target.value)}
+                          className={`w-full ${inputCls}`} placeholder="Name" />
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <label className="block text-xs text-slate-500 mb-1">Address</label>
+                          <input value={editAddress} onChange={e => setEditAddress(e.target.value)}
+                            className={`w-full ${inputCls}`} placeholder="Village/area" />
+                        </div>
+                        <div className="flex-1">
+                          <label className="block text-xs text-slate-500 mb-1">Phone</label>
+                          <input value={editPhone} onChange={e => setEditPhone(e.target.value)}
+                            className={`w-full ${inputCls}`} placeholder="Phone number" />
+                        </div>
+                      </div>
+                      <p className="text-xs text-slate-400">Name change updates all orders, payments, and rate records.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <label className="block text-xs text-slate-500 mb-1">
+                        Merge <strong>{selected.customer_name}</strong> into:
+                      </label>
+                      <select value={mergeTarget} onChange={e => setMergeTarget(e.target.value)}
+                        className={`w-full ${inputCls}`}>
+                        <option value="">— Select existing party —</option>
+                        {customers
+                          .filter(c => c.customer_name !== selected.customer_name)
+                          .map(c => (
+                            <option key={c.customer_name} value={c.customer_name}>{c.customer_name}</option>
+                          ))}
+                      </select>
+                      {mergeTarget && (
+                        <p className="text-xs text-amber-600 bg-amber-50 rounded p-2">
+                          All {selected.total_orders} orders of &quot;{selected.customer_name}&quot; will be reassigned to &quot;{mergeTarget}&quot;. This cannot be undone.
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 items-center">
+                    <button onClick={saveEdit} disabled={saving}
+                      className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                      {saving ? 'Saving...' : editMode === 'merge' ? 'Merge Parties' : 'Save Changes'}
+                    </button>
+                    <button onClick={() => { setShowEdit(false); setEditMsg(''); }}
+                      className="px-3 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600">
+                      Cancel
+                    </button>
+                    {editMsg && <span className={`text-xs font-medium ${editMsg === 'Saved!' ? 'text-emerald-600' : 'text-red-600'}`}>{editMsg}</span>}
+                  </div>
+                </div>
+              )}
               <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                   { label: 'Total Orders', value: String(selected.total_orders) },
