@@ -9,8 +9,9 @@ import BulkEntry from '@/components/BulkEntry';
 import Customers from '@/components/Customers';
 import Outstanding from '@/components/Outstanding';
 import Ledger from '@/components/Ledger';
+import Stock from '@/components/Stock';
 
-type Tab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'add';
+type Tab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'add' | 'stock';
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>('dashboard');
@@ -34,6 +35,7 @@ export default function Home() {
     { id: 'outstanding', label: 'Outstanding' },
     { id: 'customers', label: 'Customers' },
     { id: 'ledger', label: 'Ledger' },
+    { id: 'stock', label: '📦 Stock', color: 'slate' },
     { id: 'bulk', label: '⚡ Daily Entry', color: 'orange' },
     { id: 'add', label: '+ Single Sale', color: 'green' },
   ];
@@ -85,6 +87,7 @@ export default function Home() {
         {tab === 'outstanding'&& <Outstanding key={refreshKey} onRefresh={refresh} />}
         {tab === 'customers'  && <Customers key={refreshKey} />}
         {tab === 'ledger'     && <Ledger key={refreshKey} />}
+        {tab === 'stock'      && <Stock key={refreshKey} />}
         {tab === 'bulk'       && <BulkEntry onSaved={() => { refresh(); setTab('sales'); }} />}
         {tab === 'add'        && <AddSaleForm onSaved={() => { refresh(); setTab('sales'); }} />}
       </main>

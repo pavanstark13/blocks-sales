@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { date, customer_name, address, phone, size, quantity, rate, advance, status, payment_mode, notes } = body;
+  const { date, customer_name, address, phone, size, quantity, rate, advance, status, payment_mode, notes, vehicle_no } = body;
 
   if (!date || !size || !quantity) {
     return NextResponse.json({ error: 'date, size, and quantity are required' }, { status: 400 });
@@ -50,11 +50,11 @@ export async function POST(req: NextRequest) {
     .toUpperCase().replace(' ', '-');
 
   const result = await db().run(
-    `INSERT INTO sales (date, customer_name, address, phone, size, quantity, rate, amount, advance, balance, status, payment_mode, notes, month_label)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO sales (date, customer_name, address, phone, size, quantity, rate, amount, advance, balance, status, payment_mode, notes, month_label, vehicle_no)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     date, customer_name || null, address || null, phone || null,
     size, quantity, rate || null, amount, advance || 0, balance,
-    status || 'CLOSED', payment_mode || null, notes || null, month_label
+    status || 'CLOSED', payment_mode || null, notes || null, month_label, vehicle_no || null
   );
 
   return NextResponse.json({ id: Number(result.lastInsertRowid) }, { status: 201 });

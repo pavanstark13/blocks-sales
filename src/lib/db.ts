@@ -51,6 +51,14 @@ const SCHEMA = `
     date_from TEXT NOT NULL,
     date_to TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS production (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    size INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    notes TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
   CREATE INDEX IF NOT EXISTS idx_sales_date      ON sales(date);
   CREATE INDEX IF NOT EXISTS idx_sales_status    ON sales(status);
   CREATE INDEX IF NOT EXISTS idx_sales_customer  ON sales(customer_name);
@@ -58,6 +66,7 @@ const SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_payments_cust   ON payments(customer_name);
   CREATE INDEX IF NOT EXISTS idx_payments_date   ON payments(date);
   CREATE INDEX IF NOT EXISTS idx_rate_periods    ON customer_rate_periods(customer_name, size);
+  CREATE INDEX IF NOT EXISTS idx_production_date ON production(date);
 `;
 
 // ── Unified row type ──────────────────────────────────────────────────────────
@@ -88,6 +97,11 @@ function makeTurso(): DB {
     return client.execute({ sql, args: args as any });
   }
 
+  // Migrations: ADD COLUMN statements that are safe to re-run (fail silently if column exists)
+  const MIGRATIONS = [
+    `ALTER TABLE sales ADD COLUMN vehicle_no TEXT`,
+  ];
+
   // Run schema once per process
   let schemaReady: Promise<void> | null = null;
   function ensureSchema() {
@@ -96,6 +110,9 @@ function makeTurso(): DB {
         const client = await clientPromise;
         for (const stmt of SCHEMA.split(';').map(s => s.trim()).filter(Boolean)) {
           await client.execute(stmt);
+        }
+        for (const m of MIGRATIONS) {
+          try { await client.execute(m); } catch { /* column already exists */ }
         }
       })();
     }
@@ -137,6 +154,10 @@ function makeLocal(): DB {
   sqlite.pragma('journal_mode = WAL');
   sqlite.pragma('foreign_keys = ON');
   sqlite.exec(SCHEMA);
+  // Migrations (safe to re-run)
+  for (const m of [`ALTER TABLE sales ADD COLUMN vehicle_no TEXT`]) {
+    try { sqlite.exec(m); } catch { /* already exists */ }
+  }
 
   return {
     async all(sql, ...args) { return sqlite.prepare(sql).all(...args) as Row[]; },
