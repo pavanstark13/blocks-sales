@@ -25,6 +25,17 @@ const RENAMES: Record<string, string> = {
   'SECRETARY':               'Secretary',
   'MANJUNATH':               'Manjunath',
   'Tmr Construction':        'TMR Construction',
+  // New customers from per-customer files
+  'ANAGHAA CONSTRUCTIONS':   'Anaghaa Constructions',
+  'Anaghaa Contructions':    'Anaghaa Constructions',
+  'KARNATAKA INFRATECH':     'Karnataka Infratech',
+  'KARNATAKA INFRA TECH':    'Karnataka Infratech',
+  'PRAVRIDDHI INFRATECH':    'Pravriddhi Infratech',
+  'SECRETARY BGS':           'Secretary BGS',
+  'Secretary':               'Secretary BGS',
+  'SGR Ground Engineering Projects': 'SGR Ground Engineering',
+  'YANKEE CONSTRUCTIONS LLP': 'Yankee Constructions LLP',
+  'KEB MADHU':               'KEB Madhu',
 };
 
 export async function GET(req: NextRequest) {
