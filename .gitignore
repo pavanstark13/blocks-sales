@@ -42,3 +42,7 @@ next-env.d.ts
 
 # SQLite database is committed for deployment
 # /data/
+
+# Python bytecode
+__pycache__/
+*.pyc
