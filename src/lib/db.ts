@@ -131,6 +131,29 @@ const SCHEMA = `
     credit_limit REAL NOT NULL,
     notes TEXT
   );
+  CREATE TABLE IF NOT EXISTS rmc_cement (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    month_label TEXT,
+    entry_type TEXT NOT NULL,
+    vehicle_no TEXT,
+    company TEXT,
+    inward_total REAL DEFAULT 0,
+    cem1_qty REAL DEFAULT 0,
+    cem2_qty REAL DEFAULT 0,
+    cem3_qty REAL DEFAULT 0,
+    consumption_text TEXT,
+    cem1_consumption REAL DEFAULT 0,
+    cem2_consumption REAL DEFAULT 0,
+    cem3_consumption REAL DEFAULT 0,
+    cem1_balance REAL,
+    cem2_balance REAL,
+    cem3_balance REAL,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_rmc_cement_date  ON rmc_cement(date);
+  CREATE INDEX IF NOT EXISTS idx_rmc_cement_month ON rmc_cement(month_label);
+  CREATE INDEX IF NOT EXISTS idx_rmc_cement_type  ON rmc_cement(entry_type);
 `;
 
 // ── Unified row type ──────────────────────────────────────────────────────────

@@ -17,11 +17,12 @@ import RMCOutstanding from '@/components/rmc/RMCOutstanding';
 import RMCCustomers from '@/components/rmc/RMCCustomers';
 import RMCCubeTests from '@/components/rmc/RMCCubeTests';
 import RMCLedger from '@/components/rmc/RMCLedger';
+import RMCCement from '@/components/rmc/RMCCement';
 import AgeingReport from '@/components/AgeingReport';
 
 type Module = 'blocks' | 'rmc';
 type Tab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'add' | 'stock' | 'ageing';
-type RMCTab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'cube-tests' | 'ageing';
+type RMCTab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'cube-tests' | 'ageing' | 'cement';
 
 export default function Home() {
   const [module, setModule] = useState<Module>('blocks');
@@ -89,6 +90,14 @@ export default function Home() {
       ),
     },
     { id: 'ageing', label: 'Ageing' },
+    {
+      id: 'cement', label: 'Cement',
+      icon: (
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
+        </svg>
+      ),
+    },
     {
       id: 'bulk', label: 'Daily Entry', color: 'orange',
       icon: (
@@ -235,6 +244,7 @@ export default function Home() {
             {rmcTab === 'ledger'      && <RMCLedger key={refreshKey} />}
             {rmcTab === 'cube-tests'  && <RMCCubeTests key={refreshKey} />}
             {rmcTab === 'ageing'      && <AgeingReport key={refreshKey} apiBase="/api/rmc" />}
+            {rmcTab === 'cement'      && <RMCCement key={refreshKey} />}
             {rmcTab === 'bulk'        && <RMCBulkEntry onSaved={() => { refresh(); setRmcTab('sales'); }} />}
           </>
         )}
