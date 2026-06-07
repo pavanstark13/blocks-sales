@@ -22,9 +22,8 @@ const RENAMES: Record<string, string> = {
   'MAKLI GOWDRU':            'Makli Gowdru',
   'SHREE G R INFRA':         'Shree G R Infra',
   'SHIVRAJ':                 'Shivraj',
-  'SECRETARY':               'Secretary',
+  'SECRETARY':               'Secretary BGS',
   'MANJUNATH':               'Manjunath',
-  'Tmr Construction':        'TMR Construction',
   // New customers from per-customer files
   'ANAGHAA CONSTRUCTIONS':   'Anaghaa Constructions',
   'Anaghaa Contructions':    'Anaghaa Constructions',
@@ -36,6 +35,24 @@ const RENAMES: Record<string, string> = {
   'SGR Ground Engineering Projects': 'SGR Ground Engineering',
   'YANKEE CONSTRUCTIONS LLP': 'Yankee Constructions LLP',
   'KEB MADHU':               'KEB Madhu',
+  // Variants from full ASTRA report
+  'SRR DEVELPOERS':          'SRR Developers',
+  'Karnataka Infratech Company': 'Karnataka Infratech',
+  'MSR ENTERPRISES ( ranjith)': 'MSR Enterprises',
+  'MSR ENTERPRISES (ranjith)': 'MSR Enterprises',
+  'R KCORPORATION':          'RK Corporation',
+  'SHIVARAJ':                'Shivraj',
+  'Shivaraj':                'Shivraj',
+  'B G S':                   'BGS',
+  'K G K-1':                 'KGK',
+  'BENCHMARK INFRATECH':     'Benchmark Infratech',
+  'Dayabhavana':             'Dayabhavan',
+  'Deelipagowda':            'Deelip Gowda',
+  'MAAURYA CONSTRUCTIONS':   'Maurya Constructions',
+  'Relyonn Infra Project':   'Relyonn Infra Projects',
+  'SLR GROUPS&CONSTRU':      'SLR Groups & Constructions',
+  'Abhishek T H Contractor': 'Abhishek T H',
+  'ABHISHEK T.H':            'Abhishek T H',
 };
 
 export async function GET(req: NextRequest) {
