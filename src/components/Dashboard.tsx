@@ -101,7 +101,19 @@ export default function Dashboard() {
     fetch('/api/summary').then(r => r.json()).then(d => { setData(d); setLoading(false); });
   }, []);
 
-  if (loading) return <div className="flex items-center justify-center h-64 text-slate-400">Loading dashboard...</div>;
+  if (loading) return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 animate-pulse">
+            <div className="h-3 bg-slate-200 rounded w-3/4 mb-3" />
+            <div className="h-7 bg-slate-100 rounded w-1/2" />
+          </div>
+        ))}
+      </div>
+      <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5 animate-pulse h-64" />
+    </div>
+  );
   if (!data) return null;
 
   const { totals, monthSummary, topCustomers, paymentBreakdown, sizeSummary, outstanding } = data;
@@ -113,13 +125,13 @@ export default function Dashboard() {
       {/* KPI cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {[
-          { label: 'Total Orders', value: fmt(totals.total_orders), color: 'text-blue-600' },
-          { label: 'Total Blocks Sold', value: fmt(totals.total_blocks), color: 'text-emerald-600' },
-          { label: 'Total Revenue', value: fmtCur(totals.total_revenue), color: 'text-violet-600' },
-          { label: 'Outstanding Balance', value: fmtCur(totals.total_outstanding), color: 'text-rose-600' },
-          { label: 'Unique Customers', value: fmt(totals.unique_customers), color: 'text-amber-600' },
+          { label: 'Total Orders', value: fmt(totals.total_orders), color: 'text-blue-600', border: 'border-l-blue-500' },
+          { label: 'Blocks Sold', value: fmt(totals.total_blocks), color: 'text-emerald-600', border: 'border-l-emerald-500' },
+          { label: 'Total Revenue', value: fmtCur(totals.total_revenue), color: 'text-violet-600', border: 'border-l-violet-500' },
+          { label: 'Outstanding', value: fmtCur(totals.total_outstanding), color: 'text-rose-600', border: 'border-l-rose-500' },
+          { label: 'Customers', value: fmt(totals.unique_customers), color: 'text-amber-600', border: 'border-l-amber-500' },
         ].map(card => (
-          <div key={card.label} className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+          <div key={card.label} className={`bg-white rounded-xl border border-slate-100 border-l-4 ${card.border} shadow-sm p-4`}>
             <p className="text-xs text-slate-500 font-medium">{card.label}</p>
             <p className={`text-2xl font-bold mt-1 ${card.color}`}>{card.value}</p>
           </div>
