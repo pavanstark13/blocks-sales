@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import PrintChallan from '../PrintChallan';
 
 interface Sale {
   id: number;
@@ -66,9 +65,6 @@ export default function RMCSalesTable({ onRefresh }: { onRefresh: () => void }) 
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [months, setMonths] = useState<string[]>([]);
-
-  // Print modal
-  const [printSale, setPrintSale] = useState<Sale | null>(null);
 
   // Edit modal
   const [editRow, setEditRow] = useState<Sale | null>(null);
@@ -271,7 +267,6 @@ export default function RMCSalesTable({ onRefresh }: { onRefresh: () => void }) 
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex gap-1">
-                      <button onClick={() => setPrintSale(s)} className="text-xs text-slate-500 hover:underline cursor-pointer">Print</button>
                       <button onClick={() => openEdit(s)} className="text-xs text-blue-600 hover:text-blue-800 font-medium">Edit</button>
                       <button onClick={() => deleteSale(s.id)} className="text-xs text-rose-400 hover:text-rose-600">Del</button>
                     </div>
@@ -303,29 +298,6 @@ export default function RMCSalesTable({ onRefresh }: { onRefresh: () => void }) 
           </div>
         )}
       </div>
-
-      {printSale && (
-        <PrintChallan
-          sale={{
-            module: 'rmc',
-            id: printSale.id,
-            date: printSale.date,
-            customer_name: printSale.customer_name,
-            site_address: printSale.site_address,
-            grade: printSale.grade,
-            quantity: printSale.quantity,
-            rate: printSale.rate,
-            amount: printSale.amount,
-            pump_charge: printSale.pump_charge,
-            total_amount: printSale.total_amount,
-            advance: printSale.advance,
-            balance: printSale.balance,
-            payment_mode: printSale.payment_mode,
-            notes: printSale.notes,
-          }}
-          onClose={() => setPrintSale(null)}
-        />
-      )}
 
       {/* Edit Modal */}
       {editRow && (
