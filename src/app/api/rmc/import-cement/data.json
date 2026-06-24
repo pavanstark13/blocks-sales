@@ -1,5 +1,23 @@
 [
   {
+    "date": "2025-08-09",
+    "month_label": "SEP-25",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-1: 20.885, CEM-2: 7.495",
+    "cem1_consumption": 20.885,
+    "cem2_consumption": 7.495,
+    "cem3_consumption": 0,
+    "cem1_balance": 60.295,
+    "cem2_balance": 92.58,
+    "cem3_balance": null
+  },
+  {
     "date": "2025-08-15",
     "month_label": "AUG-25",
     "entry_type": "INWARD",
@@ -18,6 +36,60 @@
     "cem3_balance": null
   },
   {
+    "date": "2025-08-15",
+    "month_label": "AUG-25",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-1: 0.26212",
+    "cem1_consumption": 0.26212,
+    "cem2_consumption": 0,
+    "cem3_consumption": 0,
+    "cem1_balance": 41.718,
+    "cem2_balance": null,
+    "cem3_balance": null
+  },
+  {
+    "date": "2025-08-17",
+    "month_label": "AUG-25",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-1: 18.8222",
+    "cem1_consumption": 18.8222,
+    "cem2_consumption": 0,
+    "cem3_consumption": 0,
+    "cem1_balance": 22.896,
+    "cem2_balance": null,
+    "cem3_balance": null
+  },
+  {
+    "date": "2025-08-18",
+    "month_label": "AUG-25",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-1: 22.17123",
+    "cem1_consumption": 22.17123,
+    "cem2_consumption": 0,
+    "cem3_consumption": 0,
+    "cem1_balance": 0.724,
+    "cem2_balance": null,
+    "cem3_balance": null
+  },
+  {
     "date": "2025-08-19",
     "month_label": "AUG-25",
     "entry_type": "INWARD",
@@ -31,7 +103,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 40.82445,
+    "cem1_balance": 40.824,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -49,7 +121,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 80.52445,
+    "cem1_balance": 80.524,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -67,7 +139,25 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 121.56445,
+    "cem1_balance": 121.564,
+    "cem2_balance": null,
+    "cem3_balance": null
+  },
+  {
+    "date": "2025-08-21",
+    "month_label": "AUG-25",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-1: 2.08354",
+    "cem1_consumption": 2.08354,
+    "cem2_consumption": 0,
+    "cem3_consumption": 0,
+    "cem1_balance": 119.481,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -103,8 +193,8 @@
     "cem1_consumption": 11.361,
     "cem2_consumption": 2.104,
     "cem3_consumption": 0,
-    "cem1_balance": 108.11990999999999,
-    "cem2_balance": 37.416000000000004,
+    "cem1_balance": 108.12,
+    "cem2_balance": 37.416,
     "cem3_balance": null
   },
   {
@@ -157,8 +247,8 @@
     "cem1_consumption": 32.689,
     "cem2_consumption": 3.001,
     "cem3_consumption": 0,
-    "cem1_balance": 75.43090999999998,
-    "cem2_balance": 115.63499999999999,
+    "cem1_balance": 75.431,
+    "cem2_balance": 115.635,
     "cem3_balance": null
   },
   {
@@ -175,7 +265,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 115.99090999999999,
+    "cem1_balance": 115.991,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -193,8 +283,8 @@
     "cem1_consumption": 2.243,
     "cem2_consumption": 9.592,
     "cem3_consumption": 0,
-    "cem1_balance": 113.74790999999999,
-    "cem2_balance": 106.04299999999999,
+    "cem1_balance": 113.748,
+    "cem2_balance": 106.043,
     "cem3_balance": null
   },
   {
@@ -211,7 +301,7 @@
     "cem1_consumption": 21.136,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 92.61191,
+    "cem1_balance": 92.612,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -229,7 +319,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 132.89191,
+    "cem1_balance": 132.892,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -247,8 +337,8 @@
     "cem1_consumption": 17.043,
     "cem2_consumption": 2.099,
     "cem3_consumption": 0,
-    "cem1_balance": 115.84890999999999,
-    "cem2_balance": 103.94399999999999,
+    "cem1_balance": 115.849,
+    "cem2_balance": 103.944,
     "cem3_balance": null
   },
   {
@@ -265,7 +355,7 @@
     "cem1_consumption": 3.01,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 112.83890999999998,
+    "cem1_balance": 112.839,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -283,7 +373,7 @@
     "cem1_consumption": 83.762,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 29.076909999999984,
+    "cem1_balance": 29.077,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -301,7 +391,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 69.39690999999999,
+    "cem1_balance": 69.397,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -319,7 +409,7 @@
     "cem1_consumption": 53.08,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 16.316909999999993,
+    "cem1_balance": 16.317,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -337,7 +427,7 @@
     "cem1_consumption": 3.274,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 13.042909999999992,
+    "cem1_balance": 13.043,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -373,7 +463,7 @@
     "cem1_consumption": 10.205,
     "cem2_consumption": 1.469,
     "cem3_consumption": 0,
-    "cem1_balance": 2.837909999999999,
+    "cem1_balance": 2.838,
     "cem2_balance": 100.075,
     "cem3_balance": null
   },
@@ -391,7 +481,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 42.71791,
+    "cem1_balance": 42.718,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -409,7 +499,7 @@
     "cem1_consumption": 15.932,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 26.78591,
+    "cem1_balance": 26.786,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -445,7 +535,7 @@
     "cem1_consumption": 9.097,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 17.68891,
+    "cem1_balance": 17.689,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -463,7 +553,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 57.24891,
+    "cem1_balance": 57.249,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -481,7 +571,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 97.74891,
+    "cem1_balance": 97.749,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -499,7 +589,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 139.60890999999998,
+    "cem1_balance": 139.609,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -517,7 +607,7 @@
     "cem1_consumption": 131.864,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 7.744909999999976,
+    "cem1_balance": 7.745,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -535,7 +625,7 @@
     "cem1_consumption": 36.366,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": -28.621090000000024,
+    "cem1_balance": -28.621,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -553,7 +643,7 @@
     "cem1_consumption": 7.827,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": -36.44809000000002,
+    "cem1_balance": -36.448,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -594,24 +684,6 @@
     "cem3_balance": null
   },
   {
-    "date": "2025-08-09",
-    "month_label": "SEP-25",
-    "entry_type": "CONSUMPTION",
-    "vehicle_no": null,
-    "company": null,
-    "inward_total": 0,
-    "cem1_qty": 0,
-    "cem2_qty": 0,
-    "cem3_qty": 0,
-    "consumption_text": "CEM-1: 20.885, CEM-2: 7.495",
-    "cem1_consumption": 20.885,
-    "cem2_consumption": 7.495,
-    "cem3_consumption": 0,
-    "cem1_balance": 60.295,
-    "cem2_balance": 92.58,
-    "cem3_balance": null
-  },
-  {
     "date": "2025-09-10",
     "month_label": "SEP-25",
     "entry_type": "CONSUMPTION",
@@ -644,7 +716,7 @@
     "cem2_consumption": 3.498,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 86.51899999999999,
+    "cem2_balance": 86.519,
     "cem3_balance": null
   },
   {
@@ -697,7 +769,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 100.17500000000001,
+    "cem1_balance": 100.175,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -711,10 +783,10 @@
     "cem1_qty": 0,
     "cem2_qty": 0,
     "cem3_qty": 0,
-    "consumption_text": "CEM-1: 2.617, CEM-2: 2.791, CEM-3: 7.818",
+    "consumption_text": "CEM-1: 2.617, CEM-2: 2.791, CEM-3: 0.781",
     "cem1_consumption": 2.617,
     "cem2_consumption": 2.791,
-    "cem3_consumption": 7.8183,
+    "cem3_consumption": 0.781,
     "cem1_balance": 97.558,
     "cem2_balance": 122.666,
     "cem3_balance": 35.069
@@ -734,7 +806,7 @@
     "cem2_consumption": 94.114,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 28.551999999999992,
+    "cem2_balance": 28.552,
     "cem3_balance": null
   },
   {
@@ -751,8 +823,8 @@
     "cem1_consumption": 5.44,
     "cem2_consumption": 5.12,
     "cem3_consumption": 1.664,
-    "cem1_balance": 92.11800000000001,
-    "cem2_balance": 23.43199999999999,
+    "cem1_balance": 92.118,
+    "cem2_balance": 23.432,
     "cem3_balance": 33.405
   },
   {
@@ -769,9 +841,9 @@
     "cem1_consumption": 0.905,
     "cem2_consumption": 17.377,
     "cem3_consumption": 0.303,
-    "cem1_balance": 91.21300000000001,
-    "cem2_balance": 6.054999999999993,
-    "cem3_balance": 33.102000000000004
+    "cem1_balance": 91.213,
+    "cem2_balance": 6.055,
+    "cem3_balance": 33.102
   },
   {
     "date": "2025-09-18",
@@ -788,7 +860,7 @@
     "cem2_consumption": 2.767,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 3.2879999999999927,
+    "cem2_balance": 3.288,
     "cem3_balance": null
   },
   {
@@ -806,7 +878,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 43.58799999999999,
+    "cem2_balance": 43.588,
     "cem3_balance": null
   },
   {
@@ -823,9 +895,9 @@
     "cem1_consumption": 2.4883,
     "cem2_consumption": 6.31,
     "cem3_consumption": 1.237,
-    "cem1_balance": 88.72470000000001,
-    "cem2_balance": 37.277999999999984,
-    "cem3_balance": 31.865000000000002
+    "cem1_balance": 88.725,
+    "cem2_balance": 37.278,
+    "cem3_balance": 31.865
   },
   {
     "date": "2025-09-22",
@@ -841,7 +913,7 @@
     "cem1_consumption": 17.512,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 71.21270000000001,
+    "cem1_balance": 71.213,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -860,7 +932,7 @@
     "cem2_consumption": 4.046,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 33.231999999999985,
+    "cem2_balance": 33.232,
     "cem3_balance": null
   },
   {
@@ -878,7 +950,7 @@
     "cem2_consumption": 18.792,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 14.439999999999984,
+    "cem2_balance": 14.44,
     "cem3_balance": null
   },
   {
@@ -896,7 +968,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 55.79999999999998,
+    "cem2_balance": 55.8,
     "cem3_balance": null
   },
   {
@@ -913,8 +985,8 @@
     "cem1_consumption": 7.893,
     "cem2_consumption": 4.763,
     "cem3_consumption": 2.166,
-    "cem1_balance": 63.31970000000001,
-    "cem2_balance": 51.036999999999985,
+    "cem1_balance": 63.32,
+    "cem2_balance": 51.037,
     "cem3_balance": 29.699
   },
   {
@@ -931,8 +1003,8 @@
     "cem1_consumption": 3.491,
     "cem2_consumption": 50.179,
     "cem3_consumption": 0,
-    "cem1_balance": 59.82870000000001,
-    "cem2_balance": 0.8579999999999828,
+    "cem1_balance": 59.829,
+    "cem2_balance": 0.858,
     "cem3_balance": null
   },
   {
@@ -950,7 +1022,7 @@
     "cem2_consumption": 4.309,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": -3.4510000000000174,
+    "cem2_balance": -3.451,
     "cem3_balance": null
   },
   {
@@ -968,7 +1040,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 36.408999999999985,
+    "cem2_balance": 36.409,
     "cem3_balance": null
   },
   {
@@ -986,7 +1058,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 76.32899999999998,
+    "cem2_balance": 76.329,
     "cem3_balance": null
   },
   {
@@ -1003,8 +1075,8 @@
     "cem1_consumption": 11.22,
     "cem2_consumption": 8.49,
     "cem3_consumption": 0,
-    "cem1_balance": 48.60870000000001,
-    "cem2_balance": 67.38899999999998,
+    "cem1_balance": 48.609,
+    "cem2_balance": 67.389,
     "cem3_balance": null
   },
   {
@@ -1021,7 +1093,7 @@
     "cem1_consumption": 28.282,
     "cem2_consumption": 0,
     "cem3_consumption": 4.839,
-    "cem1_balance": 20.326700000000013,
+    "cem1_balance": 20.327,
     "cem2_balance": null,
     "cem3_balance": 24.86
   },
@@ -1040,7 +1112,7 @@
     "cem2_consumption": 1.953,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 65.43599999999999,
+    "cem2_balance": 65.436,
     "cem3_balance": null
   },
   {
@@ -1058,7 +1130,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 105.33599999999998,
+    "cem2_balance": 105.336,
     "cem3_balance": null
   },
   {
@@ -1076,7 +1148,7 @@
     "cem2_consumption": 13.17495,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 92.16199999999998,
+    "cem2_balance": 92.162,
     "cem3_balance": null
   },
   {
@@ -1094,7 +1166,7 @@
     "cem2_consumption": 21.353,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 70.80899999999997,
+    "cem2_balance": 70.809,
     "cem3_balance": null
   },
   {
@@ -1112,7 +1184,7 @@
     "cem2_consumption": 10.65,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 60.15899999999997,
+    "cem2_balance": 60.159,
     "cem3_balance": null
   },
   {
@@ -1130,7 +1202,7 @@
     "cem2_consumption": 85.888,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": -25.729000000000035,
+    "cem2_balance": -25.729,
     "cem3_balance": null
   },
   {
@@ -1184,7 +1256,7 @@
     "cem2_consumption": 7.197,
     "cem3_consumption": 0.52,
     "cem1_balance": 88.486,
-    "cem2_balance": -32.92600000000004,
+    "cem2_balance": -32.926,
     "cem3_balance": 24.34
   },
   {
@@ -1201,7 +1273,7 @@
     "cem1_consumption": 2.561,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 85.92500000000001,
+    "cem1_balance": 85.925,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -1219,7 +1291,7 @@
     "cem1_consumption": 21.365,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 64.56000000000002,
+    "cem1_balance": 64.56,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -1238,7 +1310,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 5.633999999999965,
+    "cem2_balance": 5.634,
     "cem3_balance": null
   },
   {
@@ -1256,7 +1328,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 45.57399999999996,
+    "cem2_balance": 45.574,
     "cem3_balance": null
   },
   {
@@ -1273,8 +1345,8 @@
     "cem1_consumption": 6.726,
     "cem2_consumption": 2.402,
     "cem3_consumption": 1.668,
-    "cem1_balance": 57.83400000000002,
-    "cem2_balance": 43.17199999999996,
+    "cem1_balance": 57.834,
+    "cem2_balance": 43.172,
     "cem3_balance": 22.672
   },
   {
@@ -1292,7 +1364,7 @@
     "cem2_consumption": 45.646,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": -2.4740000000000393,
+    "cem2_balance": -2.474,
     "cem3_balance": null
   },
   {
@@ -1309,7 +1381,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 90.11400000000002,
+    "cem1_balance": 90.114,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -1327,9 +1399,9 @@
     "cem1_consumption": 20.817,
     "cem2_consumption": 2.402,
     "cem3_consumption": 3.792,
-    "cem1_balance": 69.29700000000003,
-    "cem2_balance": -4.876000000000039,
-    "cem3_balance": 18.880000000000003
+    "cem1_balance": 69.297,
+    "cem2_balance": -4.876,
+    "cem3_balance": 18.88
   },
   {
     "date": "2025-10-16",
@@ -1345,7 +1417,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 104.15700000000002,
+    "cem1_balance": 104.157,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -1363,9 +1435,9 @@
     "cem1_consumption": 5.364,
     "cem2_consumption": 5.186,
     "cem3_consumption": 0.671,
-    "cem1_balance": 98.79300000000002,
-    "cem2_balance": -10.06200000000004,
-    "cem3_balance": 18.209000000000003
+    "cem1_balance": 98.793,
+    "cem2_balance": -10.062,
+    "cem3_balance": 18.209
   },
   {
     "date": "2025-10-17",
@@ -1381,9 +1453,9 @@
     "cem1_consumption": 16.412,
     "cem2_consumption": 1.501,
     "cem3_consumption": 4.086,
-    "cem1_balance": 82.38100000000003,
-    "cem2_balance": -11.56300000000004,
-    "cem3_balance": 14.123000000000003
+    "cem1_balance": 82.381,
+    "cem2_balance": -11.563,
+    "cem3_balance": 14.123
   },
   {
     "date": "2025-10-18",
@@ -1400,7 +1472,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 28.496999999999964,
+    "cem2_balance": 28.497,
     "cem3_balance": null
   },
   {
@@ -1418,7 +1490,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 65.97699999999996,
+    "cem2_balance": 65.977,
     "cem3_balance": null
   },
   {
@@ -1435,9 +1507,9 @@
     "cem1_consumption": 19.107,
     "cem2_consumption": 14.107,
     "cem3_consumption": 6.416,
-    "cem1_balance": 63.27400000000003,
-    "cem2_balance": 51.86999999999996,
-    "cem3_balance": 7.7070000000000025
+    "cem1_balance": 63.274,
+    "cem2_balance": 51.87,
+    "cem3_balance": 7.707
   },
   {
     "date": "2025-10-19",
@@ -1454,7 +1526,7 @@
     "cem2_consumption": 9.037,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 42.83299999999996,
+    "cem2_balance": 42.833,
     "cem3_balance": null
   },
   {
@@ -1471,9 +1543,9 @@
     "cem1_consumption": 6.253,
     "cem2_consumption": 0,
     "cem3_consumption": 1.563,
-    "cem1_balance": 57.02100000000003,
+    "cem1_balance": 57.021,
     "cem2_balance": null,
-    "cem3_balance": 6.144000000000003
+    "cem3_balance": 6.144
   },
   {
     "date": "2025-10-21",
@@ -1489,7 +1561,7 @@
     "cem1_consumption": 20.197,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 36.82400000000003,
+    "cem1_balance": 36.824,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -1507,9 +1579,9 @@
     "cem1_consumption": 4.811,
     "cem2_consumption": 0,
     "cem3_consumption": 1.221,
-    "cem1_balance": 32.01300000000003,
+    "cem1_balance": 32.013,
     "cem2_balance": null,
-    "cem3_balance": 4.923000000000003
+    "cem3_balance": 4.923
   },
   {
     "date": "2025-10-28",
@@ -1526,7 +1598,7 @@
     "cem2_consumption": 2.101,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 40.731999999999964,
+    "cem2_balance": 40.732,
     "cem3_balance": null
   },
   {
@@ -1544,7 +1616,7 @@
     "cem2_consumption": 4.8,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 35.93199999999997,
+    "cem2_balance": 35.932,
     "cem3_balance": null
   },
   {
@@ -1562,7 +1634,7 @@
     "cem2_consumption": 1.5,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 34.43199999999997,
+    "cem2_balance": 34.432,
     "cem3_balance": null
   },
   {
@@ -1580,7 +1652,7 @@
     "cem2_consumption": 6.296,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 28.136000000000003,
+    "cem2_balance": 28.136,
     "cem3_balance": null
   },
   {
@@ -1597,7 +1669,7 @@
     "cem1_consumption": 4.251,
     "cem2_consumption": 0,
     "cem3_consumption": 1.053,
-    "cem1_balance": 27.761999999999997,
+    "cem1_balance": 27.762,
     "cem2_balance": null,
     "cem3_balance": 3.87
   },
@@ -1615,8 +1687,8 @@
     "cem1_consumption": 7.927,
     "cem2_consumption": 3.602,
     "cem3_consumption": 1.416,
-    "cem1_balance": 19.834999999999997,
-    "cem2_balance": 24.534000000000002,
+    "cem1_balance": 19.835,
+    "cem2_balance": 24.534,
     "cem3_balance": 2.454
   },
   {
@@ -1633,7 +1705,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 59.974999999999994,
+    "cem1_balance": 59.975,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -1706,7 +1778,7 @@
     "cem2_consumption": 9.83,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 51.224000000000004,
+    "cem2_balance": 51.224,
     "cem3_balance": null
   },
   {
@@ -1724,7 +1796,7 @@
     "cem2_consumption": 0.278,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 50.946000000000005,
+    "cem2_balance": 50.946,
     "cem3_balance": null
   },
   {
@@ -1778,7 +1850,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 63.489999999999995,
+    "cem2_balance": 63.49,
     "cem3_balance": null
   },
   {
@@ -1796,7 +1868,7 @@
     "cem2_consumption": 17.124,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 63.489999999999995,
+    "cem2_balance": 63.49,
     "cem3_balance": null
   },
   {
@@ -1814,7 +1886,7 @@
     "cem2_consumption": 16.32,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 47.169999999999995,
+    "cem2_balance": 47.17,
     "cem3_balance": null
   },
   {
@@ -1849,9 +1921,9 @@
     "cem1_consumption": 2.706,
     "cem2_consumption": 2.152,
     "cem3_consumption": 0.692,
-    "cem1_balance": 96.48899999999999,
-    "cem2_balance": 39.257999999999996,
-    "cem3_balance": 1.7620000000000002
+    "cem1_balance": 96.489,
+    "cem2_balance": 39.258,
+    "cem3_balance": 1.762
   },
   {
     "date": "2025-11-16",
@@ -1885,8 +1957,8 @@
     "cem1_consumption": 5.592,
     "cem2_consumption": 5.497,
     "cem3_consumption": 1.42,
-    "cem1_balance": 90.89699999999999,
-    "cem2_balance": 33.760999999999996,
+    "cem1_balance": 90.897,
+    "cem2_balance": 33.761,
     "cem3_balance": 34.46
   },
   {
@@ -1904,7 +1976,7 @@
     "cem2_consumption": 17.014,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 16.746999999999996,
+    "cem2_balance": 16.747,
     "cem3_balance": null
   },
   {
@@ -1921,8 +1993,8 @@
     "cem1_consumption": 2.242,
     "cem2_consumption": 41.279,
     "cem3_consumption": 0,
-    "cem1_balance": 88.65499999999999,
-    "cem2_balance": -24.532000000000007,
+    "cem1_balance": 88.655,
+    "cem2_balance": -24.532,
     "cem3_balance": null
   },
   {
@@ -1939,7 +2011,7 @@
     "cem1_consumption": 36.909,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 51.74599999999999,
+    "cem1_balance": 51.746,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -1975,9 +2047,9 @@
     "cem1_consumption": 1.921,
     "cem2_consumption": 2.961,
     "cem3_consumption": 0.471,
-    "cem1_balance": 49.82499999999999,
-    "cem2_balance": 35.739000000000004,
-    "cem3_balance": 33.989000000000004
+    "cem1_balance": 49.825,
+    "cem2_balance": 35.739,
+    "cem3_balance": 33.989
   },
   {
     "date": "2025-11-22",
@@ -2119,7 +2191,7 @@
     "cem1_consumption": 7.421,
     "cem2_consumption": 5.6,
     "cem3_consumption": 1.828,
-    "cem1_balance": 42.40399999999999,
+    "cem1_balance": 42.404,
     "cem2_balance": 46.842,
     "cem3_balance": 32.161
   },
@@ -2173,9 +2245,9 @@
     "cem1_consumption": 2.048,
     "cem2_consumption": 0,
     "cem3_consumption": 0.508,
-    "cem1_balance": 81.29599999999999,
+    "cem1_balance": 81.296,
     "cem2_balance": null,
-    "cem3_balance": 31.653000000000002
+    "cem3_balance": 31.653
   },
   {
     "date": "2025-11-30",
@@ -2191,9 +2263,9 @@
     "cem1_consumption": 6.037,
     "cem2_consumption": 2.4,
     "cem3_consumption": 1.505,
-    "cem1_balance": 75.25899999999999,
+    "cem1_balance": 75.259,
     "cem2_balance": 37.246,
-    "cem3_balance": 30.148000000000003
+    "cem3_balance": 30.148
   },
   {
     "date": "2025-11-30",
@@ -2228,7 +2300,7 @@
     "cem2_consumption": 13.805,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 63.520999999999994,
+    "cem2_balance": 63.521,
     "cem3_balance": null
   },
   {
@@ -2246,7 +2318,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 103.64099999999999,
+    "cem2_balance": 103.641,
     "cem3_balance": null
   },
   {
@@ -2354,7 +2426,7 @@
     "cem2_consumption": 11.001,
     "cem3_consumption": 0.896,
     "cem1_balance": 63.591,
-    "cem2_balance": 7.163000000000002,
+    "cem2_balance": 7.163,
     "cem3_balance": 28.279
   },
   {
@@ -2372,7 +2444,7 @@
     "cem2_consumption": 7.193,
     "cem3_consumption": 1.314,
     "cem1_balance": 58.435,
-    "cem2_balance": -0.029999999999997584,
+    "cem2_balance": -0.03,
     "cem3_balance": 26.965
   },
   {
@@ -2462,7 +2534,7 @@
     "cem2_consumption": 8.169,
     "cem3_consumption": 0.38,
     "cem1_balance": 56.933,
-    "cem2_balance": 62.516000000000005,
+    "cem2_balance": 62.516,
     "cem3_balance": 26.585
   },
   {
@@ -2533,7 +2605,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 94.61500000000001,
+    "cem1_balance": 94.615,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -2552,7 +2624,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 86.19800000000001,
+    "cem2_balance": 86.198,
     "cem3_balance": null
   },
   {
@@ -2569,8 +2641,8 @@
     "cem1_consumption": 1.92,
     "cem2_consumption": 4.806,
     "cem3_consumption": 0.476,
-    "cem1_balance": 92.69500000000001,
-    "cem2_balance": 81.39200000000001,
+    "cem1_balance": 92.695,
+    "cem2_balance": 81.392,
     "cem3_balance": 26.109
   },
   {
@@ -2587,8 +2659,8 @@
     "cem1_consumption": 41.28,
     "cem2_consumption": 3.304,
     "cem3_consumption": 0,
-    "cem1_balance": 51.415000000000006,
-    "cem2_balance": 78.08800000000001,
+    "cem1_balance": 51.415,
+    "cem2_balance": 78.088,
     "cem3_balance": null
   },
   {
@@ -2606,7 +2678,7 @@
     "cem2_consumption": 15.851,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 62.23700000000001,
+    "cem2_balance": 62.237,
     "cem3_balance": null
   },
   {
@@ -2624,7 +2696,7 @@
     "cem2_consumption": 10.652,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 51.58500000000001,
+    "cem2_balance": 51.585,
     "cem3_balance": null
   },
   {
@@ -2641,8 +2713,8 @@
     "cem1_consumption": 9.932,
     "cem2_consumption": 3.597,
     "cem3_consumption": 2.495,
-    "cem1_balance": 41.483000000000004,
-    "cem2_balance": 47.98800000000001,
+    "cem1_balance": 41.483,
+    "cem2_balance": 47.988,
     "cem3_balance": 23.614
   },
   {
@@ -2696,7 +2768,7 @@
     "cem2_consumption": 33.053,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 2.278000000000006,
+    "cem2_balance": 2.278,
     "cem3_balance": null
   },
   {
@@ -2713,9 +2785,9 @@
     "cem1_consumption": 2.211,
     "cem2_consumption": 3.376,
     "cem3_consumption": 0.958,
-    "cem1_balance": 68.95700000000001,
-    "cem2_balance": -1.097999999999994,
-    "cem3_balance": 19.741000000000003
+    "cem1_balance": 68.957,
+    "cem2_balance": -1.098,
+    "cem3_balance": 19.741
   },
   {
     "date": "2025-12-25",
@@ -2731,9 +2803,9 @@
     "cem1_consumption": 3.773,
     "cem2_consumption": 0.955,
     "cem3_consumption": 0,
-    "cem1_balance": 65.18400000000001,
+    "cem1_balance": 65.184,
     "cem2_balance": null,
-    "cem3_balance": 18.786000000000005
+    "cem3_balance": 18.786
   },
   {
     "date": "2025-12-26",
@@ -2750,7 +2822,7 @@
     "cem2_consumption": 7.197,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": -8.294999999999995,
+    "cem2_balance": -8.295,
     "cem3_balance": null
   },
   {
@@ -2767,7 +2839,7 @@
     "cem1_consumption": 4.21,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 60.97400000000001,
+    "cem1_balance": 60.974,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -2804,7 +2876,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 68.75999999999999,
+    "cem2_balance": 68.76,
     "cem3_balance": null
   },
   {
@@ -2821,8 +2893,8 @@
     "cem1_consumption": 0.633,
     "cem2_consumption": 3,
     "cem3_consumption": 0,
-    "cem1_balance": 60.34100000000001,
-    "cem2_balance": 65.75999999999999,
+    "cem1_balance": 60.341,
+    "cem2_balance": 65.76,
     "cem3_balance": null
   },
   {
@@ -2840,7 +2912,7 @@
     "cem2_consumption": 18.776,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 46.983999999999995,
+    "cem2_balance": 46.984,
     "cem3_balance": null
   },
   {
@@ -2857,9 +2929,9 @@
     "cem1_consumption": 1.686,
     "cem2_consumption": 1.499,
     "cem3_consumption": 0.424,
-    "cem1_balance": 58.65500000000001,
-    "cem2_balance": 45.48499999999999,
-    "cem3_balance": 18.362000000000005
+    "cem1_balance": 58.655,
+    "cem2_balance": 45.485,
+    "cem3_balance": 18.362
   },
   {
     "date": "2025-12-30",
@@ -2875,7 +2947,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 99.19500000000001,
+    "cem1_balance": 99.195,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -2893,9 +2965,9 @@
     "cem1_consumption": 1.922,
     "cem2_consumption": 8.275,
     "cem3_consumption": 0.484,
-    "cem1_balance": 97.27300000000001,
-    "cem2_balance": 37.209999999999994,
-    "cem3_balance": 17.878000000000007
+    "cem1_balance": 97.273,
+    "cem2_balance": 37.21,
+    "cem3_balance": 17.878
   },
   {
     "date": "2026-01-01",
@@ -2911,7 +2983,7 @@
     "cem1_consumption": 1.686,
     "cem2_consumption": 0,
     "cem3_consumption": 0.728,
-    "cem1_balance": 95.58699999999999,
+    "cem1_balance": 95.587,
     "cem2_balance": null,
     "cem3_balance": 17.15
   },
@@ -2929,9 +3001,9 @@
     "cem1_consumption": 3.298,
     "cem2_consumption": 18.44,
     "cem3_consumption": 0.963,
-    "cem1_balance": 92.28899999999999,
+    "cem1_balance": 92.289,
     "cem2_balance": 18.77,
-    "cem3_balance": 16.186999999999998
+    "cem3_balance": 16.187
   },
   {
     "date": "2026-01-03",
@@ -2944,12 +3016,12 @@
     "cem2_qty": 0,
     "cem3_qty": 0,
     "consumption_text": "CEM-1.313,      CEM-2: 4.196, CEM-3: 0.331",
-    "cem1_consumption": 313,
+    "cem1_consumption": 0,
     "cem2_consumption": 4.196,
     "cem3_consumption": 0.331,
-    "cem1_balance": 90.97599999999998,
+    "cem1_balance": 90.976,
     "cem2_balance": 14.574,
-    "cem3_balance": 15.855999999999998
+    "cem3_balance": 15.856
   },
   {
     "date": "2026-01-04",
@@ -2983,9 +3055,9 @@
     "cem1_consumption": 1.012,
     "cem2_consumption": 0,
     "cem3_consumption": 0.212,
-    "cem1_balance": 89.96399999999998,
+    "cem1_balance": 89.964,
     "cem2_balance": null,
-    "cem3_balance": 15.643999999999998
+    "cem3_balance": 15.644
   },
   {
     "date": "2026-01-06",
@@ -3001,8 +3073,8 @@
     "cem1_consumption": 0.711,
     "cem2_consumption": 9.243,
     "cem3_consumption": 0,
-    "cem1_balance": 89.25299999999999,
-    "cem2_balance": -0.9670000000000005,
+    "cem1_balance": 89.253,
+    "cem2_balance": -0.967,
     "cem3_balance": null
   },
   {
@@ -3019,7 +3091,7 @@
     "cem1_consumption": 27.124,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 62.12899999999999,
+    "cem1_balance": 62.129,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -3037,7 +3109,7 @@
     "cem1_consumption": 13.804,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 48.32499999999999,
+    "cem1_balance": 48.325,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -3055,7 +3127,7 @@
     "cem1_consumption": 10.793,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 37.53199999999999,
+    "cem1_balance": 37.532,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -3073,7 +3145,7 @@
     "cem1_consumption": 11.995,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 25.536999999999992,
+    "cem1_balance": 25.537,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -3091,7 +3163,7 @@
     "cem1_consumption": 12.41,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 13.126999999999992,
+    "cem1_balance": 13.127,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -3109,7 +3181,7 @@
     "cem1_consumption": 25.033,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": -11.90600000000001,
+    "cem1_balance": -11.906,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -3127,7 +3199,7 @@
     "cem1_consumption": 6.286,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": -18.192000000000007,
+    "cem1_balance": -18.192,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -3145,7 +3217,7 @@
     "cem1_consumption": 3.49,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": -21.68200000000001,
+    "cem1_balance": -21.682,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -3163,7 +3235,7 @@
     "cem1_consumption": 4.79,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": -26.47200000000001,
+    "cem1_balance": -26.472,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -3200,7 +3272,7 @@
     "cem2_consumption": 31.508,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 9.272000000000002,
+    "cem2_balance": 9.272,
     "cem3_balance": null
   },
   {
@@ -3235,9 +3307,9 @@
     "cem1_consumption": 10.425,
     "cem2_consumption": 10.237,
     "cem3_consumption": 2.207,
-    "cem1_balance": 29.794999999999998,
-    "cem2_balance": -0.9649999999999981,
-    "cem3_balance": 13.436999999999998
+    "cem1_balance": 29.795,
+    "cem2_balance": -0.965,
+    "cem3_balance": 13.437
   },
   {
     "date": "2026-01-18",
@@ -3253,7 +3325,7 @@
     "cem1_consumption": 19.386,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 10.408999999999999,
+    "cem1_balance": 10.409,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -3271,7 +3343,7 @@
     "cem1_consumption": 11.188,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": -0.7790000000000017,
+    "cem1_balance": -0.779,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -3307,9 +3379,9 @@
     "cem1_consumption": 7.997,
     "cem2_consumption": 0,
     "cem3_consumption": 1.038,
-    "cem1_balance": 31.683999999999997,
+    "cem1_balance": 31.684,
     "cem2_balance": null,
-    "cem3_balance": 12.398999999999997
+    "cem3_balance": 12.399
   },
   {
     "date": "2026-01-21",
@@ -3325,9 +3397,9 @@
     "cem1_consumption": 31.953,
     "cem2_consumption": 0,
     "cem3_consumption": 4.244,
-    "cem1_balance": -0.2690000000000019,
+    "cem1_balance": -0.269,
     "cem2_balance": null,
-    "cem3_balance": 8.154999999999998
+    "cem3_balance": 8.155
   },
   {
     "date": "2026-01-22",
@@ -3362,7 +3434,7 @@
     "cem2_consumption": 28.318,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 10.882000000000001,
+    "cem2_balance": 10.882,
     "cem3_balance": null
   },
   {
@@ -3398,7 +3470,7 @@
     "cem2_consumption": 9.754,
     "cem3_consumption": 0,
     "cem1_balance": 18.51,
-    "cem2_balance": 1.128000000000002,
+    "cem2_balance": 1.128,
     "cem3_balance": null
   },
   {
@@ -3415,8 +3487,8 @@
     "cem1_consumption": 5.43,
     "cem2_consumption": 1.502,
     "cem3_consumption": 0,
-    "cem1_balance": 13.080000000000002,
-    "cem2_balance": -0.3739999999999981,
+    "cem1_balance": 13.08,
+    "cem2_balance": -0.374,
     "cem3_balance": null
   },
   {
@@ -3524,7 +3596,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 102.41999999999999,
+    "cem2_balance": 102.42,
     "cem3_balance": null
   },
   {
@@ -3542,7 +3614,7 @@
     "cem2_consumption": 9.553,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 92.86699999999999,
+    "cem2_balance": 92.867,
     "cem3_balance": null
   },
   {
@@ -3596,7 +3668,7 @@
     "cem2_consumption": 3.6,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 98.98400000000001,
+    "cem2_balance": 98.984,
     "cem3_balance": null
   },
   {
@@ -3615,7 +3687,7 @@
     "cem3_consumption": 0.647,
     "cem1_balance": 66.784,
     "cem2_balance": 77.774,
-    "cem3_balance": 7.507999999999997
+    "cem3_balance": 7.508
   },
   {
     "date": "2026-01-31",
@@ -3685,8 +3757,8 @@
     "cem1_consumption": 2.644,
     "cem2_consumption": 40.216,
     "cem3_consumption": 0.671,
-    "cem1_balance": 62.193000000000005,
-    "cem2_balance": 31.437000000000005,
+    "cem1_balance": 62.193,
+    "cem2_balance": 31.437,
     "cem3_balance": 6.62
   },
   {
@@ -3721,9 +3793,9 @@
     "cem1_consumption": 2.08,
     "cem2_consumption": 9.605,
     "cem3_consumption": 0.318,
-    "cem1_balance": 60.11300000000001,
+    "cem1_balance": 60.113,
     "cem2_balance": 62.092,
-    "cem3_balance": 6.3020000000000005
+    "cem3_balance": 6.302
   },
   {
     "date": "2026-02-06",
@@ -3775,8 +3847,8 @@
     "cem1_consumption": 3.966,
     "cem2_consumption": 13.441,
     "cem3_consumption": 0.979,
-    "cem1_balance": 56.147000000000006,
-    "cem2_balance": 35.352999999999994,
+    "cem1_balance": 56.147,
+    "cem2_balance": 35.353,
     "cem3_balance": 5.323
   },
   {
@@ -3812,7 +3884,7 @@
     "cem2_consumption": 28.726,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 45.266999999999996,
+    "cem2_balance": 45.267,
     "cem3_balance": null
   },
   {
@@ -3829,7 +3901,7 @@
     "cem1_consumption": 23.303,
     "cem2_consumption": 8.038,
     "cem3_consumption": 0,
-    "cem1_balance": 32.84400000000001,
+    "cem1_balance": 32.844,
     "cem2_balance": 37.229,
     "cem3_balance": null
   },
@@ -3866,7 +3938,7 @@
     "cem2_consumption": 29.323,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 0.2729999999999997,
+    "cem2_balance": 0.273,
     "cem3_balance": null
   },
   {
@@ -3884,7 +3956,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 35.57299999999999,
+    "cem2_balance": 35.573,
     "cem3_balance": null
   },
   {
@@ -3902,7 +3974,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 70.87299999999999,
+    "cem2_balance": 70.873,
     "cem3_balance": null
   },
   {
@@ -3920,7 +3992,7 @@
     "cem2_consumption": 38.51,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 32.36299999999999,
+    "cem2_balance": 32.363,
     "cem3_balance": null
   },
   {
@@ -3938,7 +4010,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 66.90299999999999,
+    "cem2_balance": 66.903,
     "cem3_balance": null
   },
   {
@@ -3956,7 +4028,7 @@
     "cem2_consumption": 41.973,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 24.929999999999993,
+    "cem2_balance": 24.93,
     "cem3_balance": null
   },
   {
@@ -3973,9 +4045,9 @@
     "cem1_consumption": 2.63,
     "cem2_consumption": 0,
     "cem3_consumption": 0.645,
-    "cem1_balance": 30.21400000000001,
-    "cem2_balance": 24.822999999999993,
-    "cem3_balance": 4.678000000000001
+    "cem1_balance": 30.214,
+    "cem2_balance": 24.823,
+    "cem3_balance": 4.678
   },
   {
     "date": "2026-02-16",
@@ -3991,8 +4063,8 @@
     "cem1_consumption": 0.272,
     "cem2_consumption": 0.067,
     "cem3_consumption": 0,
-    "cem1_balance": 29.94200000000001,
-    "cem2_balance": 24.755999999999993,
+    "cem1_balance": 29.942,
+    "cem2_balance": 24.756,
     "cem3_balance": null
   },
   {
@@ -4010,7 +4082,7 @@
     "cem2_consumption": 3.037,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 21.718999999999994,
+    "cem2_balance": 21.719,
     "cem3_balance": null
   },
   {
@@ -4027,9 +4099,9 @@
     "cem1_consumption": 2.201,
     "cem2_consumption": 0,
     "cem3_consumption": 0.517,
-    "cem1_balance": 27.74100000000001,
+    "cem1_balance": 27.741,
     "cem2_balance": null,
-    "cem3_balance": 4.1610000000000005
+    "cem3_balance": 4.161
   },
   {
     "date": "2026-02-19",
@@ -4063,7 +4135,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 67.40100000000001,
+    "cem1_balance": 67.401,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -4082,7 +4154,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 87.79899999999999,
+    "cem2_balance": 87.799,
     "cem3_balance": null
   },
   {
@@ -4099,8 +4171,8 @@
     "cem1_consumption": 25.748,
     "cem2_consumption": 2.4,
     "cem3_consumption": 0,
-    "cem1_balance": 41.653000000000006,
-    "cem2_balance": 85.39899999999999,
+    "cem1_balance": 41.653,
+    "cem2_balance": 85.399,
     "cem3_balance": null
   },
   {
@@ -4118,7 +4190,7 @@
     "cem2_consumption": 9.076,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 76.32299999999998,
+    "cem2_balance": 76.323,
     "cem3_balance": null
   },
   {
@@ -4136,7 +4208,7 @@
     "cem2_consumption": 32.79,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 43.53299999999998,
+    "cem2_balance": 43.533,
     "cem3_balance": null
   },
   {
@@ -4153,9 +4225,9 @@
     "cem1_consumption": 10.349,
     "cem2_consumption": 13.851,
     "cem3_consumption": 2.597,
-    "cem1_balance": 31.304000000000006,
-    "cem2_balance": 29.68199999999998,
-    "cem3_balance": 1.5640000000000005
+    "cem1_balance": 31.304,
+    "cem2_balance": 29.682,
+    "cem3_balance": 1.564
   },
   {
     "date": "2026-02-26",
@@ -4190,7 +4262,7 @@
     "cem2_consumption": 0.05,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 29.63199999999998,
+    "cem2_balance": 29.632,
     "cem3_balance": null
   },
   {
@@ -4207,9 +4279,9 @@
     "cem1_consumption": 3.573,
     "cem2_consumption": 1.199,
     "cem3_consumption": 0.905,
-    "cem1_balance": 67.95100000000001,
-    "cem2_balance": 28.43299999999998,
-    "cem3_balance": 0.6590000000000005
+    "cem1_balance": 67.951,
+    "cem2_balance": 28.433,
+    "cem3_balance": 0.659
   },
   {
     "date": "2026-02-28",
@@ -4225,8 +4297,8 @@
     "cem1_consumption": 27.477,
     "cem2_consumption": 16.466,
     "cem3_consumption": 0,
-    "cem1_balance": 40.474000000000004,
-    "cem2_balance": 11.966999999999977,
+    "cem1_balance": 40.474,
+    "cem2_balance": 11.967,
     "cem3_balance": null
   },
   {
@@ -4243,9 +4315,9 @@
     "cem1_consumption": 1.2,
     "cem2_consumption": 13.965,
     "cem3_consumption": 0.298,
-    "cem1_balance": 39.273999999999994,
-    "cem2_balance": -1.9979999999999993,
-    "cem3_balance": 0.36100000000000004
+    "cem1_balance": 39.274,
+    "cem2_balance": -1.998,
+    "cem3_balance": 0.361
   },
   {
     "date": "2026-03-02",
@@ -4262,7 +4334,7 @@
     "cem2_consumption": 1.346,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": -3.3439999999999994,
+    "cem2_balance": -3.344,
     "cem3_balance": null
   },
   {
@@ -4280,7 +4352,7 @@
     "cem2_consumption": 1.678,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": -5.021999999999999,
+    "cem2_balance": -5.022,
     "cem3_balance": null
   },
   {
@@ -4297,8 +4369,8 @@
     "cem1_consumption": 24.151,
     "cem2_consumption": 2.448,
     "cem3_consumption": 0,
-    "cem1_balance": 15.122999999999994,
-    "cem2_balance": -7.469999999999999,
+    "cem1_balance": 15.123,
+    "cem2_balance": -7.47,
     "cem3_balance": null
   },
   {
@@ -4315,7 +4387,7 @@
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 52.474999999999994,
+    "cem1_balance": 52.475,
     "cem2_balance": 0,
     "cem3_balance": 0
   },
@@ -4352,7 +4424,7 @@
     "cem2_consumption": 18.112,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 16.528000000000002,
+    "cem2_balance": 16.528,
     "cem3_balance": null
   },
   {
@@ -4370,7 +4442,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 57.028000000000006,
+    "cem2_balance": 57.028,
     "cem3_balance": null
   },
   {
@@ -4388,7 +4460,7 @@
     "cem2_consumption": 10.107,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 46.92100000000001,
+    "cem2_balance": 46.921,
     "cem3_balance": null
   },
   {
@@ -4406,7 +4478,7 @@
     "cem2_consumption": 19.037,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 27.884000000000007,
+    "cem2_balance": 27.884,
     "cem3_balance": null
   },
   {
@@ -4423,8 +4495,8 @@
     "cem1_consumption": 6.153,
     "cem2_consumption": 28.089,
     "cem3_consumption": 0,
-    "cem1_balance": 9.998999999999995,
-    "cem2_balance": -0.2049999999999912,
+    "cem1_balance": 9.999,
+    "cem2_balance": -0.205,
     "cem3_balance": null
   },
   {
@@ -4441,7 +4513,7 @@
     "cem1_consumption": 15.161,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": -5.162000000000004,
+    "cem1_balance": -5.162,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -4459,8 +4531,8 @@
     "cem1_consumption": 0.607,
     "cem2_consumption": 1.596,
     "cem3_consumption": 0,
-    "cem1_balance": -5.769000000000005,
-    "cem2_balance": -1.8009999999999913,
+    "cem1_balance": -5.769,
+    "cem2_balance": -1.801,
     "cem3_balance": null
   },
   {
@@ -4496,7 +4568,7 @@
     "cem2_consumption": 20.507,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 14.752999999999997,
+    "cem2_balance": 14.753,
     "cem3_balance": null
   },
   {
@@ -4550,7 +4622,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 76.07300000000001,
+    "cem2_balance": 76.073,
     "cem3_balance": null
   },
   {
@@ -4586,7 +4658,7 @@
     "cem2_consumption": 24.931,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 81.08200000000001,
+    "cem2_balance": 81.082,
     "cem3_balance": null
   },
   {
@@ -4604,7 +4676,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 120.58200000000001,
+    "cem2_balance": 120.582,
     "cem3_balance": null
   },
   {
@@ -4622,7 +4694,7 @@
     "cem2_consumption": 14.731,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 105.85100000000001,
+    "cem2_balance": 105.851,
     "cem3_balance": null
   },
   {
@@ -4640,7 +4712,7 @@
     "cem2_consumption": 5.971,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 99.88000000000001,
+    "cem2_balance": 99.88,
     "cem3_balance": null
   },
   {
@@ -4658,7 +4730,7 @@
     "cem2_consumption": 22.63,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 77.25000000000001,
+    "cem2_balance": 77.25,
     "cem3_balance": null
   },
   {
@@ -4676,7 +4748,7 @@
     "cem2_consumption": 17.557,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 59.69300000000001,
+    "cem2_balance": 59.693,
     "cem3_balance": null
   },
   {
@@ -4694,7 +4766,7 @@
     "cem2_consumption": 35.187,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 24.506000000000014,
+    "cem2_balance": 24.506,
     "cem3_balance": null
   },
   {
@@ -4730,7 +4802,7 @@
     "cem2_consumption": 25.722,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": -1.2159999999999869,
+    "cem2_balance": -1.216,
     "cem3_balance": null
   },
   {
@@ -4748,7 +4820,7 @@
     "cem2_consumption": 2.095,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": -3.310999999999987,
+    "cem2_balance": -3.311,
     "cem3_balance": null
   },
   {
@@ -4766,7 +4838,7 @@
     "cem2_consumption": 2.694,
     "cem3_consumption": 0,
     "cem1_balance": 80.882,
-    "cem2_balance": -6.004999999999987,
+    "cem2_balance": -6.005,
     "cem3_balance": null
   },
   {
@@ -4856,7 +4928,7 @@
     "cem2_consumption": 35.652,
     "cem3_consumption": 0,
     "cem1_balance": 116.578,
-    "cem2_balance": 40.31999999999999,
+    "cem2_balance": 40.32,
     "cem3_balance": null
   },
   {
@@ -4874,7 +4946,7 @@
     "cem2_consumption": 2.399,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 37.92099999999999,
+    "cem2_balance": 37.921,
     "cem3_balance": null
   },
   {
@@ -4892,7 +4964,7 @@
     "cem2_consumption": 18.304,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 19.616999999999994,
+    "cem2_balance": 19.617,
     "cem3_balance": null
   },
   {
@@ -4910,7 +4982,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 59.67699999999999,
+    "cem2_balance": 59.677,
     "cem3_balance": null
   },
   {
@@ -4946,7 +5018,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 94.28999999999999,
+    "cem2_balance": 94.29,
     "cem3_balance": null
   },
   {
@@ -4964,7 +5036,7 @@
     "cem2_consumption": 11.753,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 82.53699999999999,
+    "cem2_balance": 82.537,
     "cem3_balance": null
   },
   {
@@ -4982,7 +5054,7 @@
     "cem2_consumption": 2.399,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 80.13799999999999,
+    "cem2_balance": 80.138,
     "cem3_balance": null
   },
   {
@@ -5000,7 +5072,7 @@
     "cem2_consumption": 37.643,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 42.49499999999999,
+    "cem2_balance": 42.495,
     "cem3_balance": null
   },
   {
@@ -5018,7 +5090,7 @@
     "cem2_consumption": 33.254,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 9.240999999999993,
+    "cem2_balance": 9.241,
     "cem3_balance": null
   },
   {
@@ -5035,8 +5107,8 @@
     "cem1_consumption": 6.191,
     "cem2_consumption": 2.396,
     "cem3_consumption": 1.538,
-    "cem1_balance": 110.37899999999999,
-    "cem2_balance": 6.844999999999993,
+    "cem1_balance": 110.379,
+    "cem2_balance": 6.845,
     "cem3_balance": 34.112
   },
   {
@@ -5054,7 +5126,7 @@
     "cem2_consumption": 7.675,
     "cem3_consumption": 0,
     "cem1_balance": 71.369,
-    "cem2_balance": -0.8300000000000072,
+    "cem2_balance": -0.83,
     "cem3_balance": null
   },
   {
@@ -5089,7 +5161,7 @@
     "cem1_consumption": 8.521,
     "cem2_consumption": 0,
     "cem3_consumption": 0.774,
-    "cem1_balance": 32.507000000000005,
+    "cem1_balance": 32.507,
     "cem2_balance": null,
     "cem3_balance": 32.231
   },
@@ -5143,8 +5215,8 @@
     "cem1_consumption": 8.403,
     "cem2_consumption": 10.111,
     "cem3_consumption": 0,
-    "cem1_balance": 24.104000000000006,
-    "cem2_balance": 70.12899999999999,
+    "cem1_balance": 24.104,
+    "cem2_balance": 70.129,
     "cem3_balance": null
   },
   {
@@ -5162,7 +5234,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 110.72899999999998,
+    "cem2_balance": 110.729,
     "cem3_balance": null
   },
   {
@@ -5179,7 +5251,7 @@
     "cem1_consumption": 2.912,
     "cem2_consumption": 0,
     "cem3_consumption": 1.257,
-    "cem1_balance": 21.192000000000007,
+    "cem1_balance": 21.192,
     "cem2_balance": null,
     "cem3_balance": 30.974
   },
@@ -5198,7 +5270,7 @@
     "cem2_consumption": 44.017,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 66.71199999999999,
+    "cem2_balance": 66.712,
     "cem3_balance": null
   },
   {
@@ -5216,7 +5288,7 @@
     "cem2_consumption": 21.839,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 44.87299999999999,
+    "cem2_balance": 44.873,
     "cem3_balance": null
   },
   {
@@ -5234,7 +5306,7 @@
     "cem2_consumption": 16.79,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 28.08299999999999,
+    "cem2_balance": 28.083,
     "cem3_balance": null
   },
   {
@@ -5251,7 +5323,7 @@
     "cem1_consumption": 0.524,
     "cem2_consumption": 0,
     "cem3_consumption": 0.235,
-    "cem1_balance": 20.668000000000006,
+    "cem1_balance": 20.668,
     "cem2_balance": null,
     "cem3_balance": 30.739
   },
@@ -5270,7 +5342,7 @@
     "cem2_consumption": 3.894,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 24.188999999999993,
+    "cem2_balance": 24.189,
     "cem3_balance": null
   },
   {
@@ -5288,7 +5360,7 @@
     "cem2_consumption": 1.495,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 22.693999999999992,
+    "cem2_balance": 22.694,
     "cem3_balance": null
   },
   {
@@ -5297,16 +5369,16 @@
     "entry_type": "INWARD",
     "vehicle_no": "KA01AJ1804",
     "company": "ZUARI",
-    "inward_total": 39.76,
+    "inward_total": 40.25,
     "cem1_qty": 0,
-    "cem2_qty": 39.76,
+    "cem2_qty": 40.25,
     "cem3_qty": 0,
     "consumption_text": null,
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 62.45399999999999,
+    "cem2_balance": 62.944,
     "cem3_balance": null
   },
   {
@@ -5315,16 +5387,16 @@
     "entry_type": "INWARD",
     "vehicle_no": "KA10A4899",
     "company": "ZUARI",
-    "inward_total": 36.61,
+    "inward_total": 37.15,
     "cem1_qty": 0,
-    "cem2_qty": 36.61,
+    "cem2_qty": 37.15,
     "cem3_qty": 0,
     "consumption_text": null,
     "cem1_consumption": 0,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 99.064,
+    "cem2_balance": 100.094,
     "cem3_balance": null
   },
   {
@@ -5341,8 +5413,8 @@
     "cem1_consumption": 1.679,
     "cem2_consumption": 1.545,
     "cem3_consumption": 0.731,
-    "cem1_balance": 18.989000000000008,
-    "cem2_balance": 97.51899999999999,
+    "cem1_balance": 18.989,
+    "cem2_balance": 98.549,
     "cem3_balance": 30.008
   },
   {
@@ -5359,8 +5431,8 @@
     "cem1_consumption": 2.277,
     "cem2_consumption": 0.197,
     "cem3_consumption": 0.657,
-    "cem1_balance": 16.712000000000007,
-    "cem2_balance": 97.32199999999999,
+    "cem1_balance": 16.712,
+    "cem2_balance": 98.352,
     "cem3_balance": 29.351
   },
   {
@@ -5378,7 +5450,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 137.082,
+    "cem2_balance": 138.112,
     "cem3_balance": null
   },
   {
@@ -5396,7 +5468,7 @@
     "cem2_consumption": 54.717,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 82.365,
+    "cem2_balance": 83.395,
     "cem3_balance": null
   },
   {
@@ -5413,9 +5485,9 @@
     "cem1_consumption": 18.742,
     "cem2_consumption": 2.099,
     "cem3_consumption": 4.731,
-    "cem1_balance": -2.029999999999994,
-    "cem2_balance": 80.26599999999999,
-    "cem3_balance": 24.619999999999997
+    "cem1_balance": -2.03,
+    "cem2_balance": 81.296,
+    "cem3_balance": 24.62
   },
   {
     "date": "2026-04-26",
@@ -5469,7 +5541,7 @@
     "cem3_consumption": 2.247,
     "cem1_balance": 58.587,
     "cem2_balance": null,
-    "cem3_balance": 22.372999999999998
+    "cem3_balance": 22.373
   },
   {
     "date": "2026-04-29",
@@ -5504,7 +5576,7 @@
     "cem2_consumption": 16.05,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 64.216,
+    "cem2_balance": 65.246,
     "cem3_balance": null
   },
   {
@@ -5521,7 +5593,7 @@
     "cem1_consumption": 5.603,
     "cem2_consumption": 0,
     "cem3_consumption": 1.414,
-    "cem1_balance": 88.34400000000001,
+    "cem1_balance": 88.344,
     "cem2_balance": null,
     "cem3_balance": 20.959
   },
@@ -5558,7 +5630,7 @@
     "cem2_consumption": 2.399,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 61.81699999999999,
+    "cem2_balance": 62.847,
     "cem3_balance": null
   },
   {
@@ -5594,7 +5666,7 @@
     "cem2_consumption": 11.689,
     "cem3_consumption": 0.99,
     "cem1_balance": 41.94,
-    "cem2_balance": 50.12799999999999,
+    "cem2_balance": 51.158,
     "cem3_balance": 17.061
   },
   {
@@ -5612,7 +5684,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 90.28799999999998,
+    "cem2_balance": 91.318,
     "cem3_balance": null
   },
   {
@@ -5648,7 +5720,7 @@
     "cem2_consumption": 14.401,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 75.88699999999999,
+    "cem2_balance": 76.917,
     "cem3_balance": null
   },
   {
@@ -5666,7 +5738,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 116.60699999999999,
+    "cem2_balance": 117.637,
     "cem3_balance": null
   },
   {
@@ -5683,7 +5755,7 @@
     "cem1_consumption": 5.519,
     "cem2_consumption": 0,
     "cem3_consumption": 0,
-    "cem1_balance": 71.08099999999999,
+    "cem1_balance": 71.081,
     "cem2_balance": null,
     "cem3_balance": null
   },
@@ -5738,7 +5810,7 @@
     "cem2_consumption": 8.469,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 108.13799999999999,
+    "cem2_balance": 109.168,
     "cem3_balance": null
   },
   {
@@ -5756,7 +5828,7 @@
     "cem2_consumption": 3.968,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 104.16999999999999,
+    "cem2_balance": 105.2,
     "cem3_balance": null
   },
   {
@@ -5774,7 +5846,7 @@
     "cem2_consumption": 36.422,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 67.74799999999999,
+    "cem2_balance": 68.778,
     "cem3_balance": null
   },
   {
@@ -5792,7 +5864,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 107.72799999999998,
+    "cem2_balance": 108.758,
     "cem3_balance": null
   },
   {
@@ -5810,7 +5882,7 @@
     "cem2_consumption": 2.097,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 105.63099999999999,
+    "cem2_balance": 106.661,
     "cem3_balance": null
   },
   {
@@ -5828,7 +5900,7 @@
     "cem2_consumption": 18.789,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 86.84199999999998,
+    "cem2_balance": 87.872,
     "cem3_balance": null
   },
   {
@@ -5846,7 +5918,7 @@
     "cem2_consumption": 26.964,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 59.877999999999986,
+    "cem2_balance": 60.908,
     "cem3_balance": null
   },
   {
@@ -5864,7 +5936,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 100.01799999999999,
+    "cem2_balance": 101.048,
     "cem3_balance": null
   },
   {
@@ -5882,7 +5954,7 @@
     "cem2_consumption": 16.48,
     "cem3_consumption": 1.569,
     "cem1_balance": 92.425,
-    "cem2_balance": 83.53799999999998,
+    "cem2_balance": 84.568,
     "cem3_balance": 13.663
   },
   {
@@ -5900,7 +5972,7 @@
     "cem2_consumption": 21.419,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 62.118999999999986,
+    "cem2_balance": 63.149,
     "cem3_balance": null
   },
   {
@@ -5918,7 +5990,7 @@
     "cem2_consumption": 0,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 102.47899999999998,
+    "cem2_balance": 103.509,
     "cem3_balance": null
   },
   {
@@ -5936,7 +6008,7 @@
     "cem2_consumption": 2.097,
     "cem3_consumption": 5.201,
     "cem1_balance": 68.8,
-    "cem2_balance": 100.38199999999999,
+    "cem2_balance": 101.412,
     "cem3_balance": 8.462
   },
   {
@@ -5954,7 +6026,7 @@
     "cem2_consumption": 6.291,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 94.091,
+    "cem2_balance": 95.121,
     "cem3_balance": null
   },
   {
@@ -5972,7 +6044,7 @@
     "cem2_consumption": 40.593,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 53.49799999999999,
+    "cem2_balance": 54.528,
     "cem3_balance": null
   },
   {
@@ -5990,7 +6062,7 @@
     "cem2_consumption": 1.871,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 51.626999999999995,
+    "cem2_balance": 52.657,
     "cem3_balance": null
   },
   {
@@ -6025,8 +6097,8 @@
     "cem1_consumption": 0.153,
     "cem2_consumption": 8.388,
     "cem3_consumption": 0,
-    "cem1_balance": 105.61699999999999,
-    "cem2_balance": 45.11,
+    "cem1_balance": 105.617,
+    "cem2_balance": 46.14,
     "cem3_balance": null
   },
   {
@@ -6044,7 +6116,7 @@
     "cem2_consumption": 8.508,
     "cem3_consumption": 0,
     "cem1_balance": null,
-    "cem2_balance": 36.602000000000004,
+    "cem2_balance": 37.632,
     "cem3_balance": null
   },
   {
@@ -6061,8 +6133,8 @@
     "cem1_consumption": 0.138,
     "cem2_consumption": 5.464,
     "cem3_consumption": 0,
-    "cem1_balance": 105.47899999999998,
-    "cem2_balance": 31.138000000000005,
+    "cem1_balance": 105.479,
+    "cem2_balance": 32.168,
     "cem3_balance": null
   },
   {
@@ -6079,8 +6151,8 @@
     "cem1_consumption": 2.413,
     "cem2_consumption": 8.385,
     "cem3_consumption": 1.037,
-    "cem1_balance": 103.06599999999999,
-    "cem2_balance": 22.753000000000007,
+    "cem1_balance": 103.066,
+    "cem2_balance": 23.783,
     "cem3_balance": 7.425
   },
   {
@@ -6097,8 +6169,368 @@
     "cem1_consumption": 26.634,
     "cem2_consumption": 0,
     "cem3_consumption": 6.679,
-    "cem1_balance": 76.43199999999999,
+    "cem1_balance": 76.432,
     "cem2_balance": null,
-    "cem3_balance": 0.7459999999999996
+    "cem3_balance": 0.746
+  },
+  {
+    "date": "2026-06-07",
+    "month_label": "JUN-26",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-2: 2.096",
+    "cem1_consumption": 0,
+    "cem2_consumption": 2.096,
+    "cem3_consumption": 0,
+    "cem1_balance": null,
+    "cem2_balance": 21.687,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-08",
+    "month_label": "JUN-26",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-2: 4.191",
+    "cem1_consumption": 0,
+    "cem2_consumption": 4.191,
+    "cem3_consumption": 0,
+    "cem1_balance": null,
+    "cem2_balance": 17.496,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-09",
+    "month_label": "JUN-26",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-1: 3.362, CEM-2: 3.842,  CEM-3: 0.839",
+    "cem1_consumption": 3.362,
+    "cem2_consumption": 3.842,
+    "cem3_consumption": 0.839,
+    "cem1_balance": 73.07,
+    "cem2_balance": 13.654,
+    "cem3_balance": -0.093
+  },
+  {
+    "date": "2026-06-10",
+    "month_label": "JUN-26",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-2: 8.709",
+    "cem1_consumption": 0,
+    "cem2_consumption": 8.709,
+    "cem3_consumption": 0,
+    "cem1_balance": null,
+    "cem2_balance": 4.945,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-11",
+    "month_label": "JUN-26",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-2: 38.949",
+    "cem1_consumption": 0,
+    "cem2_consumption": 38.949,
+    "cem3_consumption": 0,
+    "cem1_balance": null,
+    "cem2_balance": -34.004,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-12",
+    "month_label": "JUN-26",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-1: 12.894",
+    "cem1_consumption": 12.894,
+    "cem2_consumption": 0,
+    "cem3_consumption": 0,
+    "cem1_balance": 60.176,
+    "cem2_balance": null,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-13",
+    "month_label": "JUN-26",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-1: 13.723",
+    "cem1_consumption": 13.723,
+    "cem2_consumption": 0,
+    "cem3_consumption": 0,
+    "cem1_balance": 46.453,
+    "cem2_balance": null,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-14",
+    "month_label": "JUN-26",
+    "entry_type": "INWARD",
+    "vehicle_no": "KA01AJ7178",
+    "company": "ZUARI",
+    "inward_total": 40.02,
+    "cem1_qty": 0,
+    "cem2_qty": 40.02,
+    "cem3_qty": 0,
+    "consumption_text": null,
+    "cem1_consumption": 0,
+    "cem2_consumption": 0,
+    "cem3_consumption": 0,
+    "cem1_balance": null,
+    "cem2_balance": 6.016,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-14",
+    "month_label": "JUN-26",
+    "entry_type": "INWARD",
+    "vehicle_no": "KA01AJ1803",
+    "company": "ZUARI",
+    "inward_total": 39.61,
+    "cem1_qty": 0,
+    "cem2_qty": 39.61,
+    "cem3_qty": 0,
+    "consumption_text": null,
+    "cem1_consumption": 0,
+    "cem2_consumption": 0,
+    "cem3_consumption": 0,
+    "cem1_balance": null,
+    "cem2_balance": 45.626,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-15",
+    "month_label": "JUN-26",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-2: 8.751",
+    "cem1_consumption": 0,
+    "cem2_consumption": 8.751,
+    "cem3_consumption": 0,
+    "cem1_balance": null,
+    "cem2_balance": 36.875,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-16",
+    "month_label": "JUN-26",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-2: 14.460",
+    "cem1_consumption": 0,
+    "cem2_consumption": 14.46,
+    "cem3_consumption": 0,
+    "cem1_balance": null,
+    "cem2_balance": 22.415,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-17",
+    "month_label": "JUN-26",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-2: 43.465",
+    "cem1_consumption": 0,
+    "cem2_consumption": 43.465,
+    "cem3_consumption": 0,
+    "cem1_balance": null,
+    "cem2_balance": -21.05,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-18",
+    "month_label": "JUN-26",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-1: 17.276, CEM-2: 14.395",
+    "cem1_consumption": 17.276,
+    "cem2_consumption": 14.395,
+    "cem3_consumption": 0,
+    "cem1_balance": 29.177,
+    "cem2_balance": -35.445,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-18",
+    "month_label": "JUN-26",
+    "entry_type": "INWARD",
+    "vehicle_no": "KA31AJ1803",
+    "company": "ZUARI",
+    "inward_total": 40.11,
+    "cem1_qty": 40.11,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": null,
+    "cem1_consumption": 0,
+    "cem2_consumption": 0,
+    "cem3_consumption": 0,
+    "cem1_balance": 69.287,
+    "cem2_balance": null,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-19",
+    "month_label": "JUN-26",
+    "entry_type": "INWARD",
+    "vehicle_no": "KA10A4899",
+    "company": "ZUARI",
+    "inward_total": 37.59,
+    "cem1_qty": 0,
+    "cem2_qty": 37.59,
+    "cem3_qty": 0,
+    "consumption_text": null,
+    "cem1_consumption": 0,
+    "cem2_consumption": 0,
+    "cem3_consumption": 0,
+    "cem1_balance": null,
+    "cem2_balance": 2.145,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-19",
+    "month_label": "JUN-26",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-1: 4.636",
+    "cem1_consumption": 4.636,
+    "cem2_consumption": 0,
+    "cem3_consumption": 0,
+    "cem1_balance": 64.651,
+    "cem2_balance": null,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-20",
+    "month_label": "JUN-26",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-1: 3.352",
+    "cem1_consumption": 3.352,
+    "cem2_consumption": 0,
+    "cem3_consumption": 0,
+    "cem1_balance": 61.299,
+    "cem2_balance": null,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-21",
+    "month_label": "JUN-26",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-1: 3.293",
+    "cem1_consumption": 3.293,
+    "cem2_consumption": 0,
+    "cem3_consumption": 0,
+    "cem1_balance": 58.006,
+    "cem2_balance": null,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-22",
+    "month_label": "JUN-26",
+    "entry_type": "INWARD",
+    "vehicle_no": "KA01AJ1804",
+    "company": "ZUARI",
+    "inward_total": 40.37,
+    "cem1_qty": 0,
+    "cem2_qty": 40.37,
+    "cem3_qty": 0,
+    "consumption_text": null,
+    "cem1_consumption": 0,
+    "cem2_consumption": 0,
+    "cem3_consumption": 0,
+    "cem1_balance": null,
+    "cem2_balance": 42.515,
+    "cem3_balance": null
+  },
+  {
+    "date": "2026-06-22",
+    "month_label": "JUN-26",
+    "entry_type": "CONSUMPTION",
+    "vehicle_no": null,
+    "company": null,
+    "inward_total": 0,
+    "cem1_qty": 0,
+    "cem2_qty": 0,
+    "cem3_qty": 0,
+    "consumption_text": "CEM-1: 15.358, CEM-2: 42.826, CEM-3: 3.845",
+    "cem1_consumption": 15.358,
+    "cem2_consumption": 42.826,
+    "cem3_consumption": 3.845,
+    "cem1_balance": 42.648,
+    "cem2_balance": -0.311,
+    "cem3_balance": -3.938
   }
 ]

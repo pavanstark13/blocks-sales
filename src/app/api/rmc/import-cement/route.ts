@@ -24,6 +24,7 @@ interface CementRecord {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const run = searchParams.get('run');
+  const force = searchParams.get('force'); // ?force=1 clears and re-imports
 
   const database = db();
   const rows = records as CementRecord[];
@@ -33,21 +34,29 @@ export async function GET(req: NextRequest) {
   const months = [...new Set(rows.map(r => r.month_label))];
 
   if (!run) {
+    const existing = await database.get(`SELECT COUNT(*) as cnt FROM rmc_cement`);
     return NextResponse.json({
-      message: 'RMC cement data import — add ?run=1 to apply',
-      total: rows.length,
+      message: 'RMC cement import — add ?run=1 to import, ?run=1&force=1 to clear and re-import',
+      total_in_file: rows.length,
       inward_records: inwardCount,
       consumption_records: consumptionCount,
       months,
+      existing_records: existing?.cnt ?? 0,
     });
   }
 
   const existing = await database.get(`SELECT COUNT(*) as cnt FROM rmc_cement`);
-  if (Number(existing?.cnt ?? 0) > 0) {
+  const existingCount = Number(existing?.cnt ?? 0);
+
+  if (existingCount > 0 && !force) {
     return NextResponse.json(
-      { error: `Already imported: ${existing?.cnt} records found. Skipping.`, count: existing?.cnt },
+      { error: `Already imported: ${existingCount} records. Use ?run=1&force=1 to clear and re-import.`, count: existingCount },
       { status: 409 }
     );
+  }
+
+  if (existingCount > 0 && force) {
+    await database.run(`DELETE FROM rmc_cement`);
   }
 
   let inserted = 0;
@@ -70,6 +79,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     success: true,
     inserted,
-    message: `Done. ${inserted} cement records imported.`,
+    cleared: existingCount > 0 && !!force,
+    message: `Done. ${inserted} cement records imported (${inwardCount} inward + ${consumptionCount} consumption). Aug 2025 – Jun 2026.`,
   });
 }
