@@ -1,33 +1,90 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
+
+// Supports multiple AI providers — uses the first available key:
+//   GOOGLE_GEMINI_API_KEY  (free tier: 15 RPM, generous limits)
+//   GROQ_API_KEY           (free tier: Llama 3.3 70B, very fast)
+//   ANTHROPIC_API_KEY      (paid)
+
+async function callGemini(apiKey: string, prompt: string): Promise<string> {
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.3, maxOutputTokens: 1500 },
+      }),
+    }
+  );
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Gemini error ${res.status}: ${err.slice(0, 200)}`);
+  }
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+}
+
+async function callGroq(apiKey: string, prompt: string): Promise<string> {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.3,
+      max_tokens: 1500,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Groq error ${res.status}: ${err.slice(0, 200)}`);
+  }
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content ?? '';
+}
+
+async function callAnthropic(apiKey: string, prompt: string): Promise<string> {
+  const Anthropic = (await import('@anthropic-ai/sdk')).default;
+  const client = new Anthropic({ apiKey });
+  const message = await client.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 1500,
+    messages: [{ role: 'user', content: prompt }],
+  });
+  return (message.content[0] as { type: string; text: string }).text;
+}
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
+  const geminiKey = process.env.GOOGLE_GEMINI_API_KEY;
+  const groqKey   = process.env.GROQ_API_KEY;
+  const anthroKey = process.env.ANTHROPIC_API_KEY;
+
+  if (!geminiKey && !groqKey && !anthroKey) {
     return NextResponse.json(
-      { error: 'ANTHROPIC_API_KEY not configured. Add it in Vercel → Settings → Environment Variables.' },
+      {
+        error: 'No AI API key configured.',
+        setup: 'Add one of these to Vercel → Settings → Environment Variables:\n• GOOGLE_GEMINI_API_KEY (free — get at aistudio.google.com)\n• GROQ_API_KEY (free — get at console.groq.com)\n• ANTHROPIC_API_KEY (paid)',
+      },
       { status: 503 }
     );
   }
 
   const { reportData, module: mod } = await req.json();
-  const client = new Anthropic({ apiKey });
 
   const moduleLabel = mod === 'rmc' ? 'Ready Mix Concrete (RMC)' : 'Cement Blocks';
-  const unitLabel = mod === 'rmc' ? 'm³' : 'blocks';
+  const unitLabel   = mod === 'rmc' ? 'm³' : 'blocks';
   const productLabel = mod === 'rmc' ? 'concrete grades (M20/M25/M30 etc.)' : 'block sizes (4"/6"/8")';
 
-  // Summarise data compactly for the prompt
   const stats = reportData.stats ?? {};
-  const monthly: {month_label:string;revenue:number;volume:number;outstanding:number;collection_rate:number;orders:number}[] = reportData.monthly ?? [];
-  const topCustomers: {customer_name:string;revenue:number;volume:number;outstanding:number;orders:number}[] = (reportData.top_customers ?? reportData.topCustomers ?? []).slice(0, 10);
+  const monthly: {month_label:string;revenue:number;volume:number;outstanding:number;collection_rate:number}[] = reportData.monthly ?? [];
+  const topCustomers: {customer_name:string;revenue:number;outstanding:number}[] = (reportData.top_customers ?? reportData.topCustomers ?? []).slice(0, 10);
   const grades = (reportData.grades ?? reportData.sizes ?? []).slice(0, 8);
   const ageing = reportData.ageing ?? {};
 
-  // Month-over-month trend (last 3)
   const recent = monthly.slice(-3);
-  const revTrend = recent.map((m: {month_label:string;revenue:number}) => `${m.month_label}: ₹${(m.revenue/100000).toFixed(1)}L`).join(', ');
-  const volTrend = recent.map((m: {month_label:string;volume:number}) => `${m.month_label}: ${m.volume} ${unitLabel}`).join(', ');
+  const revTrend = recent.map(m => `${m.month_label}: ₹${(m.revenue/100000).toFixed(1)}L`).join(', ');
+  const volTrend = recent.map(m => `${m.month_label}: ${m.volume} ${unitLabel}`).join(', ');
 
   const prompt = `You are a business analyst for a ${moduleLabel} manufacturing company in India.
 
@@ -48,19 +105,13 @@ Analyse this sales data and provide concise, actionable insights for the busines
 - Volume: ${volTrend}
 
 **All monthly data (month, revenue ₹L, volume ${unitLabel}, collection%)**
-${monthly.map((m:{month_label:string;revenue:number;volume:number;collection_rate:number}) =>
-  `${m.month_label}: ₹${(m.revenue/100000).toFixed(1)}L, ${m.volume}${unitLabel}, ${m.collection_rate}%`
-).join('\n')}
+${monthly.map(m => `${m.month_label}: ₹${(m.revenue/100000).toFixed(1)}L, ${m.volume}${unitLabel}, ${m.collection_rate}%`).join('\n')}
 
 **Top 10 customers (name, revenue ₹L, outstanding ₹L)**
-${topCustomers.map((c:{customer_name:string;revenue:number;outstanding:number}) =>
-  `${c.customer_name}: ₹${(c.revenue/100000).toFixed(1)}L revenue, ₹${(c.outstanding/100000).toFixed(1)}L outstanding`
-).join('\n')}
+${topCustomers.map(c => `${c.customer_name}: ₹${(c.revenue/100000).toFixed(1)}L revenue, ₹${(c.outstanding/100000).toFixed(1)}L outstanding`).join('\n')}
 
 **${productLabel} breakdown (type, revenue ₹L, volume)**
-${grades.map((g:{grade?:string;size?:number;revenue:number;volume:number}) =>
-  `${g.grade ?? g.size}: ₹${(g.revenue/100000).toFixed(1)}L, ${g.volume}${unitLabel}`
-).join('\n')}
+${grades.map((g: {grade?:string;size?:number;revenue:number;volume:number}) => `${g.grade ?? g.size}: ₹${(g.revenue/100000).toFixed(1)}L, ${g.volume}${unitLabel}`).join('\n')}
 
 **Outstanding ageing**
 - 0-15 days: ₹${((ageing.d0_15??0)/100000).toFixed(1)}L
@@ -71,7 +122,7 @@ ${grades.map((g:{grade?:string;size?:number;revenue:number;volume:number}) =>
 
 ---
 
-Respond ONLY with a JSON object in this exact structure (no markdown, no explanation):
+Respond ONLY with a JSON object in this exact structure (no markdown fences, no explanation outside the JSON):
 {
   "projection": {
     "next_month_revenue": <number in rupees>,
@@ -95,20 +146,27 @@ Rules:
 - insights: 3-5 items, mix of positive and neutral observations
 - issues: 2-4 items, focus on collection risk, declining customers, overdue amounts
 - recommendations: 3-5 items, specific and actionable (name specific customers when relevant)
-- All rupee values in the JSON should be numbers, not strings`;
+- All rupee values in the JSON must be plain numbers, not strings`;
 
   try {
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1500,
-      messages: [{ role: 'user', content: prompt }],
-    });
+    let raw: string;
+    let provider: string;
 
-    const text = (message.content[0] as { type: string; text: string }).text.trim();
-    // Strip any accidental markdown fences
-    const clean = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
+    if (geminiKey) {
+      raw = await callGemini(geminiKey, prompt);
+      provider = 'Gemini 1.5 Flash';
+    } else if (groqKey) {
+      raw = await callGroq(groqKey, prompt);
+      provider = 'Groq / Llama 3.3';
+    } else {
+      raw = await callAnthropic(anthroKey!, prompt);
+      provider = 'Claude';
+    }
+
+    // Strip accidental markdown fences
+    const clean = raw.trim().replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
     const parsed = JSON.parse(clean);
-    return NextResponse.json({ ok: true, analysis: parsed });
+    return NextResponse.json({ ok: true, analysis: parsed, provider });
   } catch (err) {
     return NextResponse.json(
       { error: `AI analysis failed: ${(err as Error).message}` },

@@ -72,6 +72,8 @@ export default function AIInsights({ reportData, module: mod, unitLabel = 'units
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [setup, setSetup] = useState<string | null>(null);
+  const [provider, setProvider] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(true);
 
   const run = async () => {
@@ -84,8 +86,12 @@ export default function AIInsights({ reportData, module: mod, unitLabel = 'units
         body: JSON.stringify({ reportData, module: mod }),
       });
       const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || 'Unknown error');
+      if (!res.ok || data.error) {
+        if (data.setup) setSetup(data.setup);
+        throw new Error(data.error || 'Unknown error');
+      }
       setAnalysis(data.analysis);
+      setProvider(data.provider ?? null);
       setExpanded(true);
     } catch (e) {
       setError((e as Error).message);
@@ -149,10 +155,8 @@ export default function AIInsights({ reportData, module: mod, unitLabel = 'units
       {error && (
         <div className="p-4 bg-red-50 border-b border-red-100">
           <p className="text-sm text-red-700 font-medium">⚠ {error}</p>
-          {error.includes('ANTHROPIC_API_KEY') && (
-            <p className="text-xs text-red-500 mt-1">
-              Go to Vercel → Your Project → Settings → Environment Variables → Add <code className="bg-red-100 px-1 rounded">ANTHROPIC_API_KEY</code>
-            </p>
+          {setup && (
+            <pre className="text-xs text-red-500 mt-2 whitespace-pre-wrap bg-red-100 rounded p-2">{setup}</pre>
           )}
         </div>
       )}
@@ -160,7 +164,7 @@ export default function AIInsights({ reportData, module: mod, unitLabel = 'units
       {!analysis && !loading && !error && (
         <div className="p-6 text-center text-slate-400">
           <p className="text-sm">Click <strong>Run AI Analysis</strong> to get sales projections, insights, and recommendations powered by Claude AI.</p>
-          <p className="text-xs mt-1 text-slate-300">Takes ~5 seconds · Analyses all your data</p>
+          <p className="text-xs mt-1 text-slate-300">Powered by Google Gemini (free) · Takes ~5 seconds</p>
         </div>
       )}
 
@@ -294,7 +298,9 @@ export default function AIInsights({ reportData, module: mod, unitLabel = 'units
             </div>
           </div>
 
-          <p className="text-[10px] text-slate-300 text-right">Powered by Claude AI · Analysis is advisory only</p>
+          <p className="text-[10px] text-slate-300 text-right">
+            {provider ? `Powered by ${provider}` : 'AI powered'} · Analysis is advisory only
+          </p>
         </div>
       )}
     </div>
