@@ -6,23 +6,36 @@ import { NextRequest, NextResponse } from 'next/server';
 //   ANTHROPIC_API_KEY      (paid)
 
 async function callGemini(apiKey: string, prompt: string): Promise<string> {
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.3, maxOutputTokens: 1500 },
-      }),
+  // Try models in order until one works
+  const models = [
+    'gemini-2.0-flash',
+    'gemini-2.0-flash-exp',
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-latest',
+  ];
+
+  let lastErr = '';
+  for (const model of models) {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.3, maxOutputTokens: 1500 },
+        }),
+      }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
     }
-  );
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Gemini error ${res.status}: ${err.slice(0, 200)}`);
+    const body = await res.text();
+    if (res.status === 404) { lastErr = body; continue; } // try next model
+    throw new Error(`Gemini error ${res.status}: ${body.slice(0, 300)}`);
   }
-  const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+  throw new Error(`No working Gemini model found. Last error: ${lastErr.slice(0, 200)}`);
 }
 
 async function callGroq(apiKey: string, prompt: string): Promise<string> {
