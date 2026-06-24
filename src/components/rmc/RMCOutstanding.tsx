@@ -154,15 +154,17 @@ export default function RMCOutstanding({ onRefresh }: { onRefresh: () => void })
             <label className="block text-xs font-medium text-slate-500 mb-1">Payment Mode</label>
             <select value={form.mode} onChange={e => setForm(p => ({ ...p, mode: e.target.value }))}
               className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
-              {PAYMENT_MODES.map(m => <option key={m}>{m}</option>)}
+              {['CASH', 'CHEQUE', 'NY A/C', 'MKL A/C', 'KMK A/C', 'KSC A/C', 'ONLINE'].map(m => <option key={m}>{m}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Notes</label>
+            <label className="block text-xs font-medium text-slate-500 mb-1">
+              {form.mode === 'CHEQUE' ? 'Cheque No / Bank Name *' : 'Notes (optional)'}
+            </label>
             <input type="text" value={form.notes}
               onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
               className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Optional" />
+              placeholder={form.mode === 'CHEQUE' ? 'e.g. Chq #12345 dated 01-Jun-25, SBI Rayadurgam' : 'Optional'} />
           </div>
         </div>
         <div className="flex gap-2 mt-4">
@@ -288,6 +290,18 @@ export default function RMCOutstanding({ onRefresh }: { onRefresh: () => void })
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <span className="font-bold text-rose-600 text-lg">{fmtCur(custBalance)}</span>
+                    <button
+                      onClick={() => {
+                        const phone = prompt(`Enter phone number for ${customer}:`);
+                        if (!phone) return;
+                        const msg = `Dear ${customer}, your outstanding balance of ₹${Math.round(custBalance).toLocaleString('en-IN')} for RMC concrete orders is due. Kindly arrange payment at your earliest. Thank you. - ASTRA CONMIX`;
+                        window.open(`https://wa.me/91${phone.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+                      }}
+                      className="text-xs px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 font-medium cursor-pointer"
+                      title="Send WhatsApp reminder"
+                    >
+                      WA
+                    </button>
                     <button
                       onClick={() => { setBulkPayCustomer(customer); setBulkPayForm(f => ({ ...f, amount: String(Math.round(custBalance)) })); }}
                       className="text-xs px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium cursor-pointer transition-colors duration-150"

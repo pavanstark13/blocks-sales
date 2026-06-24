@@ -93,6 +93,83 @@ function fmtCur(n: number | null) {
   return '₹' + new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(n);
 }
 
+function MonthlyTarget({ actualRevenue, actualBlocks }: { actualRevenue: number; actualBlocks: number }) {
+  const [editing, setEditing] = useState(false);
+  const monthKey = (() => { const d = new Date(); return `blocks_${d.getFullYear()}_${d.getMonth()}`; })();
+  const [targetRev, setTargetRev] = useState(() => {
+    if (typeof window === 'undefined') return 0;
+    return Number(localStorage.getItem(monthKey + '_rev') || 0);
+  });
+  const [targetBlocks, setTargetBlocks] = useState(() => {
+    if (typeof window === 'undefined') return 0;
+    return Number(localStorage.getItem(monthKey + '_blocks') || 0);
+  });
+  const [inputRev, setInputRev] = useState('');
+  const [inputBlocks, setInputBlocks] = useState('');
+
+  const revPct = targetRev > 0 ? Math.min(100, Math.round((actualRevenue / targetRev) * 100)) : 0;
+  const blocksPct = targetBlocks > 0 ? Math.min(100, Math.round((actualBlocks / targetBlocks) * 100)) : 0;
+
+  const save = () => {
+    if (inputRev) { const v = Number(inputRev); setTargetRev(v); localStorage.setItem(monthKey + '_rev', String(v)); }
+    if (inputBlocks) { const v = Number(inputBlocks); setTargetBlocks(v); localStorage.setItem(monthKey + '_blocks', String(v)); }
+    setEditing(false);
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">This Month — Target vs Actual</h3>
+        <button onClick={() => { setInputRev(targetRev ? String(targetRev) : ''); setInputBlocks(targetBlocks ? String(targetBlocks) : ''); setEditing(v => !v); }}
+          className="text-xs text-blue-600 hover:underline cursor-pointer">
+          {editing ? 'Cancel' : 'Set Target'}
+        </button>
+      </div>
+      {editing && (
+        <div className="flex gap-3 mb-3 flex-wrap">
+          <div className="flex-1 min-w-32">
+            <label className="block text-xs text-slate-400 mb-0.5">Revenue Target (₹)</label>
+            <input type="number" value={inputRev} onChange={e => setInputRev(e.target.value)} placeholder="e.g. 2000000"
+              className="w-full border border-slate-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div className="flex-1 min-w-32">
+            <label className="block text-xs text-slate-400 mb-0.5">Volume Target (Blocks)</label>
+            <input type="number" value={inputBlocks} onChange={e => setInputBlocks(e.target.value)} placeholder="e.g. 50000"
+              className="w-full border border-slate-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div className="flex items-end">
+            <button onClick={save} className="px-3 py-1 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700 cursor-pointer">Save</button>
+          </div>
+        </div>
+      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <div className="flex justify-between text-xs mb-1">
+            <span className="text-slate-600 font-medium">Revenue</span>
+            <span className="text-slate-500">{targetRev > 0 ? `₹${Math.round(actualRevenue/100000*10)/10}L / ₹${Math.round(targetRev/100000*10)/10}L` : '—'}</span>
+          </div>
+          <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div className={`h-full rounded-full transition-all ${revPct >= 100 ? 'bg-emerald-500' : revPct >= 70 ? 'bg-blue-500' : revPct >= 40 ? 'bg-amber-400' : 'bg-rose-400'}`}
+              style={{ width: `${revPct}%` }} />
+          </div>
+          <p className="text-xs text-slate-400 mt-0.5">{targetRev > 0 ? `${revPct}% achieved` : 'Set a target to track progress'}</p>
+        </div>
+        <div>
+          <div className="flex justify-between text-xs mb-1">
+            <span className="text-slate-600 font-medium">Volume (Blocks)</span>
+            <span className="text-slate-500">{targetBlocks > 0 ? `${actualBlocks.toLocaleString('en-IN')} / ${targetBlocks.toLocaleString('en-IN')}` : '—'}</span>
+          </div>
+          <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div className={`h-full rounded-full transition-all ${blocksPct >= 100 ? 'bg-emerald-500' : blocksPct >= 70 ? 'bg-blue-500' : blocksPct >= 40 ? 'bg-amber-400' : 'bg-rose-400'}`}
+              style={{ width: `${blocksPct}%` }} />
+          </div>
+          <p className="text-xs text-slate-400 mt-0.5">{targetBlocks > 0 ? `${blocksPct}% achieved` : 'Set a target to track progress'}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [data, setData] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -137,6 +214,12 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+
+      {/* Target tracker - uses current month actuals from monthSummary */}
+      <MonthlyTarget
+        actualRevenue={monthSummary[monthSummary.length - 1]?.total_amount ?? 0}
+        actualBlocks={monthSummary[monthSummary.length - 1]?.total_qty ?? 0}
+      />
 
       {/* Monthly revenue chart */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5">

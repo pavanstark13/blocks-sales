@@ -38,6 +38,83 @@ const GRADE_TEXT: Record<string, string> = {
   Other: 'text-amber-600',
 };
 
+function MonthlyTarget({ actualRevenue, actualVolume }: { actualRevenue: number; actualVolume: number }) {
+  const [editing, setEditing] = useState(false);
+  const monthKey = (() => { const d = new Date(); return `rmc_${d.getFullYear()}_${d.getMonth()}`; })();
+  const [targetRev, setTargetRev] = useState(() => {
+    if (typeof window === 'undefined') return 0;
+    return Number(localStorage.getItem(monthKey + '_rev') || 0);
+  });
+  const [targetVol, setTargetVol] = useState(() => {
+    if (typeof window === 'undefined') return 0;
+    return Number(localStorage.getItem(monthKey + '_vol') || 0);
+  });
+  const [inputRev, setInputRev] = useState('');
+  const [inputVol, setInputVol] = useState('');
+
+  const revPct = targetRev > 0 ? Math.min(100, Math.round((actualRevenue / targetRev) * 100)) : 0;
+  const volPct = targetVol > 0 ? Math.min(100, Math.round((actualVolume / targetVol) * 100)) : 0;
+
+  const save = () => {
+    if (inputRev) { const v = Number(inputRev); setTargetRev(v); localStorage.setItem(monthKey + '_rev', String(v)); }
+    if (inputVol) { const v = Number(inputVol); setTargetVol(v); localStorage.setItem(monthKey + '_vol', String(v)); }
+    setEditing(false);
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">This Month — Target vs Actual</h3>
+        <button onClick={() => { setInputRev(targetRev ? String(targetRev) : ''); setInputVol(targetVol ? String(targetVol) : ''); setEditing(v => !v); }}
+          className="text-xs text-purple-600 hover:underline cursor-pointer">
+          {editing ? 'Cancel' : 'Set Target'}
+        </button>
+      </div>
+      {editing && (
+        <div className="flex gap-3 mb-3 flex-wrap">
+          <div className="flex-1 min-w-32">
+            <label className="block text-xs text-slate-400 mb-0.5">Revenue Target (₹)</label>
+            <input type="number" value={inputRev} onChange={e => setInputRev(e.target.value)} placeholder="e.g. 5000000"
+              className="w-full border border-slate-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" />
+          </div>
+          <div className="flex-1 min-w-32">
+            <label className="block text-xs text-slate-400 mb-0.5">Volume Target (m³)</label>
+            <input type="number" value={inputVol} onChange={e => setInputVol(e.target.value)} placeholder="e.g. 1500"
+              className="w-full border border-slate-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" />
+          </div>
+          <div className="flex items-end">
+            <button onClick={save} className="px-3 py-1 bg-purple-600 text-white rounded text-sm font-medium hover:bg-purple-700 cursor-pointer">Save</button>
+          </div>
+        </div>
+      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <div className="flex justify-between text-xs mb-1">
+            <span className="text-slate-600 font-medium">Revenue</span>
+            <span className="text-slate-500">{targetRev > 0 ? `₹${Math.round(actualRevenue/100000*10)/10}L / ₹${Math.round(targetRev/100000*10)/10}L` : '—'}</span>
+          </div>
+          <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div className={`h-full rounded-full transition-all ${revPct >= 100 ? 'bg-emerald-500' : revPct >= 70 ? 'bg-purple-500' : revPct >= 40 ? 'bg-amber-400' : 'bg-rose-400'}`}
+              style={{ width: `${revPct}%` }} />
+          </div>
+          <p className="text-xs text-slate-400 mt-0.5">{targetRev > 0 ? `${revPct}% achieved` : 'Set a target to track progress'}</p>
+        </div>
+        <div>
+          <div className="flex justify-between text-xs mb-1">
+            <span className="text-slate-600 font-medium">Volume (m³)</span>
+            <span className="text-slate-500">{targetVol > 0 ? `${actualVolume.toFixed(1)} / ${targetVol} m³` : '—'}</span>
+          </div>
+          <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div className={`h-full rounded-full transition-all ${volPct >= 100 ? 'bg-emerald-500' : volPct >= 70 ? 'bg-purple-500' : volPct >= 40 ? 'bg-amber-400' : 'bg-rose-400'}`}
+              style={{ width: `${volPct}%` }} />
+          </div>
+          <p className="text-xs text-slate-400 mt-0.5">{targetVol > 0 ? `${volPct}% achieved` : 'Set a target to track progress'}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function RMCDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,6 +161,8 @@ export default function RMCDashboard() {
           <p className="text-xs text-slate-400 mt-1">{data.outstanding_count} open order{data.outstanding_count !== 1 ? 's' : ''}</p>
         </div>
       </div>
+
+      <MonthlyTarget actualRevenue={data.month_amount} actualVolume={data.month_volume} />
 
       {/* Grade Breakdown */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5">

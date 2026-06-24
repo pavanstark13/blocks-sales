@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import PrintChallan from './PrintChallan';
 
 interface Sale {
   id: number;
@@ -51,6 +52,7 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
   const [dateTo, setDateTo] = useState('');
   const [editing, setEditing] = useState<Partial<Sale> | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [printSale, setPrintSale] = useState<Sale | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -235,6 +237,7 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
                     </td>
                     <td className="px-4 py-2">
                       <div className="flex gap-1.5 flex-wrap">
+                        <button onClick={() => setPrintSale(s)} className="text-xs text-slate-500 hover:underline">Print</button>
                         <button onClick={() => setEditing(s)}
                           className="text-xs text-blue-600 hover:underline">Edit</button>
                         {s.status !== 'CLOSED' && (
@@ -266,6 +269,13 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
             Next
           </button>
         </div>
+      )}
+
+      {printSale && (
+        <PrintChallan
+          sale={{ module: 'blocks', ...printSale }}
+          onClose={() => setPrintSale(null)}
+        />
       )}
 
       {/* Edit Modal */}

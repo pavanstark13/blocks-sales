@@ -33,6 +33,10 @@ export default function Outstanding({ onRefresh }: { onRefresh: () => void }) {
   const [dateTo, setDateTo] = useState('');
   const [updating, setUpdating] = useState<number | null>(null);
   const [payInput, setPayInput] = useState<Record<number, string>>({});
+  const [payModal, setPayModal] = useState<Sale | null>(null);
+  const [payModalAmt, setPayModalAmt] = useState('');
+  const [payModalMode, setPayModalMode] = useState('CASH');
+  const [payModalNote, setPayModalNote] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -74,6 +78,26 @@ export default function Outstanding({ onRefresh }: { onRefresh: () => void }) {
       body: JSON.stringify({ advance: newAdvance, balance: newBalance, status: newStatus }),
     });
     setPayInput(p => ({ ...p, [sale.id]: '' }));
+    setUpdating(null);
+    load();
+    onRefresh();
+  };
+
+  const handleModalPayment = async () => {
+    if (!payModal) return;
+    const paid = Number(payModalAmt || 0);
+    if (!paid) return;
+    const newAdvance = (payModal.advance || 0) + paid;
+    const newBalance = Math.max(0, (payModal.amount || 0) - newAdvance);
+    const newStatus = newBalance === 0 ? 'CLOSED' : payModal.status;
+    setUpdating(payModal.id);
+    const noteStr = payModalNote ? payModalNote : undefined;
+    await fetch(`/api/sales/${payModal.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ advance: newAdvance, balance: newBalance, status: newStatus, ...(noteStr ? { notes: noteStr } : {}) }),
+    });
+    setPayModal(null); setPayModalAmt(''); setPayModalMode('CASH'); setPayModalNote('');
     setUpdating(null);
     load();
     onRefresh();
@@ -183,11 +207,22 @@ export default function Outstanding({ onRefresh }: { onRefresh: () => void }) {
                           value={payInput[s.id] || ''}
                           onChange={e => setPayInput(p => ({ ...p, [s.id]: e.target.value }))}
                           className="w-24 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                        <button onClick={() => handlePayment(s)}
-                          disabled={updating === s.id || !payInput[s.id]}
+                        <button onClick={() => { setPayModal(s); setPayModalAmt(payInput[s.id] || String(s.balance || '')); setPayModalMode(s.payment_mode || 'CASH'); setPayModalNote(''); }}
+                          disabled={updating === s.id}
                           className="px-2 py-1 text-xs bg-emerald-600 text-white rounded-lg disabled:opacity-40 hover:bg-emerald-700">
                           {updating === s.id ? '...' : 'Pay'}
                         </button>
+                        {s.phone && (
+                          <a
+                            href={`https://wa.me/91${s.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Dear ${s.customer_name || 'Sir/Madam'}, your outstanding balance of ₹${Math.round(s.balance || 0).toLocaleString('en-IN')} for ${s.quantity} ${s.size}" blocks delivered on ${s.date} is due. Kindly arrange payment. Thank you. - ASTRA CONMIX`)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-2 py-1 text-xs bg-green-500 text-white rounded-lg hover:bg-green-600"
+                            title="Send WhatsApp reminder"
+                          >
+                            WA
+                          </a>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -197,6 +232,52 @@ export default function Outstanding({ onRefresh }: { onRefresh: () => void }) {
           </div>
         )}
       </div>
+      {payModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+            <h3 className="text-base font-semibold text-slate-800 mb-1">Record Payment</h3>
+            <p className="text-xs text-slate-500 mb-4">{payModal.customer_name} · {payModal.size}&quot; blocks · Balance: ₹{Math.round(payModal.balance || 0).toLocaleString('en-IN')}</p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Amount (₹)</label>
+                <input type="number" value={payModalAmt} onChange={e => setPayModalAmt(e.target.value)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Payment Mode</label>
+                <select value={payModalMode} onChange={e => setPayModalMode(e.target.value)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option>CASH</option><option>CHEQUE</option><option>NY A/C</option><option>MKL A/C</option><option>KMK A/C</option><option>ONLINE</option>
+                </select>
+              </div>
+              {payModalMode === 'CHEQUE' && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Cheque No / Bank (goes into notes)</label>
+                  <input type="text" value={payModalNote} onChange={e => setPayModalNote(e.target.value)}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Chq #12345 - SBI, Rayadurgam" />
+                </div>
+              )}
+              {payModalMode !== 'CHEQUE' && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Notes (optional)</label>
+                  <input type="text" value={payModalNote} onChange={e => setPayModalNote(e.target.value)}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Optional" />
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button onClick={handleModalPayment} disabled={!payModalAmt || updating === payModal.id}
+                className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 cursor-pointer">
+                Save Payment
+              </button>
+              <button onClick={() => setPayModal(null)} className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm hover:bg-slate-50 cursor-pointer">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
