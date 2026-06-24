@@ -18,11 +18,14 @@ import RMCCustomers from '@/components/rmc/RMCCustomers';
 import RMCCubeTests from '@/components/rmc/RMCCubeTests';
 import RMCLedger from '@/components/rmc/RMCLedger';
 import RMCCement from '@/components/rmc/RMCCement';
+import RMCReport from '@/components/rmc/RMCReport';
 import AgeingReport from '@/components/AgeingReport';
+import BlocksReport from '@/components/BlocksReport';
+import BlocksCement from '@/components/BlocksCement';
 
 type Module = 'blocks' | 'rmc';
-type Tab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'add' | 'stock' | 'ageing';
-type RMCTab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'cube-tests' | 'ageing' | 'cement';
+type Tab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'add' | 'stock' | 'ageing' | 'cement' | 'report';
+type RMCTab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'cube-tests' | 'ageing' | 'cement' | 'report';
 
 export default function Home() {
   const [module, setModule] = useState<Module>('blocks');
@@ -58,6 +61,22 @@ export default function Home() {
     },
     { id: 'ageing', label: 'Ageing' },
     {
+      id: 'cement', label: 'Cement',
+      icon: (
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
+        </svg>
+      ),
+    },
+    {
+      id: 'report', label: 'Reports',
+      icon: (
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      ),
+    },
+    {
       id: 'bulk', label: 'Daily Entry', color: 'orange',
       icon: (
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,6 +109,14 @@ export default function Home() {
       ),
     },
     { id: 'ageing', label: 'Ageing' },
+    {
+      id: 'report', label: 'Reports',
+      icon: (
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      ),
+    },
     {
       id: 'cement', label: 'Cement',
       icon: (
@@ -229,6 +256,8 @@ export default function Home() {
             {tab === 'ledger'     && <Ledger key={refreshKey} />}
             {tab === 'stock'      && <Stock key={refreshKey} />}
             {tab === 'ageing'     && <AgeingReport key={refreshKey} apiBase="/api" />}
+            {tab === 'cement'     && <BlocksCement key={refreshKey} />}
+            {tab === 'report'     && <BlocksReport key={refreshKey} />}
             {tab === 'bulk'       && <BulkEntry onSaved={() => { refresh(); setTab('sales'); }} />}
             {tab === 'add'        && <AddSaleForm onSaved={() => { refresh(); setTab('sales'); }} />}
           </>
@@ -244,6 +273,7 @@ export default function Home() {
             {rmcTab === 'ledger'      && <RMCLedger key={refreshKey} />}
             {rmcTab === 'cube-tests'  && <RMCCubeTests key={refreshKey} />}
             {rmcTab === 'ageing'      && <AgeingReport key={refreshKey} apiBase="/api/rmc" />}
+            {rmcTab === 'report'      && <RMCReport key={refreshKey} />}
             {rmcTab === 'cement'      && <RMCCement key={refreshKey} />}
             {rmcTab === 'bulk'        && <RMCBulkEntry onSaved={() => { refresh(); setRmcTab('sales'); }} />}
           </>

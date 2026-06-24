@@ -9,23 +9,18 @@ function monthLabel(date: string): string {
 
 async function rebalance(database: DB) {
   const all = await database.all(
-    `SELECT id, entry_type, cem1_qty, cem2_qty, cem3_qty, cem1_consumption, cem2_consumption, cem3_consumption
-     FROM rmc_cement ORDER BY date ASC, id ASC`
+    `SELECT id, entry_type, bags, bags_consumed FROM blocks_cement ORDER BY date ASC, id ASC`
   );
-  let b1 = 0, b2 = 0, b3 = 0;
+  let balance = 0;
   for (const r of all) {
     if (r.entry_type === 'INWARD') {
-      b1 += Number(r.cem1_qty) || 0;
-      b2 += Number(r.cem2_qty) || 0;
-      b3 += Number(r.cem3_qty) || 0;
+      balance += Number(r.bags) || 0;
     } else {
-      b1 -= Number(r.cem1_consumption) || 0;
-      b2 -= Number(r.cem2_consumption) || 0;
-      b3 -= Number(r.cem3_consumption) || 0;
+      balance -= Number(r.bags_consumed) || 0;
     }
     await database.run(
-      `UPDATE rmc_cement SET cem1_balance = ?, cem2_balance = ?, cem3_balance = ? WHERE id = ?`,
-      Math.max(0, b1), Math.max(0, b2), Math.max(0, b3), r.id
+      `UPDATE blocks_cement SET balance_bags = ? WHERE id = ?`,
+      Math.max(0, balance), r.id
     );
   }
 }
@@ -37,7 +32,7 @@ export async function GET(req: NextRequest) {
 
   const database = db();
 
-  let sql = `SELECT * FROM rmc_cement`;
+  let sql = `SELECT * FROM blocks_cement`;
   const params: string[] = [];
   const conditions: string[] = [];
 
@@ -53,30 +48,26 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const {
-    date, entry_type, company, vehicle_no,
-    cem1_qty = 0, cem2_qty = 0, cem3_qty = 0,
-    cem1_consumption = 0, cem2_consumption = 0, cem3_consumption = 0,
-    consumption_text,
+    date, entry_type, supplier, vehicle_no,
+    bags = 0, price_per_bag = 0,
+    bags_consumed = 0, consumption_note, notes,
   } = body;
 
   if (!date || !entry_type) {
     return NextResponse.json({ error: 'date and entry_type required' }, { status: 400 });
   }
 
-  const inward_total = (Number(cem1_qty) || 0) + (Number(cem2_qty) || 0) + (Number(cem3_qty) || 0);
+  const total_cost = (Number(bags) || 0) * (Number(price_per_bag) || 0);
   const database = db();
 
   await database.run(
-    `INSERT INTO rmc_cement (date, month_label, entry_type, vehicle_no, company, inward_total,
-      cem1_qty, cem2_qty, cem3_qty, consumption_text,
-      cem1_consumption, cem2_consumption, cem3_consumption,
-      cem1_balance, cem2_balance, cem3_balance)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0)`,
+    `INSERT INTO blocks_cement (date, month_label, entry_type, supplier, vehicle_no,
+      bags, price_per_bag, total_cost, bags_consumed, consumption_note, balance_bags, notes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`,
     date, monthLabel(date), entry_type.toUpperCase(),
-    vehicle_no || null, company || null, inward_total,
-    Number(cem1_qty) || 0, Number(cem2_qty) || 0, Number(cem3_qty) || 0,
-    consumption_text || null,
-    Number(cem1_consumption) || 0, Number(cem2_consumption) || 0, Number(cem3_consumption) || 0,
+    supplier || null, vehicle_no || null,
+    Number(bags) || 0, Number(price_per_bag) || 0, total_cost,
+    Number(bags_consumed) || 0, consumption_note || null, notes || null,
   );
 
   await rebalance(database);
@@ -86,29 +77,26 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const body = await req.json();
   const {
-    id, date, entry_type, company, vehicle_no,
-    cem1_qty = 0, cem2_qty = 0, cem3_qty = 0,
-    cem1_consumption = 0, cem2_consumption = 0, cem3_consumption = 0,
-    consumption_text,
+    id, date, entry_type, supplier, vehicle_no,
+    bags = 0, price_per_bag = 0,
+    bags_consumed = 0, consumption_note, notes,
   } = body;
 
   if (!id || !date || !entry_type) {
     return NextResponse.json({ error: 'id, date and entry_type required' }, { status: 400 });
   }
 
-  const inward_total = (Number(cem1_qty) || 0) + (Number(cem2_qty) || 0) + (Number(cem3_qty) || 0);
+  const total_cost = (Number(bags) || 0) * (Number(price_per_bag) || 0);
   const database = db();
 
   await database.run(
-    `UPDATE rmc_cement SET date = ?, month_label = ?, entry_type = ?, vehicle_no = ?, company = ?,
-      inward_total = ?, cem1_qty = ?, cem2_qty = ?, cem3_qty = ?,
-      consumption_text = ?, cem1_consumption = ?, cem2_consumption = ?, cem3_consumption = ?
+    `UPDATE blocks_cement SET date = ?, month_label = ?, entry_type = ?, supplier = ?, vehicle_no = ?,
+      bags = ?, price_per_bag = ?, total_cost = ?, bags_consumed = ?, consumption_note = ?, notes = ?
      WHERE id = ?`,
     date, monthLabel(date), entry_type.toUpperCase(),
-    vehicle_no || null, company || null, inward_total,
-    Number(cem1_qty) || 0, Number(cem2_qty) || 0, Number(cem3_qty) || 0,
-    consumption_text || null,
-    Number(cem1_consumption) || 0, Number(cem2_consumption) || 0, Number(cem3_consumption) || 0,
+    supplier || null, vehicle_no || null,
+    Number(bags) || 0, Number(price_per_bag) || 0, total_cost,
+    Number(bags_consumed) || 0, consumption_note || null, notes || null,
     id
   );
 
@@ -122,7 +110,7 @@ export async function DELETE(req: NextRequest) {
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
 
   const database = db();
-  await database.run(`DELETE FROM rmc_cement WHERE id = ?`, id);
+  await database.run(`DELETE FROM blocks_cement WHERE id = ?`, id);
   await rebalance(database);
   return NextResponse.json({ ok: true });
 }

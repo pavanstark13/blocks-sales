@@ -154,6 +154,24 @@ const SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_rmc_cement_date  ON rmc_cement(date);
   CREATE INDEX IF NOT EXISTS idx_rmc_cement_month ON rmc_cement(month_label);
   CREATE INDEX IF NOT EXISTS idx_rmc_cement_type  ON rmc_cement(entry_type);
+  CREATE TABLE IF NOT EXISTS blocks_cement (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    month_label TEXT,
+    entry_type TEXT NOT NULL,
+    supplier TEXT,
+    vehicle_no TEXT,
+    bags INTEGER DEFAULT 0,
+    price_per_bag REAL DEFAULT 0,
+    total_cost REAL DEFAULT 0,
+    bags_consumed INTEGER DEFAULT 0,
+    consumption_note TEXT,
+    balance_bags INTEGER DEFAULT 0,
+    notes TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_blocks_cement_date  ON blocks_cement(date);
+  CREATE INDEX IF NOT EXISTS idx_blocks_cement_month ON blocks_cement(month_label);
 `;
 
 // ── Unified row type ──────────────────────────────────────────────────────────
