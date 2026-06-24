@@ -6,6 +6,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, ComposedChart, Area,
 } from 'recharts';
+import AIInsights from '@/components/AIInsights';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -611,6 +612,9 @@ export default function RMCReport() {
           </table>
         </div>
       </div>
+
+      {/* AI Insights */}
+      <AIInsights reportData={data} module="rmc" unitLabel="m³" />
     </div>
   );
 }

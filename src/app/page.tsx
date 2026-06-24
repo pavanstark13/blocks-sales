@@ -20,9 +20,10 @@ import RMCLedger from '@/components/rmc/RMCLedger';
 import RMCCement from '@/components/rmc/RMCCement';
 import RMCReport from '@/components/rmc/RMCReport';
 import AgeingReport from '@/components/AgeingReport';
+import BlocksReport from '@/components/BlocksReport';
 
 type Module = 'blocks' | 'rmc';
-type Tab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'add' | 'stock' | 'ageing';
+type Tab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'add' | 'stock' | 'ageing' | 'report';
 type RMCTab = 'dashboard' | 'sales' | 'outstanding' | 'customers' | 'ledger' | 'bulk' | 'cube-tests' | 'ageing' | 'cement' | 'report';
 
 export default function Home() {
@@ -58,6 +59,14 @@ export default function Home() {
       ),
     },
     { id: 'ageing', label: 'Ageing' },
+    {
+      id: 'report', label: 'Reports',
+      icon: (
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      ),
+    },
     {
       id: 'bulk', label: 'Daily Entry', color: 'orange',
       icon: (
@@ -238,6 +247,7 @@ export default function Home() {
             {tab === 'ledger'     && <Ledger key={refreshKey} />}
             {tab === 'stock'      && <Stock key={refreshKey} />}
             {tab === 'ageing'     && <AgeingReport key={refreshKey} apiBase="/api" />}
+            {tab === 'report'     && <BlocksReport key={refreshKey} />}
             {tab === 'bulk'       && <BulkEntry onSaved={() => { refresh(); setTab('sales'); }} />}
             {tab === 'add'        && <AddSaleForm onSaved={() => { refresh(); setTab('sales'); }} />}
           </>
