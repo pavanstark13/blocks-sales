@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const COOKIE = 'bs_session';
-const PUBLIC = ['/login', '/api/auth'];
+const PUBLIC = ['/login', '/api/auth', '/api/rmc/import-cement'];
 
 // Middleware only checks cookie presence + expiry (no crypto).
 // Full HMAC verification happens inside each API route via auth.ts.
