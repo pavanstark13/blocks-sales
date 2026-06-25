@@ -405,87 +405,146 @@ export default function Ledger() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                    {entries.map((e, i) => {
-                      const hasBreakdown = e.row_type === 'sale' &&
-                        ((e.qty_4inch || 0) + (e.qty_6inch || 0) + (e.qty_8inch || 0)) > 0;
-                      return (
-                      <tr key={`${e.row_type}-${e.id}`}
-                        className={`hover:bg-slate-50 ${
-                          e.row_type === 'payment' ? 'bg-emerald-50/40' :
-                          (e.status === 'OPEN' || e.status === 'PENDING') ? 'bg-amber-50/30' : ''
-                        }`}>
-                        <td className="px-3 py-2 text-xs text-slate-400">{i + 1}</td>
-                        <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{e.date}</td>
-                        <td className="px-3 py-2">
-                          {e.row_type === 'payment' ? (
-                            <div>
-                              <div className="font-medium text-emerald-700">Payment received</div>
-                              <div className="text-xs text-slate-400">
-                                {e.payment_mode && <span className="mr-2">{e.payment_mode}</span>}
-                                {e.notes && <span>{e.notes}</span>}
-                              </div>
-                            </div>
-                          ) : (
-                            <div>
+                    {(() => {
+                      // Group same-date + same-site/address sale rows into one display row
+                      const groups: LedgerEntry[][] = [];
+                      for (const e of entries) {
+                        if (e.row_type === 'payment') {
+                          groups.push([e]);
+                          continue;
+                        }
+                        const siteKey = (e.site_name || e.address || '').toLowerCase().trim();
+                        const last = groups[groups.length - 1];
+                        if (
+                          last && last[0].row_type === 'sale' &&
+                          last[0].date === e.date &&
+                          (last[0].site_name || last[0].address || '').toLowerCase().trim() === siteKey
+                        ) {
+                          last.push(e);
+                        } else {
+                          groups.push([e]);
+                        }
+                      }
+
+                      return groups.map((group, gi) => {
+                        const first = group[0];
+                        const last = group[group.length - 1];
+
+                        if (first.row_type === 'payment') {
+                          return (
+                            <tr key={`pay-${first.id}`} className="hover:bg-slate-50 bg-emerald-50/40">
+                              <td className="px-3 py-2 text-xs text-slate-400">{gi + 1}</td>
+                              <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{first.date}</td>
+                              <td className="px-3 py-2">
+                                <div className="font-medium text-emerald-700">Payment received</div>
+                                <div className="text-xs text-slate-400">
+                                  {first.payment_mode && <span className="mr-2">{first.payment_mode}</span>}
+                                  {first.notes && <span>{first.notes}</span>}
+                                </div>
+                              </td>
+                              <td className="px-3 py-2 text-right text-slate-300">—</td>
+                              <td className="px-3 py-2 text-right text-slate-300">—</td>
+                              <td className="px-3 py-2 text-right text-slate-300">—</td>
+                              <td className="px-3 py-2 text-right text-slate-300">—</td>
+                              <td className="px-3 py-2 text-right text-slate-300">—</td>
+                              <td className="px-3 py-2 text-right font-medium text-red-600">—</td>
+                              <td className="px-3 py-2 text-right font-medium text-green-600">{fmtCur(first.credit)}</td>
+                              <td className={`px-3 py-2 text-right font-bold ${last.running_balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                                {fmtCur(last.running_balance)}
+                                <span className="text-xs ml-0.5 font-normal">{last.running_balance > 0 ? 'Dr' : 'Cr'}</span>
+                              </td>
+                              <td className="px-3 py-2 text-center print:hidden">
+                                <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">PAID</span>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        // Merge quantities across grouped sale rows
+                        let g4 = 0, g6 = 0, g8 = 0, gTotal = 0, gDebit = 0;
+                        const rates = new Set<number>();
+                        const statuses = new Set<string>();
+                        for (const e of group) {
+                          const has = ((e.qty_4inch || 0) + (e.qty_6inch || 0) + (e.qty_8inch || 0)) > 0;
+                          if (has) {
+                            g4 += e.qty_4inch || 0;
+                            g6 += e.qty_6inch || 0;
+                            g8 += e.qty_8inch || 0;
+                          } else {
+                            if (e.size === 4) g4 += e.quantity || 0;
+                            else if (e.size === 6) g6 += e.quantity || 0;
+                            else if (e.size === 8) g8 += e.quantity || 0;
+                          }
+                          gTotal += e.quantity || 0;
+                          gDebit += e.debit || 0;
+                          if (e.rate) rates.add(Number(e.rate));
+                          if (e.status) statuses.add(e.status);
+                        }
+                        const site = first.site_name || first.address || '';
+                        const rateDisplay = rates.size === 1 ? `₹${[...rates][0]}` : rates.size > 1 ? 'mixed' : '—';
+                        const isOpen = statuses.has('OPEN') || statuses.has('PENDING');
+
+                        return (
+                          <tr key={`grp-${gi}`}
+                            className={`hover:bg-slate-50 ${isOpen ? 'bg-amber-50/30' : ''}`}>
+                            <td className="px-3 py-2 text-xs text-slate-400">{gi + 1}</td>
+                            <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{first.date}</td>
+                            <td className="px-3 py-2">
                               <div className="font-medium text-slate-800">
-                                {e.site_name ? e.site_name : hasBreakdown ? 'Blocks supplied' : `${e.size}" Blocks sold`}
+                                {site || 'Blocks supplied'}
                               </div>
-                              <div className="text-xs text-slate-400">
-                                {e.payment_mode && <span className="mr-2">{e.payment_mode}</span>}
-                                {e.notes && <span>{e.notes}</span>}
-                                {!e.notes && e.address && <span>{e.address}</span>}
-                              </div>
-                            </div>
-                          )}
-                        </td>
-                        {/* 4" / 6" / 8" / Total */}
-                        <td className="px-3 py-2 text-right text-indigo-700">
-                          {hasBreakdown ? ((e.qty_4inch || 0) > 0 ? fmt(e.qty_4inch ?? null) : '—') :
-                           (e.row_type === 'sale' && e.size === 4 ? fmt(e.quantity ?? null) : '—')}
-                        </td>
-                        <td className="px-3 py-2 text-right text-blue-700">
-                          {hasBreakdown ? ((e.qty_6inch || 0) > 0 ? fmt(e.qty_6inch ?? null) : '—') :
-                           (e.row_type === 'sale' && e.size === 6 ? fmt(e.quantity ?? null) : '—')}
-                        </td>
-                        <td className="px-3 py-2 text-right text-violet-700">
-                          {hasBreakdown ? ((e.qty_8inch || 0) > 0 ? fmt(e.qty_8inch ?? null) : '—') :
-                           (e.row_type === 'sale' && e.size === 8 ? fmt(e.quantity ?? null) : '—')}
-                        </td>
-                        <td className="px-3 py-2 text-right font-semibold text-slate-700">
-                          {e.row_type === 'sale' ? fmt(e.quantity ?? null) : '—'}
-                        </td>
-                        <td className="px-3 py-2 text-right">{e.row_type === 'sale' && e.rate ? `₹${e.rate}` : '—'}</td>
-                        <td className="px-3 py-2 text-right font-medium text-red-600">
-                          {e.debit > 0 ? fmtCur(e.debit) : '—'}
-                        </td>
-                        <td className="px-3 py-2 text-right font-medium text-green-600">
-                          {e.credit > 0 ? fmtCur(e.credit) : '—'}
-                        </td>
-                        <td className={`px-3 py-2 text-right font-bold ${e.running_balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                          {fmtCur(e.running_balance)}
-                          <span className="text-xs ml-0.5 font-normal">{e.running_balance > 0 ? 'Dr' : 'Cr'}</span>
-                        </td>
-                        <td className="px-3 py-2 text-center print:hidden">
-                          {e.row_type === 'sale' ? (
-                            <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                              e.status === 'CLOSED' ? 'bg-green-100 text-green-700' :
-                              e.status === 'OPEN' ? 'bg-amber-100 text-amber-700' :
-                              'bg-blue-100 text-blue-700'
-                            }`}>{e.status}</span>
-                          ) : (
-                            <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
-                              PAID
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                      );
-                    })}
+                              {group.length > 1 && (
+                                <div className="text-xs text-slate-400">{group.length} loads merged</div>
+                              )}
+                            </td>
+                            <td className="px-3 py-2 text-right text-indigo-700 font-medium">
+                              {g4 > 0 ? fmt(g4) : '—'}
+                            </td>
+                            <td className="px-3 py-2 text-right text-blue-700 font-medium">
+                              {g6 > 0 ? fmt(g6) : '—'}
+                            </td>
+                            <td className="px-3 py-2 text-right text-violet-700 font-medium">
+                              {g8 > 0 ? fmt(g8) : '—'}
+                            </td>
+                            <td className="px-3 py-2 text-right font-bold text-slate-700">
+                              {fmt(gTotal)}
+                            </td>
+                            <td className="px-3 py-2 text-right text-slate-500 text-xs">{rateDisplay}</td>
+                            <td className="px-3 py-2 text-right font-medium text-red-600">
+                              {gDebit > 0 ? fmtCur(gDebit) : '—'}
+                            </td>
+                            <td className="px-3 py-2 text-right font-medium text-green-600">—</td>
+                            <td className={`px-3 py-2 text-right font-bold ${last.running_balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                              {fmtCur(last.running_balance)}
+                              <span className="text-xs ml-0.5 font-normal">{last.running_balance > 0 ? 'Dr' : 'Cr'}</span>
+                            </td>
+                            <td className="px-3 py-2 text-center print:hidden">
+                              <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                                isOpen ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'
+                              }`}>{isOpen ? 'OPEN' : 'CLOSED'}</span>
+                            </td>
+                          </tr>
+                        );
+                      });
+                    })()}
 
                     {/* Totals row */}
                     {summary && (
-                      <tr className="bg-slate-100 font-semibold border-t-2 border-slate-300">
-                        <td colSpan={9} className="px-3 py-3 text-sm text-right text-slate-600">TOTAL</td>
+                      <tr className="bg-slate-100 font-semibold border-t-2 border-slate-300 text-xs">
+                        <td colSpan={3} className="px-3 py-3 text-right text-slate-600 text-sm">TOTAL</td>
+                        <td className="px-3 py-3 text-right text-indigo-700">
+                          {summary.total_4inch > 0 ? fmt(summary.total_4inch) : '—'}
+                        </td>
+                        <td className="px-3 py-3 text-right text-blue-700">
+                          {summary.total_6inch > 0 ? fmt(summary.total_6inch) : '—'}
+                        </td>
+                        <td className="px-3 py-3 text-right text-violet-700">
+                          {summary.total_8inch > 0 ? fmt(summary.total_8inch) : '—'}
+                        </td>
+                        <td className="px-3 py-3 text-right text-slate-800 font-bold">
+                          {fmt(summary.total_qty)}
+                        </td>
+                        <td className="px-3 py-3" />
                         <td className="px-3 py-3 text-right text-red-700">{fmtCur(summary.total_debit)}</td>
                         <td className="px-3 py-3 text-right text-green-700">{fmtCur(summary.total_credit)}</td>
                         <td className={`px-3 py-3 text-right ${summary.closing_balance > 0 ? 'text-rose-700' : 'text-emerald-700'}`}>
