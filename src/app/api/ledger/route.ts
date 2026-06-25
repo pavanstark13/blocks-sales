@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
 
   // Build unified ledger: merge sales (debit) and payments (credit) sorted by date
   type LedgerRow = {
-    row_type: 'sale' | 'payment';
+    row_type: 'sale' | 'payment' | 'advance_credit';
     id: number;
     date: string;
     debit: number;
@@ -92,9 +92,23 @@ export async function GET(req: NextRequest) {
     id: Number(row.id),
     date: String(row.date),
     debit: Number(row.amount) || 0,
-    credit: Number(row.advance) || 0,
+    credit: 0,
     running_balance: 0,
   })) as LedgerRow[];
+
+  // Separate visible rows for any advance paid at time of delivery
+  const advanceCreditRows = (rows as Record<string,unknown>[])
+    .filter(row => Number(row.advance) > 0)
+    .map(row => ({
+      row_type: 'advance_credit' as const,
+      id: Number(row.id),
+      date: String(row.date),
+      debit: 0,
+      credit: Number(row.advance) || 0,
+      payment_mode: row.payment_mode,
+      notes: row.site_name || row.address || '',
+      running_balance: 0,
+    })) as LedgerRow[];
 
   const paymentRows = (payments as Record<string,unknown>[]).map(p => ({
     ...p,
@@ -106,11 +120,13 @@ export async function GET(req: NextRequest) {
     running_balance: 0,
   })) as LedgerRow[];
 
-  // Merge by date then sort (sales before payments on same date)
-  const merged = [...saleRows, ...paymentRows].sort((a, b) => {
+  // Sort: sales → advance_credits → payments on same date; within type sort by id
+  const typeOrder: Record<string, number> = { sale: 0, advance_credit: 1, payment: 2 };
+  const merged = [...saleRows, ...advanceCreditRows, ...paymentRows].sort((a, b) => {
     if (a.date !== b.date) return (a.date as string).localeCompare(b.date as string);
-    if (a.row_type === 'sale' && b.row_type === 'payment') return -1;
-    if (a.row_type === 'payment' && b.row_type === 'sale') return 1;
+    const ao = typeOrder[a.row_type] ?? 1;
+    const bo = typeOrder[b.row_type] ?? 1;
+    if (ao !== bo) return ao - bo;
     return Number(a.id) - Number(b.id);
   });
 

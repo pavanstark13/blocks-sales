@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 
 interface LedgerEntry {
-  row_type: 'sale' | 'payment';
+  row_type: 'sale' | 'payment' | 'advance_credit';
   id: number;
   date: string;
   // sale fields
@@ -410,7 +410,7 @@ export default function Ledger() {
                       // Group same-date + same-site/address sale rows into one display row
                       const groups: LedgerEntry[][] = [];
                       for (const e of entries) {
-                        if (e.row_type === 'payment') {
+                        if (e.row_type === 'payment' || e.row_type === 'advance_credit') {
                           groups.push([e]);
                           continue;
                         }
@@ -456,6 +456,36 @@ export default function Ledger() {
                               </td>
                               <td className="px-3 py-2 text-center print:hidden">
                                 <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">PAID</span>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        if (first.row_type === 'advance_credit') {
+                          return (
+                            <tr key={`adv-${first.id}`} className="hover:bg-slate-50 bg-teal-50/60 payment-row">
+                              <td className="px-3 py-2 text-xs text-slate-400">{gi + 1}</td>
+                              <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{first.date}</td>
+                              <td className="px-3 py-2">
+                                <div className="font-medium text-teal-700">Received at delivery</div>
+                                <div className="text-xs text-slate-400">
+                                  {first.payment_mode && <span className="mr-2">{first.payment_mode}</span>}
+                                  {first.notes && <span>{first.notes}</span>}
+                                </div>
+                              </td>
+                              <td className="px-3 py-2 text-right text-slate-300">—</td>
+                              <td className="px-3 py-2 text-right text-slate-300">—</td>
+                              <td className="px-3 py-2 text-right text-slate-300">—</td>
+                              <td className="px-3 py-2 text-right text-slate-300">—</td>
+                              <td className="px-3 py-2 text-right text-slate-300">—</td>
+                              <td className="px-3 py-2 text-right font-medium text-red-600">—</td>
+                              <td className="px-3 py-2 text-right font-medium text-green-600">{fmtCur(first.credit)}</td>
+                              <td className={`px-3 py-2 text-right font-bold ${last.running_balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                                {fmtCur(last.running_balance)}
+                                <span className="text-xs ml-0.5 font-normal">{last.running_balance > 0 ? 'Dr' : 'Cr'}</span>
+                              </td>
+                              <td className="px-3 py-2 text-center print:hidden">
+                                <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-700">RCVD</span>
                               </td>
                             </tr>
                           );
@@ -563,44 +593,73 @@ export default function Ledger() {
               </div>
             </div>
 
-            {/* Payment Receipts section */}
-            {payments.length > 0 && (
-              <div className="bg-white rounded-xl border border-emerald-100 shadow-sm overflow-hidden print:rounded-none print:border print:border-slate-300 print:mt-6">
-                <div className="px-4 py-2 bg-emerald-50 border-b border-emerald-100 print:bg-slate-100 print:border-slate-200">
-                  <h3 className="text-xs font-semibold text-emerald-700 print:text-slate-600 uppercase tracking-wide">
-                    Payment Receipts ({payments.length})
-                  </h3>
-                </div>
-                <table className="w-full text-sm">
-                  <thead className="border-b border-slate-100">
-                    <tr className="text-xs text-slate-500 font-semibold text-left">
-                      <th className="px-4 py-2">#</th>
-                      <th className="px-4 py-2">Date</th>
-                      <th className="px-4 py-2">Mode</th>
-                      <th className="px-4 py-2">Notes</th>
-                      <th className="px-4 py-2 text-right">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {payments.map((p, i) => (
-                      <tr key={p.id} className="hover:bg-slate-50">
-                        <td className="px-4 py-2 text-xs text-slate-400">{i + 1}</td>
-                        <td className="px-4 py-2 text-slate-600">{p.date}</td>
-                        <td className="px-4 py-2">{p.payment_mode || '—'}</td>
-                        <td className="px-4 py-2 text-slate-500">{p.notes || '—'}</td>
-                        <td className="px-4 py-2 text-right font-semibold text-emerald-700">{fmtCur(p.amount)}</td>
+            {/* Payment Receipts section — includes advance-at-delivery + separate payments */}
+            {(() => {
+              const advEntries = entries.filter(e => e.row_type === 'advance_credit');
+              const allReceipts: { key: string; date: string; mode: string; notes: string; amount: number; label: string }[] = [
+                ...advEntries.map(e => ({
+                  key: `adv-${e.id}`,
+                  date: e.date,
+                  mode: (e.payment_mode as string) || '',
+                  notes: (e.notes as string) || '',
+                  amount: e.credit,
+                  label: 'At delivery',
+                })),
+                ...payments.map(p => ({
+                  key: `pay-${p.id}`,
+                  date: p.date,
+                  mode: p.payment_mode || '',
+                  notes: p.notes || '',
+                  amount: p.amount,
+                  label: 'Payment',
+                })),
+              ].sort((a, b) => a.date.localeCompare(b.date));
+
+              if (allReceipts.length === 0) return null;
+              return (
+                <div className="bg-white rounded-xl border border-emerald-100 shadow-sm overflow-hidden print:rounded-none print:border print:border-slate-300 print:mt-6">
+                  <div className="px-4 py-2 bg-emerald-50 border-b border-emerald-100 print:bg-slate-100 print:border-slate-200">
+                    <h3 className="text-xs font-semibold text-emerald-700 print:text-slate-600 uppercase tracking-wide">
+                      Payment Receipts ({allReceipts.length})
+                    </h3>
+                  </div>
+                  <table className="w-full text-sm">
+                    <thead className="border-b border-slate-100">
+                      <tr className="text-xs text-slate-500 font-semibold text-left">
+                        <th className="px-4 py-2">#</th>
+                        <th className="px-4 py-2">Date</th>
+                        <th className="px-4 py-2">Type</th>
+                        <th className="px-4 py-2">Mode</th>
+                        <th className="px-4 py-2">Notes</th>
+                        <th className="px-4 py-2 text-right">Amount</th>
                       </tr>
-                    ))}
-                    <tr className="bg-emerald-50 font-semibold border-t border-emerald-200">
-                      <td colSpan={4} className="px-4 py-2 text-sm text-right text-slate-600">Total Received</td>
-                      <td className="px-4 py-2 text-right text-emerald-800">
-                        {fmtCur(payments.reduce((s, p) => s + p.amount, 0))}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            )}
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {allReceipts.map((r, i) => (
+                        <tr key={r.key} className="hover:bg-slate-50">
+                          <td className="px-4 py-2 text-xs text-slate-400">{i + 1}</td>
+                          <td className="px-4 py-2 text-slate-600">{r.date}</td>
+                          <td className="px-4 py-2 text-xs">
+                            <span className={`inline-flex px-2 py-0.5 rounded-full font-medium ${r.label === 'At delivery' ? 'bg-teal-100 text-teal-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                              {r.label}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2">{r.mode || '—'}</td>
+                          <td className="px-4 py-2 text-slate-500">{r.notes || '—'}</td>
+                          <td className="px-4 py-2 text-right font-semibold text-emerald-700">{fmtCur(r.amount)}</td>
+                        </tr>
+                      ))}
+                      <tr className="bg-emerald-50 font-semibold border-t border-emerald-200">
+                        <td colSpan={5} className="px-4 py-2 text-sm text-right text-slate-600">Total Received</td>
+                        <td className="px-4 py-2 text-right text-emerald-800">
+                          {fmtCur(allReceipts.reduce((s, r) => s + r.amount, 0))}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()}
 
             {/* Print footer */}
             <div className="hidden print:block mt-8 pt-3 border-t-2 border-black text-xs text-center">
