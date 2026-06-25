@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 interface LedgerEntry {
   row_type: 'sale' | 'payment' | 'advance_credit';
@@ -94,6 +94,11 @@ export default function Ledger() {
   const [allPaysLoading, setAllPaysLoading] = useState(false);
   const [paySearch, setPaySearch] = useState('');
 
+  type EditTarget = { type: 'sale' | 'payment' | 'advance'; id: number; fields: Record<string, string> };
+  const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
+  const [editBusy, setEditBusy] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
   // Load customer list
   useEffect(() => {
     const params = new URLSearchParams();
@@ -130,6 +135,81 @@ export default function Ledger() {
   }, [dateFrom, dateTo]);
 
   useEffect(() => { if (viewMode === 'payments') loadAllPayments(); }, [viewMode, loadAllPayments]);
+
+  const toggleGroup = (key: string) => setExpandedGroups(prev => {
+    const next = new Set(prev); next.has(key) ? next.delete(key) : next.add(key); return next;
+  });
+
+  const handleEditSale = (e: LedgerEntry) => setEditTarget({
+    type: 'sale', id: e.id, fields: {
+      date: e.date, site_name: e.site_name || '',
+      qty_4inch: String(e.qty_4inch || ''), qty_6inch: String(e.qty_6inch || ''), qty_8inch: String(e.qty_8inch || ''),
+      rate: String(e.rate || ''), advance: String(e.advance || 0),
+      payment_mode: e.payment_mode || '', status: e.status || 'OPEN', notes: e.notes || '',
+    }
+  });
+
+  const handleEditPayment = (e: LedgerEntry) => setEditTarget({
+    type: 'payment', id: e.id, fields: {
+      date: e.date, amount: String(e.credit), payment_mode: e.payment_mode || '', notes: (e.notes as string) || '',
+    }
+  });
+
+  const handleEditAdvance = (e: LedgerEntry) => setEditTarget({
+    type: 'advance', id: e.id, fields: {
+      advance: String(e.credit), payment_mode: e.payment_mode || '',
+    }
+  });
+
+  const saveEdit = async () => {
+    if (!editTarget || !selected) return;
+    setEditBusy(true);
+    const { type, id, fields } = editTarget;
+    if (type === 'sale') {
+      await fetch(`/api/sales/${id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: fields.date, site_name: fields.site_name || null,
+          qty_4inch: parseInt(fields.qty_4inch) || 0, qty_6inch: parseInt(fields.qty_6inch) || 0, qty_8inch: parseInt(fields.qty_8inch) || 0,
+          rate: parseFloat(fields.rate) || null, advance: parseFloat(fields.advance) || 0,
+          payment_mode: fields.payment_mode || null, status: fields.status, notes: fields.notes || null,
+        }),
+      });
+    } else if (type === 'payment') {
+      await fetch(`/api/payments/${id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: fields.date, amount: parseFloat(fields.amount),
+          payment_mode: fields.payment_mode || null, notes: fields.notes || null,
+        }),
+      });
+    } else {
+      await fetch(`/api/sales/${id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ advance: parseFloat(fields.advance) || 0, payment_mode: fields.payment_mode || null }),
+      });
+    }
+    setEditBusy(false); setEditTarget(null);
+    await loadLedger(selected);
+  };
+
+  const handleDelete = async (type: 'sale' | 'payment' | 'advance', id: number) => {
+    const msg = type === 'sale' ? 'Delete this load entry? This cannot be undone.'
+      : type === 'payment' ? 'Delete this payment record?'
+      : 'Remove advance from this load?';
+    if (!confirm(msg)) return;
+    if (type === 'sale') {
+      await fetch(`/api/sales/${id}`, { method: 'DELETE' });
+    } else if (type === 'payment') {
+      await fetch(`/api/payments/${id}`, { method: 'DELETE' });
+    } else {
+      await fetch(`/api/sales/${id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ advance: 0 }),
+      });
+    }
+    if (selected) await loadLedger(selected);
+  };
 
   const filtered = customers.filter(c => {
     const q = customerSearch.toLowerCase();
@@ -415,21 +495,26 @@ export default function Ledger() {
                           continue;
                         }
                         const siteKey = (e.site_name || e.address || '').toLowerCase().trim();
-                        const last = groups[groups.length - 1];
+                        const lastG = groups[groups.length - 1];
                         if (
-                          last && last[0].row_type === 'sale' &&
-                          last[0].date === e.date &&
-                          (last[0].site_name || last[0].address || '').toLowerCase().trim() === siteKey
+                          lastG && lastG[0].row_type === 'sale' &&
+                          lastG[0].date === e.date &&
+                          (lastG[0].site_name || lastG[0].address || '').toLowerCase().trim() === siteKey
                         ) {
-                          last.push(e);
+                          lastG.push(e);
                         } else {
                           groups.push([e]);
                         }
                       }
 
+                      const btnCls = 'p-0.5 text-slate-300 hover:text-blue-600 rounded transition-colors text-sm leading-none';
+                      const delCls = 'p-0.5 text-slate-300 hover:text-red-500 rounded transition-colors text-sm leading-none';
+
                       return groups.map((group, gi) => {
                         const first = group[0];
                         const last = group[group.length - 1];
+                        const groupKey = `grp-${gi}`;
+                        const isExpanded = expandedGroups.has(groupKey);
 
                         if (first.row_type === 'payment') {
                           return (
@@ -440,7 +525,7 @@ export default function Ledger() {
                                 <div className="font-medium text-emerald-700">Payment received</div>
                                 <div className="text-xs text-slate-400">
                                   {first.payment_mode && <span className="mr-2">{first.payment_mode}</span>}
-                                  {first.notes && <span>{first.notes}</span>}
+                                  {first.notes && <span>{first.notes as string}</span>}
                                 </div>
                               </td>
                               <td className="px-3 py-2 text-right text-slate-300">—</td>
@@ -454,8 +539,12 @@ export default function Ledger() {
                                 {fmtCur(last.running_balance)}
                                 <span className="text-xs ml-0.5 font-normal">{last.running_balance > 0 ? 'Dr' : 'Cr'}</span>
                               </td>
-                              <td className="px-3 py-2 text-center print:hidden">
-                                <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">PAID</span>
+                              <td className="px-3 py-2 print:hidden">
+                                <div className="flex items-center justify-center gap-0.5">
+                                  <span className="inline-flex px-1.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">PAID</span>
+                                  <button onClick={() => handleEditPayment(first)} className={btnCls} title="Edit">✏</button>
+                                  <button onClick={() => handleDelete('payment', first.id)} className={delCls} title="Delete">🗑</button>
+                                </div>
                               </td>
                             </tr>
                           );
@@ -470,7 +559,7 @@ export default function Ledger() {
                                 <div className="font-medium text-teal-700">Received at delivery</div>
                                 <div className="text-xs text-slate-400">
                                   {first.payment_mode && <span className="mr-2">{first.payment_mode}</span>}
-                                  {first.notes && <span>{first.notes}</span>}
+                                  {first.notes && <span>{first.notes as string}</span>}
                                 </div>
                               </td>
                               <td className="px-3 py-2 text-right text-slate-300">—</td>
@@ -484,31 +573,26 @@ export default function Ledger() {
                                 {fmtCur(last.running_balance)}
                                 <span className="text-xs ml-0.5 font-normal">{last.running_balance > 0 ? 'Dr' : 'Cr'}</span>
                               </td>
-                              <td className="px-3 py-2 text-center print:hidden">
-                                <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-700">RCVD</span>
+                              <td className="px-3 py-2 print:hidden">
+                                <div className="flex items-center justify-center gap-0.5">
+                                  <span className="inline-flex px-1.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-700">RCVD</span>
+                                  <button onClick={() => handleEditAdvance(first)} className={btnCls} title="Edit">✏</button>
+                                  <button onClick={() => handleDelete('advance', first.id)} className={delCls} title="Remove">🗑</button>
+                                </div>
                               </td>
                             </tr>
                           );
                         }
 
-                        // Merge quantities across grouped sale rows
-                        let g4 = 0, g6 = 0, g8 = 0, gTotal = 0, gDebit = 0, gCredit = 0;
+                        // Compute merged totals for sale group
+                        let g4 = 0, g6 = 0, g8 = 0, gTotal = 0, gDebit = 0;
                         const rates = new Set<number>();
                         const statuses = new Set<string>();
                         for (const e of group) {
                           const has = ((e.qty_4inch || 0) + (e.qty_6inch || 0) + (e.qty_8inch || 0)) > 0;
-                          if (has) {
-                            g4 += e.qty_4inch || 0;
-                            g6 += e.qty_6inch || 0;
-                            g8 += e.qty_8inch || 0;
-                          } else {
-                            if (e.size === 4) g4 += e.quantity || 0;
-                            else if (e.size === 6) g6 += e.quantity || 0;
-                            else if (e.size === 8) g8 += e.quantity || 0;
-                          }
-                          gTotal += e.quantity || 0;
-                          gDebit += e.debit || 0;
-                          gCredit += e.credit || 0;
+                          if (has) { g4 += e.qty_4inch || 0; g6 += e.qty_6inch || 0; g8 += e.qty_8inch || 0; }
+                          else { if (e.size===4) g4+=e.quantity||0; else if (e.size===6) g6+=e.quantity||0; else if (e.size===8) g8+=e.quantity||0; }
+                          gTotal += e.quantity || 0; gDebit += e.debit || 0;
                           if (e.rate) rates.add(Number(e.rate));
                           if (e.status) statuses.add(e.status);
                         }
@@ -516,46 +600,85 @@ export default function Ledger() {
                         const rateDisplay = rates.size === 1 ? `₹${[...rates][0]}` : rates.size > 1 ? 'mixed' : '—';
                         const isOpen = statuses.has('OPEN') || statuses.has('PENDING');
 
+                        // Multi-entry group expanded: show each load as its own row
+                        if (group.length > 1 && isExpanded) {
+                          return (
+                            <React.Fragment key={groupKey}>
+                              {group.map((e, ei) => {
+                                const eHas = ((e.qty_4inch||0)+(e.qty_6inch||0)+(e.qty_8inch||0)) > 0;
+                                const e4 = eHas ? (e.qty_4inch||0) : (e.size===4?e.quantity||0:0);
+                                const e6 = eHas ? (e.qty_6inch||0) : (e.size===6?e.quantity||0:0);
+                                const e8 = eHas ? (e.qty_8inch||0) : (e.size===8?e.quantity||0:0);
+                                const eOpen = e.status==='OPEN' || e.status==='PENDING';
+                                return (
+                                  <tr key={`${groupKey}-${ei}`} className={`hover:bg-slate-50 ${eOpen?'bg-amber-50/30':''} ${ei===0?'border-t-2 border-blue-100':''}`}>
+                                    <td className="px-3 py-2 text-xs text-slate-400">{ei===0?gi+1:''}</td>
+                                    <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{e.date}</td>
+                                    <td className="px-3 py-2">
+                                      <div className="font-medium text-slate-800">{(e.site_name||e.address)||'Blocks supplied'}</div>
+                                      <div className="text-xs text-blue-500 merged-note">Load {ei+1}/{group.length}</div>
+                                    </td>
+                                    <td className="px-3 py-2 text-right text-indigo-700 font-medium">{e4>0?fmt(e4):'—'}</td>
+                                    <td className="px-3 py-2 text-right text-blue-700 font-medium">{e6>0?fmt(e6):'—'}</td>
+                                    <td className="px-3 py-2 text-right text-violet-700 font-medium">{e8>0?fmt(e8):'—'}</td>
+                                    <td className="px-3 py-2 text-right font-bold text-slate-700">{fmt(e.quantity||0)}</td>
+                                    <td className="px-3 py-2 text-right text-slate-500 text-xs">{e.rate?`₹${e.rate}`:'—'}</td>
+                                    <td className="px-3 py-2 text-right font-medium text-red-600">{e.debit>0?fmtCur(e.debit):'—'}</td>
+                                    <td className="px-3 py-2 text-right text-slate-300">—</td>
+                                    <td className={`px-3 py-2 text-right font-bold ${e.running_balance>0?'text-rose-600':'text-emerald-600'}`}>
+                                      {fmtCur(e.running_balance)}<span className="text-xs ml-0.5 font-normal">{e.running_balance>0?'Dr':'Cr'}</span>
+                                    </td>
+                                    <td className="px-3 py-2 print:hidden">
+                                      <div className="flex items-center justify-center gap-0.5">
+                                        {ei===group.length-1 && (
+                                          <button onClick={() => toggleGroup(groupKey)} className="text-xs text-blue-500 hover:text-blue-700 mr-1" title="Collapse">⊖</button>
+                                        )}
+                                        <button onClick={() => handleEditSale(e)} className={btnCls} title="Edit">✏</button>
+                                        <button onClick={() => handleDelete('sale', e.id)} className={delCls} title="Delete">🗑</button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </React.Fragment>
+                          );
+                        }
+
+                        // Single entry or collapsed multi-entry
                         return (
-                          <tr key={`grp-${gi}`}
-                            className={`hover:bg-slate-50 ${isOpen ? 'bg-amber-50/30' : ''}`}>
+                          <tr key={groupKey} className={`hover:bg-slate-50 ${isOpen ? 'bg-amber-50/30' : ''}`}>
                             <td className="px-3 py-2 text-xs text-slate-400">{gi + 1}</td>
                             <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{first.date}</td>
                             <td className="px-3 py-2">
-                              <div className="font-medium text-slate-800">
-                                {site || 'Blocks supplied'}
-                              </div>
+                              <div className="font-medium text-slate-800">{site || 'Blocks supplied'}</div>
                               {group.length > 1 && (
                                 <div className="text-xs text-slate-400 merged-note">{group.length} loads merged</div>
                               )}
                             </td>
-                            <td className="px-3 py-2 text-right text-indigo-700 font-medium">
-                              {g4 > 0 ? fmt(g4) : '—'}
-                            </td>
-                            <td className="px-3 py-2 text-right text-blue-700 font-medium">
-                              {g6 > 0 ? fmt(g6) : '—'}
-                            </td>
-                            <td className="px-3 py-2 text-right text-violet-700 font-medium">
-                              {g8 > 0 ? fmt(g8) : '—'}
-                            </td>
-                            <td className="px-3 py-2 text-right font-bold text-slate-700">
-                              {fmt(gTotal)}
-                            </td>
+                            <td className="px-3 py-2 text-right text-indigo-700 font-medium">{g4>0?fmt(g4):'—'}</td>
+                            <td className="px-3 py-2 text-right text-blue-700 font-medium">{g6>0?fmt(g6):'—'}</td>
+                            <td className="px-3 py-2 text-right text-violet-700 font-medium">{g8>0?fmt(g8):'—'}</td>
+                            <td className="px-3 py-2 text-right font-bold text-slate-700">{fmt(gTotal)}</td>
                             <td className="px-3 py-2 text-right text-slate-500 text-xs">{rateDisplay}</td>
-                            <td className="px-3 py-2 text-right font-medium text-red-600">
-                              {gDebit > 0 ? fmtCur(gDebit) : '—'}
+                            <td className="px-3 py-2 text-right font-medium text-red-600">{gDebit>0?fmtCur(gDebit):'—'}</td>
+                            <td className="px-3 py-2 text-right text-slate-300">—</td>
+                            <td className={`px-3 py-2 text-right font-bold ${last.running_balance>0?'text-rose-600':'text-emerald-600'}`}>
+                              {fmtCur(last.running_balance)}<span className="text-xs ml-0.5 font-normal">{last.running_balance>0?'Dr':'Cr'}</span>
                             </td>
-                            <td className="px-3 py-2 text-right font-medium text-green-600">
-                              {gCredit > 0 ? fmtCur(gCredit) : '—'}
-                            </td>
-                            <td className={`px-3 py-2 text-right font-bold ${last.running_balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                              {fmtCur(last.running_balance)}
-                              <span className="text-xs ml-0.5 font-normal">{last.running_balance > 0 ? 'Dr' : 'Cr'}</span>
-                            </td>
-                            <td className="px-3 py-2 text-center print:hidden">
-                              <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                                isOpen ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'
-                              }`}>{isOpen ? 'OPEN' : 'CLOSED'}</span>
+                            <td className="px-3 py-2 print:hidden">
+                              <div className="flex items-center justify-center gap-0.5">
+                                <span className={`inline-flex px-1.5 py-0.5 rounded-full text-xs font-medium ${isOpen?'bg-amber-100 text-amber-700':'bg-green-100 text-green-700'}`}>
+                                  {isOpen?'OPEN':'CLOSED'}
+                                </span>
+                                {group.length > 1 ? (
+                                  <button onClick={() => toggleGroup(groupKey)} className="text-xs text-blue-500 hover:text-blue-700 ml-1" title="Expand loads">⊕{group.length}</button>
+                                ) : (
+                                  <>
+                                    <button onClick={() => handleEditSale(first)} className={btnCls} title="Edit">✏</button>
+                                    <button onClick={() => handleDelete('sale', first.id)} className={delCls} title="Delete">🗑</button>
+                                  </>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         );
@@ -668,6 +791,106 @@ export default function Ledger() {
           </>
         )}
       </div>
+
+      {/* Edit modal */}
+      {editTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setEditTarget(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
+            <h3 className="text-base font-semibold text-slate-800 mb-4">
+              {editTarget.type === 'sale' ? 'Edit Load' : editTarget.type === 'payment' ? 'Edit Payment' : 'Edit Advance'}
+            </h3>
+            <div className="space-y-3">
+              {(editTarget.type === 'sale' || editTarget.type === 'payment') && (
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">Date</label>
+                  <input type="date" value={editTarget.fields.date}
+                    onChange={e => setEditTarget(t => t ? { ...t, fields: { ...t.fields, date: e.target.value } } : null)}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              )}
+              {editTarget.type === 'sale' && (
+                <>
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">Site / Project Name</label>
+                    <input type="text" value={editTarget.fields.site_name}
+                      onChange={e => setEditTarget(t => t ? { ...t, fields: { ...t.fields, site_name: e.target.value } } : null)}
+                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(['qty_4inch', 'qty_6inch', 'qty_8inch'] as const).map((k, i) => (
+                      <div key={k}>
+                        <label className="block text-xs text-slate-500 mb-1">{['4"','6"','8"'][i]} Qty</label>
+                        <input type="number" min="0" value={editTarget.fields[k]}
+                          onChange={e => setEditTarget(t => t ? { ...t, fields: { ...t.fields, [k]: e.target.value } } : null)}
+                          className="w-full border border-slate-200 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs text-slate-500 mb-1">Rate (₹)</label>
+                      <input type="number" value={editTarget.fields.rate}
+                        onChange={e => setEditTarget(t => t ? { ...t, fields: { ...t.fields, rate: e.target.value } } : null)}
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-slate-500 mb-1">Status</label>
+                      <select value={editTarget.fields.status}
+                        onChange={e => setEditTarget(t => t ? { ...t, fields: { ...t.fields, status: e.target.value } } : null)}
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option>OPEN</option><option>CLOSED</option><option>PENDING</option>
+                      </select>
+                    </div>
+                  </div>
+                </>
+              )}
+              {(editTarget.type === 'sale' || editTarget.type === 'advance') && (
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">Advance at delivery (₹)</label>
+                  <input type="number" min="0" value={editTarget.fields.advance}
+                    onChange={e => setEditTarget(t => t ? { ...t, fields: { ...t.fields, advance: e.target.value } } : null)}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              )}
+              {editTarget.type === 'payment' && (
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">Amount (₹)</label>
+                  <input type="number" min="0" value={editTarget.fields.amount}
+                    onChange={e => setEditTarget(t => t ? { ...t, fields: { ...t.fields, amount: e.target.value } } : null)}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              )}
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Payment Mode</label>
+                <select value={editTarget.fields.payment_mode}
+                  onChange={e => setEditTarget(t => t ? { ...t, fields: { ...t.fields, payment_mode: e.target.value } } : null)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">— None —</option>
+                  <option>CASH</option><option>NY A/C</option><option>MKL A/C</option><option>KMK A/C</option>
+                </select>
+              </div>
+              {editTarget.type !== 'advance' && (
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">Notes</label>
+                  <input type="text" value={editTarget.fields.notes || ''}
+                    onChange={e => setEditTarget(t => t ? { ...t, fields: { ...t.fields, notes: e.target.value } } : null)}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2 mt-5">
+              <button onClick={saveEdit} disabled={editBusy}
+                className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                {editBusy ? 'Saving...' : 'Save'}
+              </button>
+              <button onClick={() => setEditTarget(null)}
+                className="px-4 py-2 border border-slate-200 text-sm text-slate-600 rounded-lg hover:bg-slate-50">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         @media print {

@@ -16,6 +16,8 @@ interface Customer {
   last_order: string;
 }
 
+interface PayRecord { id: number; date: string; amount: number; payment_mode: string; notes: string; }
+
 interface CustomerRates { 4?: number; 6?: number; 8?: number; }
 
 interface RatePeriod {
@@ -79,6 +81,12 @@ export default function Customers() {
   const [editMode, setEditMode] = useState<'rename' | 'merge'>('rename');
   const [saving, setSaving] = useState(false);
   const [editMsg, setEditMsg] = useState('');
+
+  // Payment history
+  const [payHistory, setPayHistory] = useState<PayRecord[]>([]);
+  const [editPayId, setEditPayId] = useState<number | null>(null);
+  const [editPayFields, setEditPayFields] = useState<{ date: string; amount: string; payment_mode: string; notes: string }>({ date: '', amount: '', payment_mode: '', notes: '' });
+  const [editPayBusy, setEditPayBusy] = useState(false);
 
   // Bulk payment
   const [payAmount, setPayAmount] = useState('');
@@ -147,6 +155,11 @@ export default function Customers() {
     setTimeout(() => setCreditLimitSaved(false), 2000);
   };
 
+  const loadPayHistory = useCallback(async (name: string) => {
+    const rows = await fetch(`/api/customers/payment?customer=${encodeURIComponent(name)}`).then(r => r.json());
+    setPayHistory(rows);
+  }, []);
+
   const selectCustomer = (c: Customer) => {
     setSelected(c);
     setPayResult(null);
@@ -155,10 +168,12 @@ export default function Customers() {
     setPeriodSaveMsg('');
     setShowEdit(false);
     setEditMsg('');
+    setEditPayId(null);
     loadHistory(c.customer_name);
     loadRates(c.customer_name);
     loadRatePeriods(c.customer_name);
     loadCreditLimit(c.customer_name);
+    loadPayHistory(c.customer_name);
   };
 
   const openEdit = () => {
@@ -280,6 +295,30 @@ export default function Customers() {
     setPayNotes('');
     load();
     loadHistory(selected.customer_name);
+    loadPayHistory(selected.customer_name);
+  };
+
+  const openEditPay = (p: PayRecord) => {
+    setEditPayId(p.id);
+    setEditPayFields({ date: p.date, amount: String(p.amount), payment_mode: p.payment_mode || '', notes: p.notes || '' });
+  };
+
+  const saveEditPay = async () => {
+    if (!editPayId || !selected) return;
+    setEditPayBusy(true);
+    await fetch(`/api/payments/${editPayId}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date: editPayFields.date, amount: parseFloat(editPayFields.amount), payment_mode: editPayFields.payment_mode || null, notes: editPayFields.notes || null }),
+    });
+    setEditPayBusy(false); setEditPayId(null);
+    load(); loadPayHistory(selected.customer_name);
+  };
+
+  const deletePayment = async (id: number) => {
+    if (!selected) return;
+    if (!confirm('Delete this payment record?')) return;
+    await fetch(`/api/payments/${id}`, { method: 'DELETE' });
+    load(); loadPayHistory(selected.customer_name);
   };
 
   const inputCls = 'border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
@@ -710,6 +749,86 @@ export default function Customers() {
                   </tbody>
                 </table>
               </div>
+            </div>
+            {/* Payment History */}
+            <div className="bg-white rounded-xl border border-emerald-100 shadow-sm overflow-hidden">
+              <div className="px-5 py-3 border-b border-emerald-100 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-slate-700">Payment History ({payHistory.length})</h3>
+                {payHistory.length > 0 && (
+                  <span className="text-sm font-bold text-emerald-700">
+                    Total: {fmtCur(payHistory.reduce((s, p) => s + p.amount, 0))}
+                  </span>
+                )}
+              </div>
+              {payHistory.length === 0 ? (
+                <div className="px-5 py-4 text-sm text-slate-400 italic">No payments recorded yet.</div>
+              ) : (
+                <div className="overflow-x-auto max-h-72 overflow-y-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-50 sticky top-0">
+                      <tr className="text-left text-xs text-slate-500">
+                        <th className="px-4 py-2">Date</th>
+                        <th className="px-4 py-2">Mode</th>
+                        <th className="px-4 py-2">Notes</th>
+                        <th className="px-4 py-2 text-right">Amount</th>
+                        <th className="px-4 py-2 w-20"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {payHistory.map(p => (
+                        editPayId === p.id ? (
+                          <tr key={p.id} className="bg-blue-50/40">
+                            <td className="px-2 py-1">
+                              <input type="date" value={editPayFields.date} onChange={e => setEditPayFields(f => ({ ...f, date: e.target.value }))}
+                                className="border border-slate-200 rounded px-2 py-1 text-xs w-full" />
+                            </td>
+                            <td className="px-2 py-1">
+                              <select value={editPayFields.payment_mode} onChange={e => setEditPayFields(f => ({ ...f, payment_mode: e.target.value }))}
+                                className="border border-slate-200 rounded px-2 py-1 text-xs w-full">
+                                <option value="">—</option>
+                                <option>CASH</option><option>NY A/C</option><option>MKL A/C</option><option>KMK A/C</option>
+                              </select>
+                            </td>
+                            <td className="px-2 py-1">
+                              <input type="text" value={editPayFields.notes} onChange={e => setEditPayFields(f => ({ ...f, notes: e.target.value }))}
+                                className="border border-slate-200 rounded px-2 py-1 text-xs w-full" placeholder="Notes" />
+                            </td>
+                            <td className="px-2 py-1">
+                              <input type="number" value={editPayFields.amount} onChange={e => setEditPayFields(f => ({ ...f, amount: e.target.value }))}
+                                className="border border-slate-200 rounded px-2 py-1 text-xs w-24 text-right" />
+                            </td>
+                            <td className="px-2 py-1">
+                              <div className="flex gap-1">
+                                <button onClick={saveEditPay} disabled={editPayBusy}
+                                  className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50">
+                                  {editPayBusy ? '...' : 'Save'}
+                                </button>
+                                <button onClick={() => setEditPayId(null)}
+                                  className="px-2 py-1 border border-slate-200 rounded text-xs hover:bg-slate-50">
+                                  ✕
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ) : (
+                          <tr key={p.id} className="hover:bg-slate-50">
+                            <td className="px-4 py-2 text-slate-500 whitespace-nowrap">{p.date}</td>
+                            <td className="px-4 py-2">{p.payment_mode || '—'}</td>
+                            <td className="px-4 py-2 text-slate-500 text-xs">{p.notes || '—'}</td>
+                            <td className="px-4 py-2 text-right font-semibold text-emerald-700">{fmtCur(p.amount)}</td>
+                            <td className="px-4 py-2">
+                              <div className="flex gap-1 justify-end">
+                                <button onClick={() => openEditPay(p)} className="text-slate-400 hover:text-blue-600 text-xs" title="Edit">✏</button>
+                                <button onClick={() => deletePayment(p.id)} className="text-slate-400 hover:text-red-500 text-xs" title="Delete">🗑</button>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </>
         ) : (
