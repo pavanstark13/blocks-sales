@@ -37,23 +37,35 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { date, customer_name, address, phone, size, quantity, rate, advance, status, payment_mode, notes, vehicle_no } = body;
+  const {
+    date, customer_name, address, phone, site_name,
+    size, rate, advance, status, payment_mode, notes, vehicle_no,
+    qty_4inch = 0, qty_6inch = 0, qty_8inch = 0,
+  } = body;
 
-  if (!date || !size || !quantity) {
-    return NextResponse.json({ error: 'date, size, and quantity are required' }, { status: 400 });
+  const q4 = Number(qty_4inch) || 0;
+  const q6 = Number(qty_6inch) || 0;
+  const q8 = Number(qty_8inch) || 0;
+  const hasBreakdown = q4 > 0 || q6 > 0 || q8 > 0;
+  const quantity = hasBreakdown ? q4 + q6 + q8 : Number(body.quantity) || 0;
+  const effectiveSize = hasBreakdown ? 0 : Number(size) || 0;
+
+  if (!date || quantity <= 0) {
+    return NextResponse.json({ error: 'date and quantity are required' }, { status: 400 });
   }
 
   const amount  = rate && quantity ? Math.round(rate * quantity * 100) / 100 : null;
-  const balance = amount != null && advance != null ? Math.max(0, amount - advance) : amount;
+  const balance = amount != null ? Math.max(0, amount - (Number(advance) || 0)) : amount;
   const month_label = new Date(date)
     .toLocaleString('en', { month: 'short', year: '2-digit' })
     .toUpperCase().replace(' ', '-');
 
   const result = await db().run(
-    `INSERT INTO sales (date, customer_name, address, phone, size, quantity, rate, amount, advance, balance, status, payment_mode, notes, month_label, vehicle_no)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    date, customer_name || null, address || null, phone || null,
-    size, quantity, rate || null, amount, advance || 0, balance,
+    `INSERT INTO sales (date, customer_name, address, phone, site_name, size, quantity, qty_4inch, qty_6inch, qty_8inch, rate, amount, advance, balance, status, payment_mode, notes, month_label, vehicle_no)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    date, customer_name || null, address || null, phone || null, site_name || null,
+    effectiveSize, quantity, q4, q6, q8,
+    rate || null, amount, Number(advance) || 0, balance,
     status || 'CLOSED', payment_mode || null, notes || null, month_label, vehicle_no || null
   );
 

@@ -6,25 +6,31 @@ interface Row {
   customer_name: string;
   address: string;
   phone: string;
-  size: string;
-  quantity: string;
+  site_name: string;
+  qty_4inch: string;
+  qty_6inch: string;
+  qty_8inch: string;
   rate: string;
   advance: string;
   payment_mode: string;
   status: string;
 }
 
-const SIZES = ['4', '6', '8'];
 const PAYMENT_MODES = ['CASH', 'NY A/C', 'MKL A/C', 'KMK A/C'];
 
 const emptyRow = (): Row => ({
-  customer_name: '', address: '', phone: '',
-  size: '6', quantity: '', rate: '', advance: '0',
+  customer_name: '', address: '', phone: '', site_name: '',
+  qty_4inch: '', qty_6inch: '', qty_8inch: '',
+  rate: '', advance: '0',
   payment_mode: 'CASH', status: 'CLOSED',
 });
 
+function calcTotal(r: Row) {
+  return (parseInt(r.qty_4inch) || 0) + (parseInt(r.qty_6inch) || 0) + (parseInt(r.qty_8inch) || 0);
+}
+
 function calcAmount(r: Row) {
-  const qty = parseFloat(r.quantity);
+  const qty = calcTotal(r);
   const rate = parseFloat(r.rate);
   return qty > 0 && rate > 0 ? qty * rate : null;
 }
@@ -44,16 +50,6 @@ function excelDateToString(serial: number): string {
   return d.toISOString().split('T')[0];
 }
 
-function normaliseSize(raw: string): string {
-  if (!raw) return '6';
-  const s = String(raw).trim().replace(/["\s]/g, '');
-  if (SIZES.includes(s)) return s;
-  const m = s.match(/^(\d+)/);
-  if (m && SIZES.includes(m[1])) return m[1];
-  return '6';
-}
-
-// Fuzzy column header matcher for blocks fields
 function detectCols(headers: string[]): Record<string, number> {
   const map: Record<string, number> = {};
   headers.forEach((h, i) => {
@@ -62,8 +58,10 @@ function detectCols(headers: string[]): Record<string, number> {
     if (!map.customer_name && /(customer|party|client|name)/.test(s)) map.customer_name = i;
     if (!map.address && /(address|village|area|location|place)/.test(s)) map.address = i;
     if (!map.phone && /(phone|mobile|contact|number)/.test(s)) map.phone = i;
-    if (!map.size && /(size|type|block)/.test(s)) map.size = i;
-    if (!map.quantity && /(qty|quantity|blocks|nos|count)/.test(s)) map.quantity = i;
+    if (!map.site_name && /(site|project)/.test(s)) map.site_name = i;
+    if (!map.qty_4inch && /4.*(qty|nos|quantity|block)/i.test(s)) map.qty_4inch = i;
+    if (!map.qty_6inch && /6.*(qty|nos|quantity|block)/i.test(s)) map.qty_6inch = i;
+    if (!map.qty_8inch && /8.*(qty|nos|quantity|block)/i.test(s)) map.qty_8inch = i;
     if (!map.rate && /^rate/.test(s)) map.rate = i;
     if (!map.advance && /advanc/.test(s)) map.advance = i;
     if (!map.status && /status/.test(s)) map.status = i;
@@ -72,7 +70,7 @@ function detectCols(headers: string[]): Record<string, number> {
   return map;
 }
 
-const COLS = ['customer_name','address','phone','size','quantity','rate','advance','payment_mode','status'];
+const COLS = ['customer_name','address','phone','site_name','qty_4inch','qty_6inch','qty_8inch','rate','advance','payment_mode','status'];
 
 export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
   const today = new Date().toISOString().split('T')[0];
@@ -81,9 +79,8 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<{ saved: number; errors: number } | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
-  const rateCache = useRef<Record<string, Record<number, number>>>({});
+  const rateCache = useRef<Record<string, number>>({});
 
-  // Excel upload state
   const [uploadMode, setUploadMode] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadPreview, setUploadPreview] = useState<{ rows: Row[]; dateOverride?: string; source: string } | null>(null);
@@ -102,11 +99,13 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
       );
       const data = await res.json();
       const fetched = data.rates as Record<number, number>;
-      rateCache.current[name] = fetched;
+      // Use the rate for the most common size as default
+      const defaultRate = fetched[6] || fetched[4] || fetched[8] || 0;
+      if (defaultRate) rateCache.current[name] = defaultRate;
       setRows(prev => prev.map((r, idx) => {
-        if (idx !== i) return r;
-        const savedRate = fetched[parseInt(r.size)];
-        if (savedRate && !r.rate) return { ...r, rate: String(savedRate) };
+        if (idx !== i || r.rate) return r;
+        const savedRate = defaultRate;
+        if (savedRate) return { ...r, rate: String(savedRate) };
         return r;
       }));
     } catch { /* ignore */ }
@@ -128,8 +127,10 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
       phone: src.phone,
       payment_mode: src.payment_mode,
       status: src.status,
-      size: src.size === '6' ? '4' : src.size === '4' ? '8' : '6',
-      quantity: '',
+      site_name: '',
+      qty_4inch: '',
+      qty_6inch: '',
+      qty_8inch: '',
       rate: src.rate,
       advance: '0',
     };
@@ -141,8 +142,8 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
     setTimeout(() => {
       const trs = tableRef.current?.querySelectorAll('tr[data-row]');
       const newTr = trs?.[i + 1];
-      const qtyInput = newTr?.querySelectorAll('input')[3] as HTMLElement;
-      qtyInput?.focus();
+      const siteInput = newTr?.querySelectorAll('input')[3] as HTMLElement;
+      siteInput?.focus();
     }, 50);
   };
 
@@ -157,7 +158,6 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
     }
   };
 
-  // ── Excel parsing ────────────────────────────────────────────────────────────
   const parseExcel = useCallback(async (file: File) => {
     setUploading(true);
     try {
@@ -170,7 +170,6 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
 
       if (raw.length < 2) throw new Error('Sheet appears empty');
 
-      // Find header row (first row with at least 4 non-empty cells)
       let headerIdx = 0;
       for (let i = 0; i < Math.min(5, raw.length); i++) {
         if (raw[i].filter(Boolean).length >= 4) { headerIdx = i; break; }
@@ -178,7 +177,6 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
       const headers = (raw[headerIdx] as string[]).map(h => String(h ?? ''));
       const colMap = detectCols(headers);
 
-      // Try to detect a date from the filename if no date column
       let sheetDate: string | undefined;
       if (colMap.date === undefined) {
         const fnMatch = file.name.match(/(\d{4}[-\/]\d{2}[-\/]\d{2})/);
@@ -197,13 +195,15 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
           else if (dv) rowDate = String(dv).trim();
         }
 
-        const qty = parseFloat(String(cells[colMap.quantity ?? -1] ?? '')) || 0;
-        if (qty <= 0) continue;
+        const q4 = parseInt(String(cells[colMap.qty_4inch ?? -1] ?? '')) || 0;
+        const q6 = parseInt(String(cells[colMap.qty_6inch ?? -1] ?? '')) || 0;
+        const q8 = parseInt(String(cells[colMap.qty_8inch ?? -1] ?? '')) || 0;
+        if (q4 + q6 + q8 <= 0) continue;
 
         const customer = colMap.customer_name !== undefined ? String(cells[colMap.customer_name] ?? '').trim() : '';
         const address = colMap.address !== undefined ? String(cells[colMap.address] ?? '').trim() : '';
         const phone = colMap.phone !== undefined ? String(cells[colMap.phone] ?? '').trim() : '';
-        const sizeRaw = colMap.size !== undefined ? String(cells[colMap.size] ?? '').trim() : '6';
+        const site = colMap.site_name !== undefined ? String(cells[colMap.site_name] ?? '').trim() : '';
         const rate = parseFloat(String(cells[colMap.rate ?? -1] ?? '')) || 0;
         const adv = parseFloat(String(cells[colMap.advance ?? -1] ?? '')) || 0;
         const statusRaw = colMap.status !== undefined ? String(cells[colMap.status] ?? '').trim().toUpperCase() : '';
@@ -213,8 +213,10 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
           customer_name: customer,
           address,
           phone,
-          size: normaliseSize(sizeRaw),
-          quantity: String(qty),
+          site_name: site,
+          qty_4inch: q4 > 0 ? String(q4) : '',
+          qty_6inch: q6 > 0 ? String(q6) : '',
+          qty_8inch: q8 > 0 ? String(q8) : '',
           rate: rate > 0 ? String(rate) : '',
           advance: String(adv),
           payment_mode: PAYMENT_MODES.includes(modeRaw) ? modeRaw : 'CASH',
@@ -224,7 +226,7 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
         if (rowDate && !sheetDate) sheetDate = rowDate;
       }
 
-      if (!parsed.length) throw new Error('No valid rows found (need Quantity > 0)');
+      if (!parsed.length) throw new Error('No valid rows found (need at least one of 4"/6"/8" qty > 0)');
 
       setUploadPreview({ rows: parsed, dateOverride: sheetDate, source: file.name });
     } catch (err) {
@@ -255,19 +257,12 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
     setUploadMode(false);
   };
 
-  // ── Totals ───────────────────────────────────────────────────────────────────
   const totalAmount = rows.reduce((s, r) => s + (calcAmount(r) || 0), 0);
-  const totalQty = rows.reduce((s, r) => s + (parseFloat(r.quantity) || 0), 0);
-  const filledRows = rows.filter(r => r.quantity && parseFloat(r.quantity) > 0);
-
-  const customerTotals = filledRows.reduce<Record<string, number>>((acc, r) => {
-    const key = r.customer_name || '(no name)';
-    acc[key] = (acc[key] || 0) + (calcAmount(r) || 0);
-    return acc;
-  }, {});
-  const mixedCustomers = Object.entries(customerTotals).filter(([k]) =>
-    filledRows.filter(r => (r.customer_name || '(no name)') === k).length > 1
-  );
+  const totalQty = rows.reduce((s, r) => s + calcTotal(r), 0);
+  const total4 = rows.reduce((s, r) => s + (parseInt(r.qty_4inch) || 0), 0);
+  const total6 = rows.reduce((s, r) => s + (parseInt(r.qty_6inch) || 0), 0);
+  const total8 = rows.reduce((s, r) => s + (parseInt(r.qty_8inch) || 0), 0);
+  const filledRows = rows.filter(r => calcTotal(r) > 0);
 
   const handleSave = async () => {
     if (!filledRows.length) return;
@@ -285,8 +280,10 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
             customer_name: row.customer_name || null,
             address: row.address || null,
             phone: row.phone || null,
-            size: parseInt(row.size),
-            quantity: parseInt(row.quantity),
+            site_name: row.site_name || null,
+            qty_4inch: parseInt(row.qty_4inch) || 0,
+            qty_6inch: parseInt(row.qty_6inch) || 0,
+            qty_8inch: parseInt(row.qty_8inch) || 0,
             rate: parseFloat(row.rate) || null,
             advance: parseFloat(row.advance) || 0,
             payment_mode: row.payment_mode,
@@ -309,10 +306,10 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
 
   return (
     <div className="space-y-4">
-      {/* ── Upload Preview Modal ───────────────────────────────────────────────── */}
+      {/* Upload Preview Modal */}
       {uploadPreview && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[80vh] flex flex-col">
             <div className="p-4 border-b flex items-center justify-between">
               <div>
                 <h2 className="font-semibold text-slate-800">Preview Import</h2>
@@ -330,9 +327,11 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
                   <tr className="text-left text-slate-500">
                     <th className="px-2 py-1.5 font-medium">#</th>
                     <th className="px-2 py-1.5 font-medium">Customer</th>
-                    <th className="px-2 py-1.5 font-medium">Address</th>
-                    <th className="px-2 py-1.5 font-medium">Size</th>
-                    <th className="px-2 py-1.5 font-medium text-right">Qty</th>
+                    <th className="px-2 py-1.5 font-medium">Site</th>
+                    <th className="px-2 py-1.5 font-medium text-right">4&quot;</th>
+                    <th className="px-2 py-1.5 font-medium text-right">6&quot;</th>
+                    <th className="px-2 py-1.5 font-medium text-right">8&quot;</th>
+                    <th className="px-2 py-1.5 font-medium text-right">Total</th>
                     <th className="px-2 py-1.5 font-medium text-right">Rate</th>
                     <th className="px-2 py-1.5 font-medium text-right">Amount</th>
                     <th className="px-2 py-1.5 font-medium">Status</th>
@@ -345,11 +344,11 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
                       <tr key={i} className="hover:bg-slate-50">
                         <td className="px-2 py-1.5 text-slate-400">{i + 1}</td>
                         <td className="px-2 py-1.5 font-medium text-slate-700">{r.customer_name || <span className="text-slate-300">—</span>}</td>
-                        <td className="px-2 py-1.5 text-slate-500">{r.address || '—'}</td>
-                        <td className="px-2 py-1.5">
-                          <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-[10px] font-medium">{r.size}&quot;</span>
-                        </td>
-                        <td className="px-2 py-1.5 text-right font-semibold">{r.quantity}</td>
+                        <td className="px-2 py-1.5 text-slate-500">{r.site_name || '—'}</td>
+                        <td className="px-2 py-1.5 text-right">{r.qty_4inch || '—'}</td>
+                        <td className="px-2 py-1.5 text-right">{r.qty_6inch || '—'}</td>
+                        <td className="px-2 py-1.5 text-right">{r.qty_8inch || '—'}</td>
+                        <td className="px-2 py-1.5 text-right font-semibold">{calcTotal(r)}</td>
                         <td className="px-2 py-1.5 text-right text-slate-500">{r.rate || '—'}</td>
                         <td className="px-2 py-1.5 text-right text-blue-600 font-medium">{amt ? fmtCur(amt) : '—'}</td>
                         <td className="px-2 py-1.5">
@@ -368,7 +367,7 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
             <div className="p-4 border-t flex justify-between items-center">
               <div className="text-sm text-slate-600">
                 Total: <span className="font-semibold text-blue-600">
-                  {uploadPreview.rows.reduce((s, r) => s + (parseFloat(r.quantity) || 0), 0).toLocaleString('en-IN')} blocks
+                  {uploadPreview.rows.reduce((s, r) => s + calcTotal(r), 0).toLocaleString('en-IN')} blocks
                 </span>
                 {' · '}
                 <span className="font-semibold text-slate-700">
@@ -390,20 +389,28 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
         </div>
       )}
 
-      {/* ── Header ────────────────────────────────────────────────────────────── */}
+      {/* Header */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 flex flex-wrap items-end gap-4">
         <div>
           <label className="block text-xs font-medium text-slate-600 mb-1">Date for all entries</label>
           <input type="date" value={date} onChange={e => setDate(e.target.value)}
             className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
-        <div className="flex-1 text-sm text-slate-500">
-          <span className="font-semibold text-slate-700">{filledRows.length}</span> rows ·{' '}
-          <span className="font-semibold text-slate-700">{totalQty.toLocaleString('en-IN')}</span> blocks ·{' '}
-          <span className="font-semibold text-blue-600">{fmtCur(totalAmount)}</span>
+        <div className="flex-1 text-sm text-slate-500 space-y-0.5">
+          <div>
+            <span className="font-semibold text-slate-700">{filledRows.length}</span> rows ·{' '}
+            <span className="font-semibold text-slate-700">{totalQty.toLocaleString('en-IN')}</span> total blocks ·{' '}
+            <span className="font-semibold text-blue-600">{fmtCur(totalAmount)}</span>
+          </div>
+          {totalQty > 0 && (
+            <div className="text-xs">
+              {total4 > 0 && <span className="mr-2 text-indigo-600">4&quot;: {total4.toLocaleString('en-IN')}</span>}
+              {total6 > 0 && <span className="mr-2 text-blue-600">6&quot;: {total6.toLocaleString('en-IN')}</span>}
+              {total8 > 0 && <span className="mr-2 text-violet-600">8&quot;: {total8.toLocaleString('en-IN')}</span>}
+            </div>
+          )}
         </div>
         <div className="flex gap-2 flex-wrap">
-          {/* Upload Excel button */}
           <div className="relative">
             <input
               ref={fileInputRef}
@@ -434,7 +441,7 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
         </div>
       </div>
 
-      {/* ── Upload drag zone (collapsible) ──────────────────────────────────── */}
+      {/* Drag-drop zone */}
       {uploadMode && (
         <div
           onDragOver={e => { e.preventDefault(); setDragOver(true); }}
@@ -450,7 +457,7 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
           </svg>
           <p className="text-sm text-slate-600 font-medium">Drop your Excel file here or click to browse</p>
           <p className="text-xs text-slate-400 mt-1">Supports .xlsx, .xls, .csv · Auto-detects columns</p>
-          <p className="text-xs text-slate-400 mt-0.5">Expected columns: Customer, Size, Qty, Rate (optional: Address, Phone, Advance, Status)</p>
+          <p className="text-xs text-slate-400 mt-0.5">Expected columns: Customer, Site, 4&quot; Qty, 6&quot; Qty, 8&quot; Qty, Rate</p>
         </div>
       )}
 
@@ -463,25 +470,6 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
         </button>
       </div>
 
-      {/* Mixed-size customer summary */}
-      {mixedCustomers.length > 0 && (
-        <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
-          <p className="text-xs font-semibold text-blue-700 mb-1">Mixed-size orders detected:</p>
-          <div className="flex flex-wrap gap-3">
-            {mixedCustomers.map(([name, total]) => {
-              const customerRows = filledRows.filter(r => (r.customer_name || '(no name)') === name);
-              return (
-                <div key={name} className="text-xs text-blue-700">
-                  <span className="font-medium">{name}</span>:{' '}
-                  {customerRows.map(r => `${r.size}" × ${r.quantity}`).join(' + ')}{' '}
-                  = <span className="font-bold">{fmtCur(total)}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       {result && (
         <div className={`rounded-xl p-4 text-sm font-medium ${result.errors === 0 ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}>
           {result.saved > 0 && `✓ ${result.saved} entries saved. `}
@@ -489,7 +477,7 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
         </div>
       )}
 
-      {/* ── Spreadsheet table ─────────────────────────────────────────────────── */}
+      {/* Spreadsheet table */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table ref={tableRef} className="w-full text-sm">
@@ -497,10 +485,13 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
               <tr className="text-left text-xs text-slate-500 font-semibold">
                 <th className="px-3 py-2 w-6">#</th>
                 <th className="px-2 py-2 min-w-36">Customer Name</th>
-                <th className="px-2 py-2 min-w-28">Address</th>
-                <th className="px-2 py-2 min-w-24">Phone</th>
-                <th className="px-2 py-2 w-16">Size</th>
-                <th className="px-2 py-2 w-20">Qty *</th>
+                <th className="px-2 py-2 min-w-24">Address</th>
+                <th className="px-2 py-2 min-w-20">Phone</th>
+                <th className="px-2 py-2 min-w-28">Site / Project</th>
+                <th className="px-2 py-2 w-16 text-center text-indigo-600">4&quot;</th>
+                <th className="px-2 py-2 w-16 text-center text-blue-600">6&quot;</th>
+                <th className="px-2 py-2 w-16 text-center text-violet-600">8&quot;</th>
+                <th className="px-2 py-2 w-16 text-right">Total</th>
                 <th className="px-2 py-2 w-20">Rate</th>
                 <th className="px-2 py-2 w-24">Amount</th>
                 <th className="px-2 py-2 w-20">Advance</th>
@@ -514,7 +505,8 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
               {rows.map((row, i) => {
                 const amt = calcAmount(row);
                 const bal = calcBalance(row);
-                const filled = !!row.quantity && parseFloat(row.quantity) > 0;
+                const total = calcTotal(row);
+                const filled = total > 0;
                 const isSameCustomer = i > 0 &&
                   row.customer_name &&
                   row.customer_name === rows[i - 1].customer_name;
@@ -525,11 +517,9 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
                     <td className="px-3 py-1.5 text-xs text-slate-400">{i + 1}</td>
                     <td className="px-2 py-1.5">
                       {isSameCustomer ? (
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs text-orange-600 font-medium truncate max-w-28" title={row.customer_name}>
-                            ↳ {row.customer_name}
-                          </span>
-                        </div>
+                        <span className="text-xs text-orange-600 font-medium truncate max-w-28 block" title={row.customer_name}>
+                          ↳ {row.customer_name}
+                        </span>
                       ) : (
                         <input value={row.customer_name}
                           onChange={e => setCell(i, 'customer_name', e.target.value)}
@@ -557,31 +547,36 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
                       )}
                     </td>
                     <td className="px-2 py-1.5">
-                      <select value={row.size} onChange={e => {
-                        const newSize = e.target.value;
-                        setCell(i, 'size', newSize);
-                        const cached = rateCache.current[row.customer_name];
-                        if (cached) {
-                          const savedRate = cached[parseInt(newSize) as 4 | 6 | 8];
-                          if (savedRate) setRows(prev => prev.map((r, idx) => idx === i ? { ...r, size: newSize, rate: String(savedRate) } : r));
-                        }
-                      }}
-                        className={`${inputCls} ${isSameCustomer ? 'border-orange-300' : ''}`}>
-                        <option value="4">4&quot;</option>
-                        <option value="6">6&quot;</option>
-                        <option value="8">8&quot;</option>
-                      </select>
+                      <input value={row.site_name}
+                        onChange={e => setCell(i, 'site_name', e.target.value)}
+                        onKeyDown={e => handleKeyDown(e, i, 3)}
+                        placeholder="Site name (optional)" className={inputCls} />
                     </td>
                     <td className="px-2 py-1.5">
-                      <input type="number" value={row.quantity}
-                        onChange={e => setCell(i, 'quantity', e.target.value)}
+                      <input type="number" value={row.qty_4inch}
+                        onChange={e => setCell(i, 'qty_4inch', e.target.value)}
                         onKeyDown={e => handleKeyDown(e, i, 4)}
-                        placeholder="644" className={`${inputCls} ${filled ? 'font-semibold' : ''}`} />
+                        placeholder="0" className={`${inputCls} text-center text-indigo-700`} />
+                    </td>
+                    <td className="px-2 py-1.5">
+                      <input type="number" value={row.qty_6inch}
+                        onChange={e => setCell(i, 'qty_6inch', e.target.value)}
+                        onKeyDown={e => handleKeyDown(e, i, 5)}
+                        placeholder="0" className={`${inputCls} text-center text-blue-700`} />
+                    </td>
+                    <td className="px-2 py-1.5">
+                      <input type="number" value={row.qty_8inch}
+                        onChange={e => setCell(i, 'qty_8inch', e.target.value)}
+                        onKeyDown={e => handleKeyDown(e, i, 6)}
+                        placeholder="0" className={`${inputCls} text-center text-violet-700`} />
+                    </td>
+                    <td className="px-2 py-1.5 text-right text-xs font-bold text-slate-700">
+                      {total > 0 ? total.toLocaleString('en-IN') : '—'}
                     </td>
                     <td className="px-2 py-1.5">
                       <input type="number" value={row.rate}
                         onChange={e => setCell(i, 'rate', e.target.value)}
-                        onKeyDown={e => handleKeyDown(e, i, 5)}
+                        onKeyDown={e => handleKeyDown(e, i, 7)}
                         placeholder="42" step="0.5" className={inputCls} />
                     </td>
                     <td className="px-2 py-1.5 text-right font-medium text-blue-700 text-xs">
@@ -590,7 +585,7 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
                     <td className="px-2 py-1.5">
                       <input type="number" value={row.advance}
                         onChange={e => setCell(i, 'advance', e.target.value)}
-                        onKeyDown={e => handleKeyDown(e, i, 7)}
+                        onKeyDown={e => handleKeyDown(e, i, 9)}
                         placeholder="0" className={inputCls} />
                     </td>
                     <td className={`px-2 py-1.5 text-right text-xs font-medium ${bal && bal > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
@@ -614,9 +609,9 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
                     </td>
                     <td className="px-2 py-1.5">
                       <div className="flex gap-1">
-                        <button onClick={() => duplicateCustomer(i)} title="Add another size for same customer"
-                          className="text-orange-500 hover:text-orange-700 text-sm font-bold cursor-pointer">
-                          +S
+                        <button onClick={() => duplicateCustomer(i)} title="Add another site for same customer"
+                          className="text-orange-500 hover:text-orange-700 text-xs font-bold cursor-pointer px-1">
+                          +Site
                         </button>
                         <button onClick={() => removeRow(i)}
                           className="text-slate-300 hover:text-red-500 text-lg leading-none cursor-pointer">×</button>
@@ -633,8 +628,7 @@ export default function BulkEntry({ onSaved }: { onSaved: () => void }) {
             + Add row
           </button>
           <p className="text-xs text-slate-400">
-            <span className="text-emerald-600 font-medium">Upload Excel</span> to auto-fill ·{' '}
-            <span className="text-orange-600 font-medium">+S</span> = add another size · Tab/Enter = next row
+            Enter qty per size · <span className="text-orange-600 font-medium">+Site</span> = same customer, different site · Tab/Enter = next row
           </p>
         </div>
       </div>

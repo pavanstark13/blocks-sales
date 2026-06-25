@@ -5,7 +5,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params;
   const body = await req.json();
 
-  const allowed = ['date','customer_name','address','phone','size','quantity','rate','amount','advance','balance','status','payment_mode','notes'];
+  const allowed = ['date','customer_name','address','phone','site_name','size','quantity','qty_4inch','qty_6inch','qty_8inch','rate','amount','advance','balance','status','payment_mode','notes'];
   const fields  = Object.keys(body).filter(k => allowed.includes(k));
   if (!fields.length) return NextResponse.json({ error: 'No valid fields' }, { status: 400 });
 
@@ -14,6 +14,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const merged: Record<string, unknown> = { ...existing, ...body };
 
+  const q4 = Number(merged.qty_4inch) || 0;
+  const q6 = Number(merged.qty_6inch) || 0;
+  const q8 = Number(merged.qty_8inch) || 0;
+  if (q4 + q6 + q8 > 0) merged.quantity = q4 + q6 + q8;
   if (merged.rate && merged.quantity) {
     merged.amount = Math.round(Number(merged.rate) * Number(merged.quantity) * 100) / 100;
   }

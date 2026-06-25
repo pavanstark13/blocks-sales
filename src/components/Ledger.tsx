@@ -8,8 +8,12 @@ interface LedgerEntry {
   date: string;
   // sale fields
   address?: string;
+  site_name?: string;
   size?: number;
   quantity?: number;
+  qty_4inch?: number;
+  qty_6inch?: number;
+  qty_8inch?: number;
   rate?: number;
   amount?: number;
   advance?: number;
@@ -357,8 +361,10 @@ export default function Ledger() {
                       <th className="px-3 py-2 text-left w-6">#</th>
                       <th className="px-3 py-2 text-left">Date</th>
                       <th className="px-3 py-2 text-left">Particulars</th>
-                      <th className="px-3 py-2 text-right">Size</th>
-                      <th className="px-3 py-2 text-right">Qty</th>
+                      <th className="px-3 py-2 text-right text-indigo-500">4&quot;</th>
+                      <th className="px-3 py-2 text-right text-blue-500">6&quot;</th>
+                      <th className="px-3 py-2 text-right text-violet-500">8&quot;</th>
+                      <th className="px-3 py-2 text-right font-bold">Total</th>
                       <th className="px-3 py-2 text-right">Rate</th>
                       <th className="px-3 py-2 text-right text-red-600">Debit (₹)</th>
                       <th className="px-3 py-2 text-right text-green-600">Credit (₹)</th>
@@ -367,7 +373,10 @@ export default function Ledger() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                    {entries.map((e, i) => (
+                    {entries.map((e, i) => {
+                      const hasBreakdown = e.row_type === 'sale' &&
+                        ((e.qty_4inch || 0) + (e.qty_6inch || 0) + (e.qty_8inch || 0)) > 0;
+                      return (
                       <tr key={`${e.row_type}-${e.id}`}
                         className={`hover:bg-slate-50 ${
                           e.row_type === 'payment' ? 'bg-emerald-50/40' :
@@ -386,17 +395,33 @@ export default function Ledger() {
                             </div>
                           ) : (
                             <div>
-                              <div className="font-medium text-slate-800">{e.size}&quot; Blocks sold</div>
+                              <div className="font-medium text-slate-800">
+                                {e.site_name ? e.site_name : hasBreakdown ? 'Blocks supplied' : `${e.size}" Blocks sold`}
+                              </div>
                               <div className="text-xs text-slate-400">
                                 {e.payment_mode && <span className="mr-2">{e.payment_mode}</span>}
                                 {e.notes && <span>{e.notes}</span>}
-                                {e.address && !e.notes && <span>{e.address}</span>}
+                                {!e.notes && e.address && <span>{e.address}</span>}
                               </div>
                             </div>
                           )}
                         </td>
-                        <td className="px-3 py-2 text-right">{e.row_type === 'sale' ? `${e.size}"` : '—'}</td>
-                        <td className="px-3 py-2 text-right">{e.row_type === 'sale' ? fmt(e.quantity ?? null) : '—'}</td>
+                        {/* 4" / 6" / 8" / Total */}
+                        <td className="px-3 py-2 text-right text-indigo-700">
+                          {hasBreakdown ? ((e.qty_4inch || 0) > 0 ? fmt(e.qty_4inch ?? null) : '—') :
+                           (e.row_type === 'sale' && e.size === 4 ? fmt(e.quantity ?? null) : '—')}
+                        </td>
+                        <td className="px-3 py-2 text-right text-blue-700">
+                          {hasBreakdown ? ((e.qty_6inch || 0) > 0 ? fmt(e.qty_6inch ?? null) : '—') :
+                           (e.row_type === 'sale' && e.size === 6 ? fmt(e.quantity ?? null) : '—')}
+                        </td>
+                        <td className="px-3 py-2 text-right text-violet-700">
+                          {hasBreakdown ? ((e.qty_8inch || 0) > 0 ? fmt(e.qty_8inch ?? null) : '—') :
+                           (e.row_type === 'sale' && e.size === 8 ? fmt(e.quantity ?? null) : '—')}
+                        </td>
+                        <td className="px-3 py-2 text-right font-semibold text-slate-700">
+                          {e.row_type === 'sale' ? fmt(e.quantity ?? null) : '—'}
+                        </td>
                         <td className="px-3 py-2 text-right">{e.row_type === 'sale' && e.rate ? `₹${e.rate}` : '—'}</td>
                         <td className="px-3 py-2 text-right font-medium text-red-600">
                           {e.debit > 0 ? fmtCur(e.debit) : '—'}
@@ -422,12 +447,13 @@ export default function Ledger() {
                           )}
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
 
                     {/* Totals row */}
                     {summary && (
                       <tr className="bg-slate-100 font-semibold border-t-2 border-slate-300">
-                        <td colSpan={6} className="px-3 py-3 text-sm text-right text-slate-600">TOTAL</td>
+                        <td colSpan={9} className="px-3 py-3 text-sm text-right text-slate-600">TOTAL</td>
                         <td className="px-3 py-3 text-right text-red-700">{fmtCur(summary.total_debit)}</td>
                         <td className="px-3 py-3 text-right text-green-700">{fmtCur(summary.total_credit)}</td>
                         <td className={`px-3 py-3 text-right ${summary.closing_balance > 0 ? 'text-rose-700' : 'text-emerald-700'}`}>

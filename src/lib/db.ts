@@ -16,8 +16,12 @@ const SCHEMA = `
     customer_name TEXT,
     address TEXT,
     phone TEXT,
-    size INTEGER NOT NULL,
-    quantity INTEGER NOT NULL,
+    site_name TEXT,
+    size INTEGER NOT NULL DEFAULT 0,
+    quantity INTEGER NOT NULL DEFAULT 0,
+    qty_4inch INTEGER DEFAULT 0,
+    qty_6inch INTEGER DEFAULT 0,
+    qty_8inch INTEGER DEFAULT 0,
     rate REAL,
     amount REAL,
     advance REAL DEFAULT 0,
@@ -205,6 +209,10 @@ function makeTurso(): DB {
   // Migrations: ADD COLUMN statements that are safe to re-run (fail silently if column exists)
   const MIGRATIONS = [
     `ALTER TABLE sales ADD COLUMN vehicle_no TEXT`,
+    `ALTER TABLE sales ADD COLUMN site_name TEXT`,
+    `ALTER TABLE sales ADD COLUMN qty_4inch INTEGER DEFAULT 0`,
+    `ALTER TABLE sales ADD COLUMN qty_6inch INTEGER DEFAULT 0`,
+    `ALTER TABLE sales ADD COLUMN qty_8inch INTEGER DEFAULT 0`,
   ];
 
   // Run schema once per process
@@ -260,7 +268,13 @@ function makeLocal(): DB {
   sqlite.pragma('foreign_keys = ON');
   sqlite.exec(SCHEMA);
   // Migrations (safe to re-run)
-  for (const m of [`ALTER TABLE sales ADD COLUMN vehicle_no TEXT`]) {
+  for (const m of [
+    `ALTER TABLE sales ADD COLUMN vehicle_no TEXT`,
+    `ALTER TABLE sales ADD COLUMN site_name TEXT`,
+    `ALTER TABLE sales ADD COLUMN qty_4inch INTEGER DEFAULT 0`,
+    `ALTER TABLE sales ADD COLUMN qty_6inch INTEGER DEFAULT 0`,
+    `ALTER TABLE sales ADD COLUMN qty_8inch INTEGER DEFAULT 0`,
+  ]) {
     try { sqlite.exec(m); } catch { /* already exists */ }
   }
 

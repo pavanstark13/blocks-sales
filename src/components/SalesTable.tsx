@@ -8,8 +8,12 @@ interface Sale {
   customer_name: string;
   address: string;
   phone: string;
+  site_name: string;
   size: number;
   quantity: number;
+  qty_4inch: number;
+  qty_6inch: number;
+  qty_8inch: number;
   rate: number;
   amount: number;
   advance: number;
@@ -194,10 +198,11 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
                 <tr className="text-left text-xs text-slate-500">
                   <th className="px-4 py-3">Date</th>
                   <th className="px-4 py-3">Customer</th>
-                  <th className="px-4 py-3">Address</th>
-                  <th className="px-4 py-3">Phone</th>
-                  <th className="px-4 py-3 text-right">Size</th>
-                  <th className="px-4 py-3 text-right">Qty</th>
+                  <th className="px-4 py-3">Site / Address</th>
+                  <th className="px-4 py-3 text-right text-indigo-500">4&quot;</th>
+                  <th className="px-4 py-3 text-right text-blue-500">6&quot;</th>
+                  <th className="px-4 py-3 text-right text-violet-500">8&quot;</th>
+                  <th className="px-4 py-3 text-right font-semibold">Total</th>
                   <th className="px-4 py-3 text-right">Rate</th>
                   <th className="px-4 py-3 text-right">Amount</th>
                   <th className="px-4 py-3 text-right">Advance</th>
@@ -208,14 +213,27 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {sales.map(s => (
+                {sales.map(s => {
+                  const hasBreakdown = (s.qty_4inch || 0) + (s.qty_6inch || 0) + (s.qty_8inch || 0) > 0;
+                  return (
                   <tr key={s.id} className="hover:bg-slate-50">
                     <td className="px-4 py-2 text-slate-500">{s.date}</td>
                     <td className="px-4 py-2 font-medium max-w-32 truncate" title={s.customer_name}>{s.customer_name || '—'}</td>
-                    <td className="px-4 py-2 text-slate-500 max-w-28 truncate" title={s.address}>{s.address || '—'}</td>
-                    <td className="px-4 py-2 text-slate-500">{s.phone || '—'}</td>
-                    <td className="px-4 py-2 text-right">{s.size}&quot;</td>
-                    <td className="px-4 py-2 text-right">{fmt(s.quantity)}</td>
+                    <td className="px-4 py-2 max-w-36">
+                      {s.site_name && <div className="text-xs font-medium text-slate-700 truncate">{s.site_name}</div>}
+                      {s.address && <div className="text-xs text-slate-400 truncate">{s.address}</div>}
+                      {!s.site_name && !s.address && <span className="text-slate-300">—</span>}
+                    </td>
+                    <td className="px-4 py-2 text-right text-indigo-700 font-medium">
+                      {hasBreakdown ? (s.qty_4inch > 0 ? fmt(s.qty_4inch) : '—') : (s.size === 4 ? fmt(s.quantity) : '—')}
+                    </td>
+                    <td className="px-4 py-2 text-right text-blue-700 font-medium">
+                      {hasBreakdown ? (s.qty_6inch > 0 ? fmt(s.qty_6inch) : '—') : (s.size === 6 ? fmt(s.quantity) : '—')}
+                    </td>
+                    <td className="px-4 py-2 text-right text-violet-700 font-medium">
+                      {hasBreakdown ? (s.qty_8inch > 0 ? fmt(s.qty_8inch) : '—') : (s.size === 8 ? fmt(s.quantity) : '—')}
+                    </td>
+                    <td className="px-4 py-2 text-right font-bold text-slate-700">{fmt(s.quantity)}</td>
                     <td className="px-4 py-2 text-right">{s.rate ? `₹${s.rate}` : '—'}</td>
                     <td className="px-4 py-2 text-right font-medium">{fmtCur(s.amount)}</td>
                     <td className="px-4 py-2 text-right text-emerald-600">{fmtCur(s.advance)}</td>
@@ -245,7 +263,8 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -278,8 +297,10 @@ export default function SalesTable({ onRefresh }: { onRefresh: () => void }) {
                 { key: 'date', label: 'Date', type: 'date' },
                 { key: 'address', label: 'Address', type: 'text' },
                 { key: 'phone', label: 'Phone', type: 'text' },
-                { key: 'size', label: 'Size (inch)', type: 'number' },
-                { key: 'quantity', label: 'Quantity', type: 'number' },
+                { key: 'site_name', label: 'Site / Project', type: 'text' },
+                { key: 'qty_4inch', label: '4" Qty', type: 'number' },
+                { key: 'qty_6inch', label: '6" Qty', type: 'number' },
+                { key: 'qty_8inch', label: '8" Qty', type: 'number' },
                 { key: 'rate', label: 'Rate (₹)', type: 'number' },
                 { key: 'advance', label: 'Advance (₹)', type: 'number' },
               ].map(f => (
