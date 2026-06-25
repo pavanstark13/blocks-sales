@@ -63,6 +63,10 @@ interface Summary {
   open_orders: number;
   payment_count: number;
   total_payments: number;
+  total_qty: number;
+  total_4inch: number;
+  total_6inch: number;
+  total_8inch: number;
 }
 
 function fmtCur(n: number) {
@@ -315,35 +319,63 @@ export default function Ledger() {
 
               {/* Summary cards */}
               {summary && (
-                <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="bg-red-50 rounded-lg p-3">
-                    <p className="text-xs text-red-500 font-medium">Total Sales (Dr)</p>
-                    <p className="text-lg font-bold text-red-700">{fmtCur(summary.total_debit)}</p>
-                  </div>
-                  <div className="bg-green-50 rounded-lg p-3">
-                    <p className="text-xs text-green-500 font-medium">Total Received (Cr)</p>
-                    <p className="text-lg font-bold text-green-700">{fmtCur(summary.total_credit)}</p>
-                  </div>
-                  <div className={`rounded-lg p-3 ${summary.closing_balance > 0 ? 'bg-rose-50' : 'bg-emerald-50'}`}>
-                    <p className={`text-xs font-medium ${summary.closing_balance > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
-                      Closing Balance
-                    </p>
-                    <p className={`text-lg font-bold ${summary.closing_balance > 0 ? 'text-rose-700' : 'text-emerald-700'}`}>
-                      {fmtCur(summary.closing_balance)}
-                      <span className="text-xs ml-1">{summary.closing_balance > 0 ? 'Dr' : 'Cr'}</span>
-                    </p>
-                  </div>
-                  <div className="bg-slate-50 rounded-lg p-3">
-                    <p className="text-xs text-slate-500 font-medium">Orders / Payments</p>
-                    <p className="text-lg font-bold text-slate-700">
-                      {summary.total_orders}
-                      {summary.open_orders > 0 && (
-                        <span className="text-xs text-amber-600 ml-1">({summary.open_orders} open)</span>
+                <div className="mt-4 space-y-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="bg-red-50 rounded-lg p-3">
+                      <p className="text-xs text-red-500 font-medium">Total Sales (Dr)</p>
+                      <p className="text-lg font-bold text-red-700">{fmtCur(summary.total_debit)}</p>
+                    </div>
+                    <div className="bg-green-50 rounded-lg p-3">
+                      <p className="text-xs text-green-500 font-medium">Total Received (Cr)</p>
+                      <p className="text-lg font-bold text-green-700">{fmtCur(summary.total_credit)}</p>
+                    </div>
+                    <div className={`rounded-lg p-3 ${summary.closing_balance > 0 ? 'bg-rose-50' : 'bg-emerald-50'}`}>
+                      <p className={`text-xs font-medium ${summary.closing_balance > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
+                        Closing Balance
+                      </p>
+                      <p className={`text-lg font-bold ${summary.closing_balance > 0 ? 'text-rose-700' : 'text-emerald-700'}`}>
+                        {fmtCur(summary.closing_balance)}
+                        <span className="text-xs ml-1">{summary.closing_balance > 0 ? 'Dr' : 'Cr'}</span>
+                      </p>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg p-3">
+                      <p className="text-xs text-slate-500 font-medium">Orders / Payments</p>
+                      <p className="text-lg font-bold text-slate-700">
+                        {summary.total_orders}
+                        {summary.open_orders > 0 && (
+                          <span className="text-xs text-amber-600 ml-1">({summary.open_orders} open)</span>
+                        )}
+                      </p>
+                      {summary.payment_count > 0 && (
+                        <p className="text-xs text-emerald-600">{summary.payment_count} payment{summary.payment_count > 1 ? 's' : ''}</p>
                       )}
-                    </p>
-                    {summary.payment_count > 0 && (
-                      <p className="text-xs text-emerald-600">{summary.payment_count} payment{summary.payment_count > 1 ? 's' : ''}</p>
+                    </div>
+                  </div>
+                  {/* Block quantity totals */}
+                  <div className="bg-blue-50 rounded-lg px-4 py-3 flex flex-wrap gap-4 items-center">
+                    <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Total Blocks Supplied</span>
+                    {summary.total_4inch > 0 && (
+                      <div className="text-sm">
+                        <span className="text-indigo-500 font-medium text-xs mr-1">4&quot;</span>
+                        <span className="font-bold text-indigo-700">{summary.total_4inch.toLocaleString('en-IN')}</span>
+                      </div>
                     )}
+                    {summary.total_6inch > 0 && (
+                      <div className="text-sm">
+                        <span className="text-blue-500 font-medium text-xs mr-1">6&quot;</span>
+                        <span className="font-bold text-blue-700">{summary.total_6inch.toLocaleString('en-IN')}</span>
+                      </div>
+                    )}
+                    {summary.total_8inch > 0 && (
+                      <div className="text-sm">
+                        <span className="text-violet-500 font-medium text-xs mr-1">8&quot;</span>
+                        <span className="font-bold text-violet-700">{summary.total_8inch.toLocaleString('en-IN')}</span>
+                      </div>
+                    )}
+                    <div className="text-sm border-l border-blue-200 pl-4">
+                      <span className="text-blue-500 font-medium text-xs mr-1">Total</span>
+                      <span className="font-bold text-blue-800">{summary.total_qty.toLocaleString('en-IN')} blocks</span>
+                    </div>
                   </div>
                 </div>
               )}

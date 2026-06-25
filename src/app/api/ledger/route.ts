@@ -57,7 +57,8 @@ export async function GET(req: NextRequest) {
   if (search)   { where += ' AND (address LIKE ? OR notes LIKE ?)'; params.push(`%${search}%`, `%${search}%`); }
 
   const rows = await database.all(
-    `SELECT id, date, address, size, quantity, rate, amount, advance, balance, status, payment_mode, notes, month_label
+    `SELECT id, date, address, site_name, size, quantity, qty_4inch, qty_6inch, qty_8inch,
+            rate, amount, advance, balance, status, payment_mode, notes, month_label
      FROM sales ${where} ORDER BY date ASC, id ASC`,
     ...params
   );
@@ -122,6 +123,19 @@ export async function GET(req: NextRequest) {
   const totalDebit  = entries.reduce((s, e) => s + e.debit, 0);
   const totalCredit = entries.reduce((s, e) => s + e.credit, 0);
 
+  const total4 = rows.reduce((s, r) => {
+    const q4 = Number(r.qty_4inch) || 0;
+    return s + (q4 > 0 ? q4 : (Number(r.size) === 4 ? Number(r.quantity) || 0 : 0));
+  }, 0);
+  const total6 = rows.reduce((s, r) => {
+    const q6 = Number(r.qty_6inch) || 0;
+    return s + (q6 > 0 ? q6 : (Number(r.size) === 6 ? Number(r.quantity) || 0 : 0));
+  }, 0);
+  const total8 = rows.reduce((s, r) => {
+    const q8 = Number(r.qty_8inch) || 0;
+    return s + (q8 > 0 ? q8 : (Number(r.size) === 8 ? Number(r.quantity) || 0 : 0));
+  }, 0);
+
   const summary = {
     total_debit:     totalDebit,
     total_credit:    totalCredit,
@@ -130,6 +144,10 @@ export async function GET(req: NextRequest) {
     open_orders:     rows.filter(r => r.status === 'OPEN' || r.status === 'PENDING').length,
     payment_count:   payments.length,
     total_payments:  payments.reduce((s, p) => s + (Number(p.amount) || 0), 0),
+    total_qty:       rows.reduce((s, r) => s + (Number(r.quantity) || 0), 0),
+    total_4inch:     total4,
+    total_6inch:     total6,
+    total_8inch:     total8,
   };
 
   return NextResponse.json({ customers, entries, payments, summary });
