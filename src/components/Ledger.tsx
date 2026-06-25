@@ -462,7 +462,7 @@ export default function Ledger() {
                         }
 
                         // Merge quantities across grouped sale rows
-                        let g4 = 0, g6 = 0, g8 = 0, gTotal = 0, gDebit = 0;
+                        let g4 = 0, g6 = 0, g8 = 0, gTotal = 0, gDebit = 0, gCredit = 0;
                         const rates = new Set<number>();
                         const statuses = new Set<string>();
                         for (const e of group) {
@@ -478,6 +478,7 @@ export default function Ledger() {
                           }
                           gTotal += e.quantity || 0;
                           gDebit += e.debit || 0;
+                          gCredit += e.credit || 0;
                           if (e.rate) rates.add(Number(e.rate));
                           if (e.status) statuses.add(e.status);
                         }
@@ -514,7 +515,9 @@ export default function Ledger() {
                             <td className="px-3 py-2 text-right font-medium text-red-600">
                               {gDebit > 0 ? fmtCur(gDebit) : '—'}
                             </td>
-                            <td className="px-3 py-2 text-right font-medium text-green-600">—</td>
+                            <td className="px-3 py-2 text-right font-medium text-green-600">
+                              {gCredit > 0 ? fmtCur(gCredit) : '—'}
+                            </td>
                             <td className={`px-3 py-2 text-right font-bold ${last.running_balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
                               {fmtCur(last.running_balance)}
                               <span className="text-xs ml-0.5 font-normal">{last.running_balance > 0 ? 'Dr' : 'Cr'}</span>
@@ -625,10 +628,11 @@ export default function Ledger() {
           /* Ledger table */
           table { border-collapse: collapse !important; width: 100% !important; }
           th, td {
-            border: 1px solid #555 !important;
+            border: 1px solid #333 !important;
             padding: 4px 7px !important;
             font-size: 10px !important;
             color: #000 !important;
+            font-weight: 500 !important;
           }
           thead tr {
             background-color: #1e293b !important;
@@ -636,21 +640,37 @@ export default function Ledger() {
           thead th {
             background-color: #1e293b !important;
             color: #fff !important;
-            font-weight: 700 !important;
+            font-weight: 800 !important;
             font-size: 9px !important;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.05em;
+          }
+          tbody td {
+            color: #111 !important;
+            font-weight: 500 !important;
+          }
+          /* Amount / balance columns — bold */
+          tbody td:nth-child(n+9) {
+            font-weight: 700 !important;
           }
           /* Totals row */
           tbody tr:last-child td {
-            background-color: #e2e8f0 !important;
-            font-weight: 700 !important;
-            border-top: 2px solid #000 !important;
+            background-color: #cbd5e1 !important;
+            font-weight: 800 !important;
+            border-top: 2.5px solid #000 !important;
+            font-size: 10.5px !important;
           }
-          /* Payment rows — light stripe */
-          tr.payment-row td { background-color: #f0fdf4 !important; }
+          /* Payment rows */
+          tr.payment-row td {
+            background-color: #dcfce7 !important;
+            font-style: italic;
+          }
           /* Merged rows note */
-          .merged-note { color: #555 !important; font-size: 9px !important; }
+          .merged-note {
+            color: #333 !important;
+            font-size: 9px !important;
+            font-weight: 600 !important;
+          }
 
           /* Quantity summary bar */
           .qty-summary-bar {
