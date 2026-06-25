@@ -303,56 +303,57 @@ export default function Ledger() {
                 </button>
               </div>
 
-              {/* Print header */}
+      {/* Print header */}
               <div className="hidden print:block text-center mb-4">
-                <h1 className="text-2xl font-bold">BLOCKS SALES</h1>
-                <h2 className="text-lg font-semibold mt-1">Customer Ledger</h2>
-                <p className="text-base mt-1">{selected}</p>
-                {selectedInfo?.address && <p className="text-sm text-slate-600">{selectedInfo.address}</p>}
-                {selectedInfo?.phone && <p className="text-sm">Ph: {selectedInfo.phone}</p>}
-                <p className="text-xs text-slate-500 mt-1">
-                  {dateFrom || dateTo ? `Period: ${dateFrom || '—'} to ${dateTo || '—'} · ` : ''}
-                  Printed: {new Date().toLocaleDateString('en-IN')}
+                <h1 className="text-3xl font-black tracking-wide" style={{fontFamily: 'serif'}}>BLOCKS SALES</h1>
+                <div className="text-sm font-medium mt-0.5 tracking-widest uppercase">Customer Ledger Statement</div>
+                <div className="mt-3 border-t-2 border-b border-black pt-2 pb-1">
+                  <p className="text-xl font-bold">{selected}</p>
+                  {selectedInfo?.address && <p className="text-sm font-medium">{selectedInfo.address}</p>}
+                  {selectedInfo?.phone && <p className="text-sm">Ph: {selectedInfo.phone}</p>}
+                </div>
+                <p className="text-xs mt-1 text-gray-600">
+                  {dateFrom || dateTo ? `Period: ${dateFrom || '—'} to ${dateTo || '—'}  ·  ` : ''}
+                  Printed: {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}
                 </p>
-                <hr className="mt-3" />
               </div>
 
               {/* Summary cards */}
               {summary && (
                 <div className="mt-4 space-y-3">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="bg-red-50 rounded-lg p-3">
-                      <p className="text-xs text-red-500 font-medium">Total Sales (Dr)</p>
-                      <p className="text-lg font-bold text-red-700">{fmtCur(summary.total_debit)}</p>
+                    <div className="bg-red-50 rounded-lg p-3 print-summary-box">
+                      <p className="text-xs text-red-500 font-medium print:text-black">Total Sales (Dr)</p>
+                      <p className="text-lg font-bold text-red-700 print:text-black">{fmtCur(summary.total_debit)}</p>
                     </div>
-                    <div className="bg-green-50 rounded-lg p-3">
-                      <p className="text-xs text-green-500 font-medium">Total Received (Cr)</p>
-                      <p className="text-lg font-bold text-green-700">{fmtCur(summary.total_credit)}</p>
+                    <div className="bg-green-50 rounded-lg p-3 print-summary-box">
+                      <p className="text-xs text-green-500 font-medium print:text-black">Total Received (Cr)</p>
+                      <p className="text-lg font-bold text-green-700 print:text-black">{fmtCur(summary.total_credit)}</p>
                     </div>
-                    <div className={`rounded-lg p-3 ${summary.closing_balance > 0 ? 'bg-rose-50' : 'bg-emerald-50'}`}>
-                      <p className={`text-xs font-medium ${summary.closing_balance > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
+                    <div className={`rounded-lg p-3 print-summary-box ${summary.closing_balance > 0 ? 'bg-rose-50' : 'bg-emerald-50'}`}>
+                      <p className={`text-xs font-medium print:text-black ${summary.closing_balance > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
                         Closing Balance
                       </p>
-                      <p className={`text-lg font-bold ${summary.closing_balance > 0 ? 'text-rose-700' : 'text-emerald-700'}`}>
+                      <p className={`text-lg font-bold print:text-black ${summary.closing_balance > 0 ? 'text-rose-700' : 'text-emerald-700'}`}>
                         {fmtCur(summary.closing_balance)}
                         <span className="text-xs ml-1">{summary.closing_balance > 0 ? 'Dr' : 'Cr'}</span>
                       </p>
                     </div>
-                    <div className="bg-slate-50 rounded-lg p-3">
-                      <p className="text-xs text-slate-500 font-medium">Orders / Payments</p>
-                      <p className="text-lg font-bold text-slate-700">
+                    <div className="bg-slate-50 rounded-lg p-3 print-summary-box">
+                      <p className="text-xs text-slate-500 font-medium print:text-black">Orders / Payments</p>
+                      <p className="text-lg font-bold text-slate-700 print:text-black">
                         {summary.total_orders}
                         {summary.open_orders > 0 && (
-                          <span className="text-xs text-amber-600 ml-1">({summary.open_orders} open)</span>
+                          <span className="text-xs text-amber-600 ml-1 print:text-black">({summary.open_orders} open)</span>
                         )}
                       </p>
                       {summary.payment_count > 0 && (
-                        <p className="text-xs text-emerald-600">{summary.payment_count} payment{summary.payment_count > 1 ? 's' : ''}</p>
+                        <p className="text-xs text-emerald-600 print:text-black">{summary.payment_count} payment{summary.payment_count > 1 ? 's' : ''}</p>
                       )}
                     </div>
                   </div>
                   {/* Block quantity totals */}
-                  <div className="bg-blue-50 rounded-lg px-4 py-3 flex flex-wrap gap-4 items-center">
+                  <div className="bg-blue-50 rounded-lg px-4 py-3 flex flex-wrap gap-4 items-center qty-summary-bar">
                     <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Total Blocks Supplied</span>
                     {summary.total_4inch > 0 && (
                       <div className="text-sm">
@@ -432,7 +433,7 @@ export default function Ledger() {
 
                         if (first.row_type === 'payment') {
                           return (
-                            <tr key={`pay-${first.id}`} className="hover:bg-slate-50 bg-emerald-50/40">
+                            <tr key={`pay-${first.id}`} className="hover:bg-slate-50 bg-emerald-50/40 payment-row">
                               <td className="px-3 py-2 text-xs text-slate-400">{gi + 1}</td>
                               <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{first.date}</td>
                               <td className="px-3 py-2">
@@ -494,7 +495,7 @@ export default function Ledger() {
                                 {site || 'Blocks supplied'}
                               </div>
                               {group.length > 1 && (
-                                <div className="text-xs text-slate-400">{group.length} loads merged</div>
+                                <div className="text-xs text-slate-400 merged-note">{group.length} loads merged</div>
                               )}
                             </td>
                             <td className="px-3 py-2 text-right text-indigo-700 font-medium">
@@ -599,16 +600,68 @@ export default function Ledger() {
             )}
 
             {/* Print footer */}
-            <div className="hidden print:block mt-8 pt-4 border-t border-slate-300 text-xs text-slate-500 text-center">
-              This is a computer-generated ledger statement from BLOCKS SALES Manager.
+            <div className="hidden print:block mt-8 pt-3 border-t-2 border-black text-xs text-center">
+              <span className="font-semibold">BLOCKS SALES Manager</span> — Computer-generated ledger statement. Not valid without authorised signature.
             </div>
           </>
         )}
       </div>
 
-      {printing && (
-        <style>{`@media print { .print\\:hidden { display: none !important; } }`}</style>
-      )}
+      <style>{`
+        @media print {
+          .print\\:hidden { display: none !important; }
+
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+          body { font-family: Arial, sans-serif; font-size: 11px; color: #000; }
+
+          /* Summary boxes */
+          .print-summary-box {
+            border: 1.5px solid #000 !important;
+            padding: 6px 10px !important;
+            background: #fff !important;
+          }
+
+          /* Ledger table */
+          table { border-collapse: collapse !important; width: 100% !important; }
+          th, td {
+            border: 1px solid #555 !important;
+            padding: 4px 7px !important;
+            font-size: 10px !important;
+            color: #000 !important;
+          }
+          thead tr {
+            background-color: #1e293b !important;
+          }
+          thead th {
+            background-color: #1e293b !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+            font-size: 9px !important;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+          }
+          /* Totals row */
+          tbody tr:last-child td {
+            background-color: #e2e8f0 !important;
+            font-weight: 700 !important;
+            border-top: 2px solid #000 !important;
+          }
+          /* Payment rows — light stripe */
+          tr.payment-row td { background-color: #f0fdf4 !important; }
+          /* Merged rows note */
+          .merged-note { color: #555 !important; font-size: 9px !important; }
+
+          /* Quantity summary bar */
+          .qty-summary-bar {
+            border: 1.5px solid #000 !important;
+            background: #f8fafc !important;
+            padding: 5px 10px !important;
+            margin-top: 8px !important;
+            font-size: 10px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
